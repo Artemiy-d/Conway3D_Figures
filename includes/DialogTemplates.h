@@ -1,10 +1,3 @@
-/* 
- * File:   modelTemplates.h
- * Author: artyom
- *
- * Created on 22 Ноябрь 2011 г., 12:16
- */
-
 #ifndef MODELTEMPLATES_H
 #define	MODELTEMPLATES_H
 
@@ -57,8 +50,8 @@ private:
     QListWidget * listModels, * listActiveModels;
     QPushButton * buttAddToActive, * buttSave, * buttToActive, * buttRotR,
         * buttRotL, * butMirrX, * buttMirrY;
-    QWidget * widgets[20];
-    int w_count;
+    QWidget * m_widgets[20];
+    int m_widgetsCount;
 };
 
 #endif	/* MODELTEMPLATES_H */

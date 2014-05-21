@@ -1,5 +1,5 @@
 /* 
- * File:   modelTemplates.cpp
+ * File:   DialogTemplates.cpp
  * Author: artyom
  * 
  * Created on 22 Ноябрь 2011 г., 12:16
@@ -12,14 +12,14 @@
 #include "Languages.h"
 #include "Modeles.h"
 #include "otherGuiClasses.h"
-#include "modelTemplates.h"
+#include "DialogTemplates.h"
 
 
 DialogTemplates::DialogTemplates()
 {
     grid_box = NULL;
-    w_count = 0;
-    widgets[w_count++] = label_all_templates = new QLabel(this);
+    m_widgetsCount = 0;
+    m_widgets[m_widgetsCount++] = label_all_templates = new QLabel(this);
     label_all_templates->move(15,12);
     listModels = new QListWidget(this);
     listModels->setGeometry(15,label_all_templates->y()+18,200,180);
@@ -35,12 +35,12 @@ DialogTemplates::DialogTemplates()
     listActiveModels->setGeometry(buttToActive->x()+buttToActive->width()+10,listModels->y(),listModels->width(),listModels->height() );
     listActiveModels->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    widgets[w_count++] = label_active_templates = new QLabel(this);
+    m_widgets[m_widgetsCount++] = label_active_templates = new QLabel(this);
     label_active_templates->move(listActiveModels->x(),label_all_templates->y());
 
     grid_box = new MyGroupBox(this);
 
-    widgets[w_count++] = current_label = new QLabel(grid_box);
+    m_widgets[m_widgetsCount++] = current_label = new QLabel(grid_box);
     current_label->move(15,20);
 
     current_name = new QLineEdit(grid_box);
@@ -48,7 +48,7 @@ DialogTemplates::DialogTemplates()
     current_name->setMaxLength(150);
     current_name->setText(tr("My template"));
 
-    widgets[w_count++] = label_size = new QLabel(grid_box);
+    m_widgets[m_widgetsCount++] = label_size = new QLabel(grid_box);
     label_size->move(15,current_name->y()+current_name->height()+10);
 
     spin_size = new QSpinBox(grid_box);
@@ -56,11 +56,11 @@ DialogTemplates::DialogTemplates()
     spin_size->setRange(2,100);
     spin_size->setValue(5);
 
-    widgets[w_count++] = buttAddToActive = new QPushButton(grid_box);
+    m_widgets[m_widgetsCount++] = buttAddToActive = new QPushButton(grid_box);
     buttAddToActive->move(14,spin_size->y()+spin_size->height()+15);
     connect(buttAddToActive,SIGNAL(clicked()),this,SLOT(addToActive()) );
 
-    widgets[w_count++] = buttSave = new QPushButton(grid_box);
+    m_widgets[m_widgetsCount++] = buttSave = new QPushButton(grid_box);
     buttSave->move(14,buttAddToActive->y()+buttAddToActive->height()+1);
     connect(buttSave,SIGNAL(clicked()),this,SLOT(saveTemplate()) );
 
@@ -223,8 +223,8 @@ DialogTemplates::DialogTemplates(const DialogTemplates&)
 
 DialogTemplates::~DialogTemplates()
 {
-    for (int i = 0; i < w_count; i++)
-        delete widgets[i];
+    for (int i = 0; i < m_widgetsCount; i++)
+        delete m_widgets[i];
 }
 
 void DialogTemplates::setLang()
@@ -237,8 +237,8 @@ void DialogTemplates::setLang()
     label_active_templates->setText(LNG["active_templates"] );
     buttAddToActive->setText(LNG["add_to_active"]);
     buttSave->setText(LNG["save_template"]);
-    for (int i = 0; i < w_count; i++)
-        widgets[i]->adjustSize();
+    for (int i = 0; i < m_widgetsCount; i++)
+        m_widgets[i]->adjustSize();
 }
 
 void DialogTemplates::resizeEvent(QResizeEvent * E)

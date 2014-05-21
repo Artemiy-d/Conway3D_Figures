@@ -82,7 +82,6 @@ private:
 
     bool all_prob_live_bool,all_prob_dead_bool,all_prob_bool;
     unsigned int probabilities_live[9],probabilities_dead[9];
-    bool disposing;
     int stepNmb;
     int maxNeighbors;
     int cnt_act_now, cnt_act_next;
@@ -106,7 +105,7 @@ public:
 
     Cell * cells;
     fpoint * points;
-    bool gridEnable;
+    bool m_gridEnable;
     int cnt_cells, cnt_points;
     bcolor color_live, color_dead, color_grid;
     Figure();

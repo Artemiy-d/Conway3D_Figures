@@ -104,8 +104,8 @@ private:
          * actStartStop, * actAgar, * actSave, * actTemplates;
 
     QMenu * menuFile, * menuEdit, * menuView, * menuModeling, * menuHelp, * menuLang, * menuOpenFinded;
-    QWidget * widgets[50];
-    int w_count;
+    QWidget * m_widgets[50];
+    int m_widgetsCount;
     QList<QMenu*> menuList;
     QList<OpenAction*> actList;
 };

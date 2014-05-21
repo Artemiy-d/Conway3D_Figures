@@ -12,8 +12,7 @@
 Figure::Figure()
 {
     srand(time(0));
-    disposing = false;
-    gridEnable = false;
+    m_gridEnable = false;
     line_width = 2.0f;
     cells = NULL;
     points = NULL;
@@ -95,7 +94,6 @@ Figure::~Figure()
     delete points_for_draw;
     delete color_array;
     delete grid_colors;
-    disposing = true;
 }
 void Figure::defaultProbabilities()
 {
@@ -456,7 +454,6 @@ void Figure::gridToList()
 bool g = false;
 void Figure::drawCells()
 {
-    if (disposing) return;
 
    // glNewList(1,GL_COMPILE);
 
@@ -482,7 +479,7 @@ void Figure::drawCells()
 
    // glDisableClientState(GL_NORMAL_ARRAY);
   //  if (line_width!=0.0f) glCallList(listGrid);
-    if (gridEnable && line_width!=0.0f)
+    if (m_gridEnable && line_width!=0.0f)
     {
         glDisable(GL_LIGHTING);
        // glDisableClientState(GL_NORMAL_ARRAY);

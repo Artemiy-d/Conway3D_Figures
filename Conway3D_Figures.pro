@@ -11,7 +11,6 @@ INCLUDEPATH += ./includes
 SOURCES += src/MyCollection.cpp \
     src/MainWindow.cpp \
     src/otherGuiClasses.cpp \
-    src/modelTemplates.cpp \
     src/main.cpp \
     src/Figure.cpp \
     src/DialogSettings.cpp \
@@ -22,13 +21,13 @@ SOURCES += src/MyCollection.cpp \
     src/BaseSurface.cpp \
     src/Scene3D.cpp \
     src/IncludingSurface.cpp \
-    src/DialogOfCreation.cpp
+    src/DialogOfCreation.cpp \
+    src/DialogTemplates.cpp
 
 HEADERS += includes/otherGuiClasses.h \
     includes/Languages.h \
     includes/Scene3D.h \
     includes/Modeles.h \
-    includes/modelTemplates.h \
     includes/MainWindow.h \
     includes/FigureClasses.h \
     includes/MyCollection.h \
@@ -36,18 +35,20 @@ HEADERS += includes/otherGuiClasses.h \
     includes/Figure.h \
     includes/complect_headers.h \
     includes/DialogSettings.h \
-    includes/DialogOfCreation.h
+    includes/DialogOfCreation.h \
+    includes/DialogTemplates.h
 
 FORMS +=
 RESOURCES +=
 TRANSLATIONS +=
-OBJECTS_DIR = build/Release/
+#OBJECTS_DIR = build/Release/
 MOC_DIR = 
 RCC_DIR = 
 UI_DIR = 
 #QMAKE_CC = gcc
 #QMAKE_CXX = g++
 DEFINES += 
-LIBS += 
+LIBS += -lglut -lGLU
+
 
 

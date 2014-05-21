@@ -15,15 +15,6 @@
 
 class QTimer;
 
-enum GraphicObject
-{
-    torus,
-    ellipsoid,
-    parallelepiped
-};
-
-
-
 class Scene3D : public QGLWidget
 {
     Q_OBJECT
@@ -44,9 +35,9 @@ private:
         void paintEvent(QPaintEvent * e);
         void setText(const QString & text, int stringNumber, bool refresh = true);
     private:
-        QString text[STATISTIC_ITEMS_COUNT];
-        QPainter painter;
-        QFont font;
+        QString m_text[STATISTIC_ITEMS_COUNT];
+        QPainter m_painter;
+        QFont m_font;
     };
 
 public:
@@ -102,17 +93,24 @@ public slots:
     void setFullScreen();
 
 private:
-    QTimer * tm;
+    QTimer * m_timer;
 
-    StatisticWidget * textWidget;
-    Model * currentModel;
-    bool Executing, AnimationOn, DrawingOn, AxesVisible, gridEnable, statistVisible;
-    bool disposing;
-    GLfloat xRot, yRot, zRot, zTra, nSca;
-    QPoint ptrMousePosition;
-    int stp;
-    QWidget * prnt;
-    Figure * figure;
+    StatisticWidget * m_statisticWidget;
+    Model * m_currentModel;
+
+    bool m_executed,
+            m_animationOn,
+            m_drawingOn,
+            m_axesVisible,
+            m_gridEnable,
+            m_statisticVisible;
+
+    bool m_leftButtonPressed;
+    GLfloat m_xRot, m_yRot, m_zRot, m_zTra, m_nSca;
+    QPoint m_mousePosition;
+    int m_stepsNumber;
+    QWidget * m_savedParent;
+    Figure * m_figure;
 };
 
 #endif	/* SCENE3D_H */

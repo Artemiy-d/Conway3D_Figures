@@ -6,7 +6,7 @@
 #include "DialogOfCreation.h"
 #include "DialogAbout.h"
 #include "DialogSettings.h"
-#include "modelTemplates.h"
+#include "DialogTemplates.h"
 #include "otherGuiClasses.h"
 #include "FigureClasses.h"
 
@@ -32,11 +32,7 @@ MainWindow::MainWindow()
     unsigned long long x;
     x = g;
 
-    QMessageBox M;
-     M.setText(QString::number(x));
-//    M.setText(QString::number(p0)+" "+ QString::number(p1)+" "+ QString::number(p2));
-   // M.exec();
-    w_count = 0;
+    m_widgetsCount = 0;
     s3d = new Scene3D();
     s3d->setParent(this);
    // s3d->
@@ -58,60 +54,60 @@ MainWindow::MainWindow()
     sliderVelocity->setMaximum(100);
     sliderVelocity->setValue(30);
     
-    widgets[w_count++] = labelV = new QLabel(panelSettings);
+    m_widgets[m_widgetsCount++] = labelV = new QLabel(panelSettings);
    // labelV->set
     labelV->move(sliderVelocity->pos().x(),sliderVelocity->pos().y()-20);
     connect(sliderVelocity,SIGNAL(valueChanged(int)),this,SLOT(sliderVelValueChanged(int)));
 
-    widgets[w_count++] = checkAnimation = new QCheckBox(panelSettings);
+    m_widgets[m_widgetsCount++] = checkAnimation = new QCheckBox(panelSettings);
     checkAnimation->setChecked(true);
     checkAnimation->move(10,70);
     connect(checkAnimation,SIGNAL(stateChanged(int)),s3d,SLOT(setAnimationEnable(int)));
 
-    widgets[w_count++] = checkGrid = new QCheckBox(panelSettings);
+    m_widgets[m_widgetsCount++] = checkGrid = new QCheckBox(panelSettings);
     checkGrid->move(10,90);
     connect(checkGrid,SIGNAL(stateChanged(int)),s3d,SLOT(setGridEnable(int)));
 
-    widgets[w_count++] = checkAxes = new QCheckBox(panelSettings);
+    m_widgets[m_widgetsCount++] = checkAxes = new QCheckBox(panelSettings);
     checkAxes->setChecked(true);
     checkAxes->move(10,110);
     connect(checkAxes,SIGNAL(stateChanged(int)),s3d,SLOT(setAxesVisible(int)));
 
-    widgets[w_count++] = checkStatistic = new QCheckBox(panelSettings);
+    m_widgets[m_widgetsCount++] = checkStatistic = new QCheckBox(panelSettings);
     checkStatistic->setChecked(true);
     checkStatistic->move(10,130);
     connect(checkStatistic,SIGNAL(stateChanged(int)),s3d,SLOT(setStatisticVisible(int)));
 
-    widgets[w_count++] = checkDraw = new QCheckBox(panelSettings);
+    m_widgets[m_widgetsCount++] = checkDraw = new QCheckBox(panelSettings);
     checkDraw->move(10,150);
     connect(checkDraw,SIGNAL(stateChanged(int)),s3d,SLOT(setDrawingEnable(int)));
     connect(checkDraw,SIGNAL(stateChanged(int)),this,SLOT(setDrawingEnable(int)));
     
 
-    widgets[w_count++] = lavelTypeDraw = new QLabel(panelSettings);
+    m_widgets[m_widgetsCount++] = lavelTypeDraw = new QLabel(panelSettings);
     lavelTypeDraw->move(15,175);
 
     comboModels = new QComboBox(panelSettings);
     comboModels->move(10,195);
     connect(comboModels,SIGNAL(currentIndexChanged(const QString&) ),s3d,SLOT(changeDrawModel(const QString&) ));
 
-    widgets[w_count++] = ButtonStart = new QPushButton(panelSettings);
+    m_widgets[m_widgetsCount++] = ButtonStart = new QPushButton(panelSettings);
     ButtonStart->move(20,checkDraw->pos().y()+100);
     connect(ButtonStart,SIGNAL(clicked()),this,SLOT(buttonStartClicked()));
 
-    widgets[w_count++] = ButtonStep = new QPushButton(panelSettings);
+    m_widgets[m_widgetsCount++] = ButtonStep = new QPushButton(panelSettings);
     ButtonStep->move(20,ButtonStart->pos().y()+ButtonStart->height()+5);
     connect(ButtonStep,SIGNAL(clicked()),s3d,SLOT(stepFigure()));
 
-    widgets[w_count++] = ButtonClear = new QPushButton(panelSettings);
+    m_widgets[m_widgetsCount++] = ButtonClear = new QPushButton(panelSettings);
     ButtonClear->move(20,ButtonStep->pos().y()+ButtonStep->height()+20);
     connect(ButtonClear,SIGNAL(clicked()),s3d,SLOT(clearMap()));
 
-    widgets[w_count++] = ButtonAgar = new QPushButton(panelSettings);
+    m_widgets[m_widgetsCount++] = ButtonAgar = new QPushButton(panelSettings);
     ButtonAgar->move(20,ButtonClear->pos().y()+ButtonClear->height()+5);
     connect(ButtonAgar,SIGNAL(clicked()),s3d,SLOT(createAgar()));
 
-    widgets[w_count++] = ButtonRnd = new QPushButton(panelSettings);
+    m_widgets[m_widgetsCount++] = ButtonRnd = new QPushButton(panelSettings);
     ButtonRnd->move(20,ButtonAgar->pos().y()+ButtonAgar->height()+5);
     connect(ButtonRnd,SIGNAL(clicked()),s3d,SLOT(createRandomMap()));
     //list.
@@ -296,7 +292,8 @@ void MainWindow::setLang()
     menuHelp->setTitle(LNG["help"]);
         actAbout->setText(LNG["about"]);
 
-    for (int i = 0; i<w_count; i++) widgets[i]->adjustSize();
+    for (int i = 0; i < m_widgetsCount; i++)
+        m_widgets[i]->adjustSize();
 }
 
 void MainWindow::setComboModels()
@@ -322,7 +319,7 @@ void MainWindow::setDrawingEnable(int on)
 void MainWindow::createNewFigure()
 {
     dialogCreating->exec();
-    if (dialogCreating->result)
+    if (dialogCreating->m_result)
     {
         file_save_name = "";
     }

@@ -12,7 +12,7 @@
 #include "DialogOfCreation.h"
 #include "DialogAbout.h"
 #include "DialogSettings.h"
-#include "modelTemplates.h"
+#include "DialogTemplates.h"
 #include "otherGuiClasses.h"
 
 #include "MyCollection.h"

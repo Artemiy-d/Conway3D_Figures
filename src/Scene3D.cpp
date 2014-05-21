@@ -17,29 +17,29 @@
 
 Scene3D::StatisticWidget::StatisticWidget(QWidget * parent) : QWidget(parent)
 {
-    text[STEPS] = tr("Step 0");
-    text[LIVING_CELLS] = tr("Users: ");
-    font.setWeight(10);
+    m_text[STEPS] = tr("Step 0");
+    m_text[LIVING_CELLS] = tr("Users: ");
+    m_font.setWeight(10);
 }
 void Scene3D::Scene3D::StatisticWidget::resizeEvent(QResizeEvent * /*e*/)
 {
-    if (height() != (font.weight() + 3) * STATISTIC_ITEMS_COUNT + 10)
-        setGeometry(pos().x(), pos().y(), width(), (font.weight() + 3) * STATISTIC_ITEMS_COUNT + 10);
+    if (height() != (m_font.weight() + 3) * STATISTIC_ITEMS_COUNT + 10)
+        setGeometry(pos().x(), pos().y(), width(), (m_font.weight() + 3) * STATISTIC_ITEMS_COUNT + 10);
 }
 void Scene3D::StatisticWidget::paintEvent(QPaintEvent * /*e*/)
 {
-    painter.begin(this);
-    painter.setFont(font);
-    painter.fillRect(0, 0, width(), height(), QColor(0, 255, 0));
+    m_painter.begin(this);
+    m_painter.setFont(m_font);
+    m_painter.fillRect(0, 0, width(), height(), QColor(0, 255, 0));
     for (int i = 0; i < STATISTIC_ITEMS_COUNT; i++)
-        painter.drawText(5, (font.weight() + 3) * (i + 1), text[i]);
-    painter.end();
+        m_painter.drawText(5, (m_font.weight() + 3) * (i + 1), m_text[i]);
+    m_painter.end();
 }
 void Scene3D::StatisticWidget::setText(const QString & _text, int stringNumber, bool refresh)
 {
     if (stringNumber < 0 || stringNumber >= STATISTIC_ITEMS_COUNT)
         return;
-    text[stringNumber] = _text;
+    m_text[stringNumber] = _text;
     if (refresh)
         this->repaint();
 }
@@ -47,73 +47,71 @@ void Scene3D::StatisticWidget::setText(const QString & _text, int stringNumber, 
 
 void Scene3D::stepFigure()
 {
-    if (figure == NULL)
+    if (m_figure == NULL)
         return;
-    figure->step();
+    m_figure->step();
 
-    if (statistVisible)
+    if (m_statisticVisible)
         drawStatistic();
-    if (AnimationOn)
+    if (m_animationOn)
         this->updateGL();
 
-    stp++;
+    m_stepsNumber++;
 }
 
 Scene3D::Scene3D(QWidget* parent) : QGLWidget(parent)
 {
-    stp = 0;
-    textWidget = new StatisticWidget(this);
-    textWidget->setGeometry(0, 0, 100, 20);
-    Executing = false;
-    AnimationOn = true;
-    AxesVisible = true;
-    gridEnable = false;
-    statistVisible = true;
-    disposing = false;
-    xRot = 0; yRot = 0; zRot = 0; zTra = 0; nSca = 1;
+    m_stepsNumber = 0;
+    m_statisticWidget = new StatisticWidget(this);
+    m_statisticWidget->setGeometry(0, 0, 100, 20);
+    m_executed = false;
+    m_animationOn = true;
+    m_axesVisible = true;
+    m_gridEnable = false;
+    m_statisticVisible = true;
+    m_xRot = 0; m_yRot = 0; m_zRot = 0; m_zTra = 0; m_nSca = 1;
     setDrawingEnable(false);
     srand(time(0));
-    figure = NULL;
-    tm = new QTimer(this);
-    tm->stop();
-    connect(tm, SIGNAL(timeout()), this, SLOT(stepFigure()));
-    currentModel = NULL;
+    m_figure = NULL;
+    m_timer = new QTimer(this);
+    m_timer->stop();
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(stepFigure()));
+    m_currentModel = NULL;
 }
 
 Scene3D::~Scene3D()
 {
-    disposing = true;
-    delete tm;
-    delete textWidget;
-    delete figure;
+    delete m_timer;
+    delete m_statisticWidget;
+    delete m_figure;
 }
 
 void Scene3D::createAgar()
 {
-    figure->createAgar();
+    m_figure->createAgar();
     updateGL();
 }
 void Scene3D::clearMap()
 {
-    figure->clearMap();
+    m_figure->clearMap();
     updateGL();
 }
 void Scene3D::createRandomMap()
 {
-    figure->createRandomMap(0.15);
+    m_figure->createRandomMap(0.15);
     updateGL();
 }
 
 void Scene3D::setGridEnable(int on)
 {
-    figure->gridEnable = gridEnable = on != 0;
+    m_figure->m_gridEnable = m_gridEnable = on != 0;
     this->updateGL();
 }
 void Scene3D::setDrawingEnable(int on)
 {
-    DrawingOn = on != 0;
+    m_drawingOn = on != 0;
     QCursor C;
-    C.setShape(DrawingOn
+    C.setShape(m_drawingOn
                ? Qt::PointingHandCursor
                : Qt::OpenHandCursor);
     this->setCursor(C);
@@ -121,25 +119,25 @@ void Scene3D::setDrawingEnable(int on)
 
 void Scene3D::setAnimationEnable(int on)
 {
-    AnimationOn = on != 0;
+    m_animationOn = on != 0;
     this->updateGL();
 }
 void Scene3D::setStatisticVisible(int on)
 {
-    textWidget->setVisible(statistVisible = (on != 0));
+    m_statisticWidget->setVisible(m_statisticVisible = (on != 0));
 }
 void Scene3D::setAxesVisible(int on)
 {
-    AxesVisible = on != 0;
+    m_axesVisible = on != 0;
     updateGL();
 }
 
 void Scene3D::drawStatistic()
 {
-    if (figure != NULL)
+    if (m_figure != NULL)
     {
-        textWidget->setText("Step " + QString::number(stp), StatisticWidget::STEPS, false);
-        textWidget->setText("Users: "+ QString::number(figure->getLivingCellsCount()), StatisticWidget::LIVING_CELLS);
+        m_statisticWidget->setText("Step " + QString::number(m_stepsNumber), StatisticWidget::STEPS, false);
+        m_statisticWidget->setText("Users: "+ QString::number(m_figure->getLivingCellsCount()), StatisticWidget::LIVING_CELLS);
     }
 }
 
@@ -149,15 +147,15 @@ void Scene3D::createFigure(FigureType typeFigure, int * sizeParams, float * /*ph
     double p_live[9], p_dead[9];
     bool grid_on = false;
 
-    if (figure != NULL)
+    if (m_figure != NULL)
     {
         if (copy_settings)
         {
-            figure->getProbabilities(p_live, p_dead);
-            grid_on = figure->gridEnable;
+            m_figure->getProbabilities(p_live, p_dead);
+            grid_on = m_figure->m_gridEnable;
         }
-        delete figure;
-        figure = NULL;
+        delete m_figure;
+        m_figure = NULL;
     }
     else
     {
@@ -167,24 +165,24 @@ void Scene3D::createFigure(FigureType typeFigure, int * sizeParams, float * /*ph
     switch (typeFigure)
     {
         case figSurface:
-            figure = new Surface(sizeParams[0], sizeParams[1]);
+            m_figure = new Surface(sizeParams[0], sizeParams[1]);
             break;
         case figTorus:
-            figure = new Torus(sizeParams[0], sizeParams[1], sizeParams[2]);
+            m_figure = new Torus(sizeParams[0], sizeParams[1], sizeParams[2]);
             break;
         case figEllipsoid:
-            figure = new Ellipsoid(sizeParams[0], sizeParams[1], sizeParams[2]);
+            m_figure = new Ellipsoid(sizeParams[0], sizeParams[1], sizeParams[2]);
             break;
         case figParallelepiped:
-            figure = new Ellipsoid(sizeParams[0], sizeParams[1], sizeParams[2], false);
+            m_figure = new Ellipsoid(sizeParams[0], sizeParams[1], sizeParams[2], false);
             break;
     }
 
-    stp = 0;
+    m_stepsNumber = 0;
     if (copy_settings)
     {
-        figure->gridEnable = grid_on;
-        figure->setProbabilities(p_live, p_dead);
+        m_figure->m_gridEnable = grid_on;
+        m_figure->setProbabilities(p_live, p_dead);
     }
 
     updateGL();
@@ -193,22 +191,22 @@ void Scene3D::createFigure(FigureType typeFigure, int * sizeParams, float * /*ph
 
 void Scene3D::setFigure(Figure * _figure)
 {
-    delete figure;
-    figure = _figure;
+    delete m_figure;
+    m_figure = _figure;
     updateGL();
 }
 
 Figure * Scene3D::getFigure()
 {
-    return figure;
+    return m_figure;
 }
 
 void Scene3D::hideEvent(QHideEvent * /*E*/)
 {
-    if (prnt == NULL)
+    if (m_savedParent == NULL)
         return;
-    this->setParent(prnt);
-    prnt->resize(prnt->width() + 1, prnt->height());
+    this->setParent(m_savedParent);
+    m_savedParent->resize(m_savedParent->width() + 1, m_savedParent->height());
     this->setVisible(true);
 }
 
@@ -222,8 +220,8 @@ void Scene3D::mouseDoubleClickEvent(QMouseEvent * /*E*/)
 }
 void Scene3D::setFullScreen()
 {
-    prnt = (QWidget*)this->parent();
-    this->setParent(0);
+    m_savedParent = (QWidget*)this->parent();
+    this->setParent(NULL);
     this->showFullScreen();
 }
 void Scene3D::initializeGL()
@@ -246,39 +244,39 @@ void Scene3D::initializeGL()
 
    // int prm[3] = {50,100,0};
  //   this->createFigure(figThor,prm,NULL,true);
-    figure = new Torus(50,100,20);
+    m_figure = new Torus(50,100,20);
 
   //  modelShip * ship = new modelShip();
   //  modelPlaner * p = new modelPlaner();
 
-   // figure->refresh();
+   // m_figure->refresh();
 
     drawStatistic();
 }
 
 bool Scene3D::isExecute()
 {
-    return Executing;
+    return m_executed;
 }
 
 void Scene3D::start(int interval)
 {
-    tm->start(interval);
-    Executing = true;
+    m_timer->start(interval);
+    m_executed = true;
 }
 void Scene3D::stop()
 {
-    tm->stop();
-    Executing = false;
+    m_timer->stop();
+    m_executed = false;
 }
 void Scene3D::setInterval(int interval)
 {
-    tm->setInterval(interval);
+    m_timer->setInterval(interval);
 }
 
 void Scene3D::changeDrawModel(const QString& name)
 {
-    currentModel = name == strPen
+    m_currentModel = name == strPen
             ? NULL
             :currentModelCollection[name.toLocal8Bit().data()];
 }
@@ -338,7 +336,7 @@ void Scene3D::getCoord(int mouse_x, int mouse_y, fpoint * point_1, fpoint * poin
 void Scene3D::paintGL()
 {
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   if (!AnimationOn || figure == NULL) return;
+   if (!m_animationOn || m_figure == NULL) return;
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
@@ -346,29 +344,29 @@ void Scene3D::paintGL()
    float pos[4] = {5,0,5,0};
    glLightfv(GL_LIGHT0,GL_POSITION,pos);
 
-   glScalef(nSca, nSca, nSca);
+   glScalef(m_nSca, m_nSca, m_nSca);
    glTranslatef(0.0f, 0, 0.0f);
 
-   glRotatef(xRot, 1.0f, 0.0f, 0.0f);
- //  glRotatef(yRot, 0.0f, 1.0f, 0.0f);
-   glRotatef(zRot, 0.0f, 0.0f, 1.0f);
-   if (AxesVisible) drawAxis();
-   figure->drawCells();
+   glRotatef(m_xRot, 1.0f, 0.0f, 0.0f);
+ //  glRotatef(m_yRot, 0.0f, 1.0f, 0.0f);
+   glRotatef(m_zRot, 0.0f, 0.0f, 1.0f);
+   if (m_axesVisible) drawAxis();
+   m_figure->drawCells();
 }
 
 
 Qt::MouseButton mpress;
 void Scene3D::mousePressEvent(QMouseEvent* pe)
 {
-   ptrMousePosition = pe->pos();
-   mpress = pe->button();
+   m_mousePosition = pe->pos();
+   m_leftButtonPressed = pe->button() == Qt::LeftButton;
    this->setFocus();
-   if (DrawingOn)
+   if (m_drawingOn)
    {
        fpoint p1,p_1;
        getCoord(pe->pos().x(), pe->pos().y(), &p1, &p_1);
-       figure->selectAndPlus(p1, p_1, mpress == Qt::LeftButton, currentModel);
-       figure->refresh();
+       m_figure->selectAndPlus(p1, p_1, m_leftButtonPressed, m_currentModel);
+       m_figure->refresh();
    }
    updateGL();
 }
@@ -376,18 +374,19 @@ void Scene3D::mousePressEvent(QMouseEvent* pe)
 void Scene3D::mouseMoveEvent(QMouseEvent* pe)
 {
 
-    if (!DrawingOn)
+    if (!m_drawingOn)
     {
-        xRot += 180 / nSca * (GLfloat)(pe->y()-ptrMousePosition.y()) / height();
-        zRot += 180 / nSca * (GLfloat)(pe->x()-ptrMousePosition.x()) / width();
-        ptrMousePosition = pe->pos();
+        m_xRot += 180 / m_nSca * (GLfloat)(pe->y() - m_mousePosition.y()) / height();
+        m_zRot += 180 / m_nSca * (GLfloat)(pe->x() - m_mousePosition.x()) / width();
+        m_mousePosition = pe->pos();
     }
-    else if (currentModel == NULL)
+    else if (m_currentModel == NULL)
     {
         fpoint p1, p_1;
         getCoord(pe->pos().x(), pe->pos().y(), &p1, &p_1);
-        figure->selectAndPlus(p1, p_1, mpress == Qt::LeftButton);
-        figure->refresh();
+
+        m_figure->selectAndPlus(p1, p_1, m_leftButtonPressed);
+        m_figure->refresh();
     }
    
    updateGL();
@@ -456,47 +455,47 @@ void Scene3D::keyPressEvent(QKeyEvent* pe)
 
 void Scene3D::scalePlus()
 {
-   nSca = nSca * 1.1;
+   m_nSca = m_nSca * 1.1;
 }
 
 void Scene3D::scaleMinus()
 {
-   nSca = nSca / 1.1;
+   m_nSca = m_nSca / 1.1;
 }
 
 void Scene3D::rotateUp()
 {
-   xRot += 1.0;
+   m_xRot += 1.0;
 }
 
 void Scene3D::rotateDown()
 {
-   xRot -= 1.0;
+   m_xRot -= 1.0;
 }
 
 void Scene3D::rotateLeft()
 {
-   zRot += 1.0;
+   m_zRot += 1.0;
 }
 
 void Scene3D::rotateRight()
 {
-   zRot -= 1.0;
+   m_zRot -= 1.0;
 }
 
 void Scene3D::translateDown()
 {
-   zTra -= 0.05;
+   m_zTra -= 0.05;
 }
 
 void Scene3D::translateUp()
 {
-   zTra += 0.05;
+   m_zTra += 0.05;
 }
 
 void Scene3D::defaultScene()
 {
-   xRot = 0; yRot = 0; zRot = 0; zTra = 0; nSca = 1;
+   m_xRot = 0; m_yRot = 0; m_zRot = 0; m_zTra = 0; m_nSca = 1;
 }
 
 void Scene3D::drawAxis()
