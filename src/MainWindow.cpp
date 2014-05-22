@@ -28,10 +28,6 @@ MainWindow::MainWindow()
 //    unsigned int p1 = (unsigned int)(x+65535);
 //    unsigned int p2 = (unsigned int)(x+65537);
 
-    int g = -10;
-    unsigned long long x;
-    x = g;
-
     m_widgetsCount = 0;
     s3d = new Scene3D();
     s3d->setParent(this);
@@ -149,10 +145,15 @@ MainWindow::MainWindow()
         actPanelSettings->setCheckable(true);
         actPanelSettings->setChecked(true);
         connect(actPanelSettings,SIGNAL(triggered(bool)),this,SLOT(setSettingsVisible(bool)));
-        if (LNG.Count()>1)
+      //  if (LNG.Count()>1)
         {
             menuLang = menuView->addMenu(LNG["languages"]);
-            LNG.CreateActions(menuLang,this);
+            const QList<QString> & languages = LNG.getLanguagesList();
+            for ( QList<QString>::const_iterator it = languages.begin(); it != languages.end(); ++it )
+            {
+                QAction * action = menuLang->addAction( *it );
+                connect( action, SIGNAL(triggered()), this, SLOT( actionLanguageClicked ) );
+            }
         }
     menuModeling = this->menuBar()->addMenu(LNG["modeling"]);
         actSettings = menuModeling->addAction(LNG["modeling_sett"]);
@@ -170,7 +171,6 @@ MainWindow::MainWindow()
  
        
     panelSettings->setParent(this);
-    connect(&LNG,SIGNAL(set_lang()),this,SLOT(setLang()) );
 
     menuOpenFinded = NULL;
     createOpenTree();
@@ -246,7 +246,8 @@ bool MainWindow::createOpenMenuTreeRec(QMenu * menu, const QString &path, int it
 static QString AddEnd(QString str, QString end, int len = 20)
 {
     QString S;
-    if (str.length()+end.length()<20) S.fill(' ',20-str.length()-end.length());
+    if (str.length()+end.length()<20)
+        S.fill(' ',20-str.length()-end.length());
     return str+S+end;
 }
 
@@ -283,7 +284,7 @@ void MainWindow::setLang()
     menuView->setTitle(LNG["view"]);
         actFullScreen->setText(LNG["full_scr"]);
         actPanelSettings->setText(LNG["settings_panel"]);
-        if (LNG.Count()>1) menuLang->setTitle(LNG["languages"]);
+        if (LNG.count()>1) menuLang->setTitle(LNG["languages"]);
 
     menuModeling->setTitle(LNG["modeling"]);
         actSettings->setText(LNG["modeling_sett"]);
@@ -300,13 +301,8 @@ void MainWindow::setComboModels()
 {
     comboModels->clear();
     comboModels->addItem(strPen);
-    ITEM <Model*>*it;
-    if ((it = currentModelCollection.getFirst())!=NULL )
-        do
-        {
-            comboModels->addItem(QString::fromLocal8Bit(it->key) );
-        }
-    while ((it = currentModelCollection.getNext())!=NULL );
+    for ( StringMap<Model*>::iterator it = currentModelCollection.begin(); it != currentModelCollection.end(); ++it )
+        comboModels->addItem( it.key() );
     comboModels->adjustSize();
 }
 
@@ -323,6 +319,20 @@ void MainWindow::createNewFigure()
     {
         file_save_name = "";
     }
+}
+
+void MainWindow::actionLanguageClicked()
+{
+    QAction * action = ( QAction* )QObject::sender();
+    LNG.setCurrentLanguage( action->text() );
+    setLang();
+}
+
+void MainWindow::changeDrawModel(const QString& name)
+{
+    s3d->setCurrentModel( name == strPen
+        ? NULL
+        : currentModelCollection[name] );
 }
 
 void MainWindow::resize()

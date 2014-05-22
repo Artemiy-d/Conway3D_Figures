@@ -97,19 +97,25 @@ void Model::rotate(int nmb)
         for (int j = 0; j<size_m; j++)
         {
             int a = i, b = j;
-            for (k = 0; k<nmb; k++) rtt(a,b)
+            for (k = 0; k<nmb; k++)
+                rtt(a,b)
             v[a*size_m+b] = cellEnable[i*size_m + j];
         }
     bool * ce = cellEnable;
     cellEnable = v;
     delete ce;
 }
-Model& Model::operator = (Model& M)
+Model& Model::operator = (const Model& M)
 {
     createField(M.size_m);
     for (int i = 0; i<all_size; i++)
         cellEnable[i] = M.cellEnable[i];
     return *this;
+}
+
+int Model::getSize() const
+{
+    return size_m;
 }
 
 bool Model::isFileValid(char* fn)
@@ -267,6 +273,6 @@ modelAcorn::modelAcorn() : Model(7)
 }
 
 
-MyCollection <Model*> modelCollection;
-MyCollection <Model*> currentModelCollection;
+StringMap <Model*> modelCollection;
+StringMap <Model*> currentModelCollection;
 QString strPen;

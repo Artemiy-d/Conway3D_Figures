@@ -77,6 +77,7 @@ Scene3D::Scene3D(QWidget* parent) : QGLWidget(parent)
     m_timer->stop();
     connect(m_timer, SIGNAL(timeout()), this, SLOT(stepFigure()));
     m_currentModel = NULL;
+    m_savedParent = NULL;
 }
 
 Scene3D::~Scene3D()
@@ -274,13 +275,6 @@ void Scene3D::setInterval(int interval)
     m_timer->setInterval(interval);
 }
 
-void Scene3D::changeDrawModel(const QString& name)
-{
-    m_currentModel = name == strPen
-            ? NULL
-            :currentModelCollection[name.toLocal8Bit().data()];
-}
-
 void Scene3D::resizeGL(int nWidth, int nHeight)
 {
    glMatrixMode(GL_PROJECTION);
@@ -294,6 +288,11 @@ void Scene3D::resizeGL(int nWidth, int nHeight)
       glOrtho(-1.0, 1.0, -1.0 * ratio, 1.0 * ratio, -5.0, 2.0);
 
    glViewport(0, 0, (GLint)nWidth, (GLint)nHeight);
+}
+
+void Scene3D::setCurrentModel(Model * _model)
+{
+    m_currentModel = _model;
 }
 
 void Scene3D::getCoord(int mouse_x, int mouse_y, fpoint * point_1, fpoint * point1)
@@ -354,8 +353,6 @@ void Scene3D::paintGL()
    m_figure->drawCells();
 }
 
-
-Qt::MouseButton mpress;
 void Scene3D::mousePressEvent(QMouseEvent* pe)
 {
    m_mousePosition = pe->pos();

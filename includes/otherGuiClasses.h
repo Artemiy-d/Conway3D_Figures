@@ -1,10 +1,3 @@
-/* 
- * File:   otherGuiClasses.h
- * Author: artyom
- *
- * Created on 11 Ноябрь 2011 г., 19:03
- */
-
 #ifndef OTHERGUICLASSES_H
 #define	OTHERGUICLASSES_H
 #include <QWidget>
@@ -34,7 +27,7 @@ public:
     GrawGrid(QWidget * parent = 0);
     virtual ~GrawGrid();
 
-    GrawGrid& operator = (Model &model);
+    GrawGrid& operator = (const Model &model);
     inline void setGeometry(int x, int y, int w, int h)
     {
         createArray(w,h);

@@ -15,6 +15,8 @@
 
 class QTimer;
 
+class Model;
+
 class Scene3D : public QGLWidget
 {
     Q_OBJECT
@@ -53,6 +55,7 @@ public:
     void setFigure(Figure * _figure);
 
     Figure * getFigure();
+    void setCurrentModel(Model * _model);
 
 private:
     void scalePlus();
@@ -89,7 +92,6 @@ public slots:
     void createAgar();
     void clearMap();
     void createRandomMap();
-    void changeDrawModel(const QString& name);
     void setFullScreen();
 
 private:

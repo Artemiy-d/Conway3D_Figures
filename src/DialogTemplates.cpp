@@ -1,13 +1,11 @@
-/* 
- * File:   DialogTemplates.cpp
- * Author: artyom
- * 
- * Created on 22 Ноябрь 2011 г., 12:16
- */
 #include <QListWidget>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QSpinBox>
+#include <QLabel>
+#include <QKeyEvent>
+#include <QMessageBox>
+
 
 #include "Languages.h"
 #include "Modeles.h"
@@ -92,16 +90,14 @@ DialogTemplates::DialogTemplates()
             char * abs_data = abs_path.toLocal8Bit().data();
             abs_data[abs_path.length()]=0;
             char * data = dt;
-            while (*(data++)=*(abs_data++));
+            while ( !!(*(data++) = *(abs_data++)) );
 
             if (Model::isFileValid(dt) )
             {
-                Model * M = new Model(dt);
-                char * x = data = s.toLocal8Bit().data();
-                while (*(++x) );
-                while (*(--x)!='.');
-                *x = 0;
-                modelCollection.AddItem(data,M);
+                int index = s.indexOf( '.' );
+                if ( index != -1 )
+                    s[index] = 0;
+                modelCollection[s] = new Model(dt);
             }
         }
     }
@@ -114,12 +110,10 @@ DialogTemplates::DialogTemplates()
 
 void DialogTemplates::selectModel(QListWidgetItem *item)
 {
-    Model * model;
-    model = QObject::sender() == listModels ?
-        modelCollection[item->text().toLocal8Bit().data()] : currentModelCollection[item->text().toLocal8Bit().data()];
-    spin_size->setValue(model->size_m);
+    Model * model = QObject::sender() == listModels ?
+        modelCollection[item->text()] : currentModelCollection[item->text()];
+    spin_size->setValue(model->getSize());
     *d_g = *model;
-   // d_g->setQuadSize(model->size_m,model->cellEnable);
     current_name->setText(item->text());
 }
 
@@ -135,26 +129,21 @@ bool DialogTemplates::eventFilter(QObject * obj, QEvent * E)
     return QDialog::eventFilter(obj,E);
 }
 
-void DialogTemplates::deleteModels(MyCollection<Model*> &coll, QListWidget * list)
+void DialogTemplates::deleteModels(StringMap<Model*> &coll, QListWidget * list)
 {
     QList<QListWidgetItem*> L = list->selectedItems();
     foreach (QListWidgetItem* w, L)
     {
-        coll.DeleteItem(w->text().toLocal8Bit().data());
+        coll.erase( coll.find( w->text() ) );
     }
     refreshList(coll,list);
 }
 
-void DialogTemplates::refreshList(MyCollection<Model*> &coll, QListWidget * list)
+void DialogTemplates::refreshList(StringMap<Model*> &coll, QListWidget * list)
 {
     list->clear();
-    ITEM <Model*> * it;
-    if ((it = coll.getFirst())!=NULL)
-        do
-        {
-            list->addItem(QString::fromLocal8Bit(it->key) );
-        }
-    while ((it = coll.getNext())!=NULL);
+    for ( StringMap<Model*>::iterator it = coll.begin(); it != coll.end(); ++it )
+        list->addItem( it.key() );
 }
 
 static void normalizeStr(char * str)
@@ -162,15 +151,16 @@ static void normalizeStr(char * str)
     char * s1 = str;
     if (*s1 == ' ') 
     {
-        while (*(++s1)==' ');
-        while (*(str++) = *(s1++));
+        while ( *(++s1) == ' ' );
+        while ( !!(*(str++) = *(s1++)) );
     }
     else while (*(str++));
     str--;
-    while (*(--str)==' ');
+    while ( *(--str) == ' ' );
     *(++str)=0;
 }
-bool DialogTemplates::beginAddTemplate(MyCollection<Model*> &coll)
+
+bool DialogTemplates::beginAddTemplate(StringMap<Model*> &coll)
 {
     if (current_name->text().length()==0)
     {
@@ -183,7 +173,7 @@ bool DialogTemplates::beginAddTemplate(MyCollection<Model*> &coll)
     char str[200];
     strcpy(str,current_name->text().toLocal8Bit().data());
     normalizeStr(str);
-    if (coll.Exists(str))
+    if (coll.find(str) != coll.end())
     {
         QMessageBox M;
         M.addButton(QMessageBox::Yes);
@@ -194,7 +184,7 @@ bool DialogTemplates::beginAddTemplate(MyCollection<Model*> &coll)
         if (M.exec() == QMessageBox::No)
             return false;
     }
-    coll.AddItem(str,new Model(*(Model*)d_g));
+    coll[str] = new Model(*(Model*)d_g);
     this->setWindowTitle(QString::fromLocal8Bit(str) );
     return true;
 }
@@ -204,7 +194,7 @@ void DialogTemplates::saveTemplate()
     if (!beginAddTemplate(modelCollection))
         return;
     QString fn = QDir::currentPath()+tr("/modeles/")+current_name->text()+tr(".mdl");
-    modelCollection[current_name->text().toLocal8Bit().data()]->saveToFile(fn.toLocal8Bit().data());
+    modelCollection[current_name->text()]->saveToFile(fn.toLocal8Bit().data());
     refreshList(modelCollection,listModels);
 }
 
@@ -216,10 +206,6 @@ void DialogTemplates::addToActive()
     emit newActive();
 }
 
-DialogTemplates::DialogTemplates(const DialogTemplates&)
-{
-
-}
 
 DialogTemplates::~DialogTemplates()
 {
@@ -241,7 +227,7 @@ void DialogTemplates::setLang()
         m_widgets[i]->adjustSize();
 }
 
-void DialogTemplates::resizeEvent(QResizeEvent * E)
+void DialogTemplates::resizeEvent(QResizeEvent * /*e*/)
 {
     if (grid_box == NULL)
         return;
@@ -258,7 +244,7 @@ void DialogTemplates::modelsToActive()
         return;
     foreach (QListWidgetItem * it, L)
     {
-        currentModelCollection.AddItem(it->text().toLocal8Bit().data(),modelCollection[it->text().toLocal8Bit().data()]);
+        currentModelCollection[it->text()] = modelCollection[it->text()];
     }
     refreshList(currentModelCollection,listActiveModels);
     emit newActive();

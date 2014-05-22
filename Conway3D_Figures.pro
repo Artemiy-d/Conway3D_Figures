@@ -1,14 +1,14 @@
 TEMPLATE = app
-DESTDIR = dist/Release/
+#DESTDIR = dist/Release/
 TARGET = Conwey3D
 VERSION = 1.0.0
 #CONFIG -= debug_and_release app_bundle lib_bundle
-CONFIG += release 
+#CONFIG += release
 QT = core gui opengl
 
 INCLUDEPATH += ./includes
 
-SOURCES += src/MyCollection.cpp \
+SOURCES += \
     src/MainWindow.cpp \
     src/otherGuiClasses.cpp \
     src/main.cpp \
@@ -30,13 +30,13 @@ HEADERS += includes/otherGuiClasses.h \
     includes/Modeles.h \
     includes/MainWindow.h \
     includes/FigureClasses.h \
-    includes/MyCollection.h \
     includes/DialogAbout.h \
     includes/Figure.h \
     includes/complect_headers.h \
     includes/DialogSettings.h \
     includes/DialogOfCreation.h \
-    includes/DialogTemplates.h
+    includes/DialogTemplates.h \
+    includes/StringMap.h
 
 FORMS +=
 RESOURCES +=
@@ -48,7 +48,8 @@ UI_DIR =
 #QMAKE_CC = gcc
 #QMAKE_CXX = g++
 DEFINES += 
-LIBS += -lglut -lGLU
+#LIBS += -lglut -lGLU
+
 
 
 

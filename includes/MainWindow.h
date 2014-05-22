@@ -82,6 +82,8 @@ public slots:
     void setLang();
     void createNewFigure();
     void setDrawingEnable(int on);
+    void actionLanguageClicked();
+    void changeDrawModel(const QString& name);
 signals:
     void sign();
     //void setFullScreen

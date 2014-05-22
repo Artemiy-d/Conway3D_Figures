@@ -3,7 +3,6 @@
 
 #include <QDialog>
 
-#include "MyCollection.h"
 
 
 class GrawGrid;
@@ -18,12 +17,14 @@ class QListWidget;
 class Model;
 class QResizeEvent;
 
+template <class T>
+struct StringMap;
+
 class DialogTemplates : public QDialog
 {
     Q_OBJECT
 public:
     DialogTemplates();
-    DialogTemplates(const DialogTemplates& orig);
     virtual ~DialogTemplates();
 private slots:
     void setLang();
@@ -33,10 +34,10 @@ private slots:
     void modelsToActive();
 protected:
     void resizeEvent(QResizeEvent * e);
-    void refreshList(MyCollection<Model*> &coll, QListWidget * list);
-    void deleteModels(MyCollection<Model*> &coll, QListWidget * list);
+    void refreshList(StringMap<Model*> &coll, QListWidget * list);
+    void deleteModels(StringMap<Model*> &coll, QListWidget * list);
     bool eventFilter(QObject * obj, QEvent * e);
-    bool beginAddTemplate(MyCollection<Model*> &coll);
+    bool beginAddTemplate(StringMap<Model*> &coll);
 signals:
     void newActive();
 

@@ -1,9 +1,8 @@
-/* 
- * File:   DialogOfCreation.cpp
- * Author: artyom
- * 
- * Created on 9 Ноябрь 2011 г., 21:40
- */
+#include <QLabel>
+#include <QSpinBox>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QPushButton>
 
 #include "otherGuiClasses.h"
 #include "Scene3D.h"

@@ -1,11 +1,4 @@
-/* 
-* File:   Figure.cpp
-* Author: artyom
-* 
-* Created on 1 Ноябрь 2011 г., 21:35
-*/
-
-#include "complect_headers.h"
+#include <time.h>
 #include "Figure.h"
 
 
@@ -40,11 +33,13 @@ void Figure::toFile(FILE * F)
     fwrite(&cnt_cells,4,1,F);
     int key = 1, s = cnt_cells/32+1;
     int * A = new int[s];
-    for (int i = 0; i<s; i++) A[i] = 0;
+    for (int i = 0; i<s; i++)
+        A[i] = 0;
     int * a = A;
     for (int i = 0; i<cnt_cells; i++)
     {
-        if (cells[i].livingStatusNow) (*a) |= key;
+        if (cells[i].livingStatusNow)
+            (*a) |= key;
         if ( (key<<=1) == 0 )
         {
             a++;
@@ -376,8 +371,8 @@ void Figure::step()
         {
             u = ActiveCellNow[i]->cnt_active_neighbors_now;
             if (ActiveCellNow[i]->step_flag!=stepNmb &&
-                    (probabilities_dead[u]!=0 && probabilities_dead[u]!=RAND_MAX ||
-                    probabilities_live[u]!=0 && probabilities_live[u]!=RAND_MAX))
+                    ( (probabilities_dead[u]!=0 && probabilities_dead[u]!=RAND_MAX) ||
+                      (probabilities_live[u]!=0 && probabilities_live[u]!=RAND_MAX) ) )
             {
                 (ActiveCellNext[cnt_act_next++] = ActiveCellNow[i])->step_flag = stepNmb;
             }

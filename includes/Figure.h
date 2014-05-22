@@ -8,8 +8,11 @@
 #ifndef FIGURE_H
 #define	FIGURE_H
 
+#include <math.h>
+#include <stdio.h>
+#include <GL/gl.h>
 
-#include "Modeles.h"
+class Model;
 
 
 enum CellSides {Side01 = 1, Side12 = 2, Side23 = 4, Side30 = 8 };
@@ -111,8 +114,8 @@ public:
     Figure();
     virtual ~Figure();
     virtual void setPhisicSize(float s1, float s2) = 0;
-    virtual void addModel(Model * M, int x, int y, bool refresh = true) = 0;
-    virtual void addModel(Model * M, Cell * C) = 0;
+    virtual void addModel(Model * m, int x, int y, bool refresh = true) = 0;
+    virtual void addModel(Model * m, Cell * c) = 0;
     virtual void createAgar() {}
     void setLineWidth(GLfloat width);
     void drawList();
@@ -157,7 +160,7 @@ public:
     void createAgar();
     Cell * getEndCell();
     void addModel(Model * m, int x, int y, bool refresh = true);
-    bool addModel(Model * m, Cell * C, bool refresh = true);
+    bool addModel(Model * m, Cell * c, bool refresh = true);
     void surfaceCellsConnect();
     void createVertexesByMain();
     void createFullPlaneVertexes(fpoint &pnt0,

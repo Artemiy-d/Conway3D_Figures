@@ -1,23 +1,12 @@
-/* 
- * File:   Modeles.h
- * Author: artyom
- *
- * Created on 3 Ноябрь 2011 г., 20:05
- */
-
 #ifndef MODELES_H
 #define	MODELES_H
-//#include "stddef.h"
-#include "MyCollection.h"
+
+#include "StringMap.h"
 
 class Model
 {
-protected:
-    int all_size;
-
 public:
-    bool * cellEnable;
-    int size_m;
+
     static bool isFileValid(char * fn);
     Model(int sz);
     Model(Model& orig);
@@ -31,7 +20,12 @@ public:
     void rotate(int nmb = 1);
     void mirrorX();
     void mirrorY();
-    Model& operator = (Model& M);
+    Model& operator = (const Model& M);
+    int getSize() const;
+protected:
+    int all_size;
+    int size_m;
+    bool * cellEnable;
 };
 
 
@@ -78,8 +72,8 @@ public:
   modelAcorn();
 };
 
-extern MyCollection <Model*> modelCollection;
-extern MyCollection <Model*> currentModelCollection;
+extern StringMap <Model*> modelCollection;
+extern StringMap <Model*> currentModelCollection;
 extern QString strPen;
 
 #endif	/* MODELES_H */

@@ -1,17 +1,17 @@
-/* 
- * File:   Languages.cpp
- * Author: artyom
- * 
- * Created on 14 Ноябрь 2011 г., 18:05
- */
-
+#include <QDir>
+#include <QTextStream>
+#include <QDebug>
 
 #include "Languages.h"
 
+Languages * Languages::s_instance = NULL;
 
-
-Languages::Languages() : QObject()
+Languages::Languages()
+    : QObject(),
+      m_current(NULL),
+      m_base(NULL)
 {
+    /*
     BaseLang.AddItem("language_name",tr("English"));
     BaseLang.AddItem("start",tr("Start"));
     BaseLang.AddItem("stop",tr("Stop"));
@@ -79,102 +79,126 @@ Languages::Languages() : QObject()
     BaseLang.AddItem("save_template",tr("Save template"));
     CurrentLang = &BaseLang;
     lang_list += CurrentLang;
+    */
 
+    qDebug() << QDir::currentPath();
     QDir dir(tr("languages") );
     QStringList sl = dir.entryList(QDir::Files);
-    QString basefile = tr("BaseLang.txt");
+ //   QString basefile = tr("BaseLang.txt");
     if (sl.count())
     {
         foreach (QString s, sl)
         {
-            if (s == basefile)
+          //  if (s == basefile)
             {
                 QString sum = dir.absoluteFilePath(s);
-                AddLang(sum, true);
+                addLanguageFile(sum);
             }
-        }
-        foreach (QString s, sl)
-        {
-            if (s != basefile)
-            {
-                QString sum = dir.absoluteFilePath(s);
-                AddLang(sum);
-            }
-        }
-        foreach (Action_lang * a_l, lang_list)
-        {
-            a_l->setText();
-            connect(a_l,SIGNAL(triggered()),this,SLOT(act_click()));
         }
     }
 
+    setCurrentLanguage( tr( "Russian" ) );
+}
 
+Languages & Languages::getInstance()
+{
+    if ( s_instance == NULL )
+        s_instance = new Languages();
+    return *s_instance;
+}
+
+void Languages::setCurrentLanguage(const QString & _current)
+{
+    LanguagesMap::iterator it = m_languages.find(_current);
+    if ( it != m_languages.end() )
+    {
+        m_current = &it.value();
+        emit set_lang();
+    }
 }
 
 
-Languages::~Languages()
+const QString& Languages::operator [] (const QString & _key)
 {
+    LanguageMap * languages[] = { m_current, m_base };
+    for ( size_t i = 0; i < sizeof( languages ) / sizeof( LanguageMap* ); ++i )
+        if ( languages[i] )
+        {
+            LanguageMap::iterator it = languages[i]->find(_key);
+            if (it != languages[i]->end())
+                return it.value();
+        }
+    return _key;
+}
 
+QList<QString> Languages::getLanguagesList() const
+{
+    return m_languages.keys();
+}
+
+int Languages::count() const
+{
+    return m_languages.size();
 }
 
 
-QString& Languages::operator [] (char * key)
+void Languages::addLanguageFile(const QString & _filename)
 {
-    return (*CurrentLang)[key];
-}
-
-
-void Languages::AddLang(QString &filename, bool base_lang)
-{
-    wchar_t * str = NULL, * strValue, * key;
-    QFile file(filename);
+    QChar * str = NULL, * strValue, * key, * strValuePtr;
+    QFile file(_filename);
     if (file.open(QIODevice::Text | QIODevice::ReadOnly))
     {
         QTextStream ts(&file);
         QString S = ts.readAll();
         file.close();
-        if (S.length()<2) return;
-        Action_lang * A_L = base_lang?&BaseLang:new Action_lang(*(MyCollection<QString>*)&BaseLang);
-        str = new wchar_t[S.length()+1];
-        str[S.length()] = 0;
-        S.toWCharArray(str);
+        if (S.length() < 2)
+            return;
+        LanguageMap lm;
+        str = S.data();
+
         while (*str!=0)
         {
-            while (*(str) == ' ' || *(str)==10 || *(str)==13) str++;
-            if (*(key = str) == 0) break;
+            while (*str == ' ' || *str == '\n' || *(str) == '\r' || *str == '\t')
+                ++str;
 
-            while (*str != ' ' && *str!=0) str++;
+            if (*(key = str) == 0)
+                break;
+
+            while ( *str != ' ' && *str != 0)
+                ++str;
+
             *(str++) = 0;
 
-            while (*str!=34 && *str!=0) str++;
-            if (*str == 0) break;
-            strValue = ++str;
-            while (*str!=34 && *str!=0)
-            {
-                if (*str == '@') *str = 10;
-                str++;
-            }
-            if (*str!=0) *(str++)=0;
+            while (*str != '"' && *str != 0 )
+                ++str;
 
-            QString V = QString::fromWCharArray(strValue);
-            A_L->AddItem(key,V);
+            if (*str == 0)
+                break;
+
+            strValuePtr = strValue = ++str;
+
+            while ( *str != '"' && *str != 0 )
+            {
+                if (*str == '\\' && *(str + 1) != 0)
+                {
+                    if ( *(str + 1) == 'n' )
+                        *(strValuePtr++) = '\n';
+                    else
+                        *(strValuePtr++) = *(str + 1);
+
+                    str += 2;
+                }
+                else
+                {
+                    *(strValuePtr++) = *(str++);
+                }
+
+            }
+            *strValuePtr = 0;
+
+            lm[QString(key)] = QString(strValue);
         }
 
-      //  delete str;
-       if (!base_lang) lang_list+=A_L;
+        m_languages.insert( lm["language_id"], LanguageMap() ).value().swap(lm);      //  delete str;
     }
 }
-
-void Languages::act_click()
-{
-    CurrentLang = (Action_lang*)QObject::sender();
-    emit set_lang();
-}
-
-void Languages::CreateActions(QMenu * menu, QObject * parent)
-{
-    menu->addActions( *(reinterpret_cast<QList<QAction*>*>(&lang_list)) );
-
-}
-
-Languages appLangs;

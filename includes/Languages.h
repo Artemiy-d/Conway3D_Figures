@@ -1,55 +1,46 @@
-/* 
- * File:   Languages.h
- * Author: artyom
- *
- * Created on 14 Ноябрь 2011 г., 18:05
- */
-
 #ifndef LANGUAGES_H
 #define	LANGUAGES_H
-#include "MyCollection.h"
 
-#include "complect_headers.h"
+#include <QObject>
+#include <QList>
 
-class Action_lang : public QAction, public MyCollection<QString>
-{
-    Q_OBJECT
-public:
-    Action_lang() : QAction((QObject*)NULL) , MyCollection<QString>() {}
-    Action_lang(MyCollection<QString> &C) : QAction((QObject*)NULL), MyCollection<QString>(C) {}
-    void setText()
-    {
-        QAction::setText(MyCollection<QString>::operator []("language_name") );
-    }
+#include "StringMap.h"
 
-    virtual ~Action_lang() {}
-
-};
 
 class Languages : public QObject
 {
     Q_OBJECT
 private:
-    QList<Action_lang*> lang_list;
-    void AddLang(QString &filename, bool base_lang = false);
-    Action_lang BaseLang;
-    Action_lang * CurrentLang;
+    typedef StringMap<  QString > LanguageMap;
+    typedef StringMap< LanguageMap > LanguagesMap;
+
 public:
-    void CreateActions(QMenu * menu, QObject * parent);
+
+    static Languages & getInstance();
+
+    void setCurrentLanguage(const QString & _current);
+
+    const QString & operator [] (const QString & _key);
+    QList<QString> getLanguagesList() const;
+    int count() const;
+private:
     Languages();
-    QString & operator [] (char * key);
-    virtual ~Languages();
-    inline int Count()
-    {
-        return lang_list.count();
-    }
+    ~Languages() {}
+
+    void addLanguageFile(const QString & _filename);
+
 signals:
     void set_lang();
-public slots:
-    void act_click();
+
+private:
+
+    LanguagesMap m_languages;
+    LanguageMap * m_current;
+    LanguageMap * m_base;
+
+    static Languages * s_instance;
 };
 
-extern Languages appLangs;
-#define LNG (appLangs)
+#define LNG (Languages::getInstance())
 #endif	/* LANGUAGES_H */
 

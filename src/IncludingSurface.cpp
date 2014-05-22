@@ -1,4 +1,5 @@
 #include "Figure.h"
+#include "Modeles.h"
 
 
 IncludingSurface::IncludingSurface(Figure * prnt)
@@ -75,32 +76,43 @@ void IncludingSurface::createAgar()
     int c1 = (count_first/3)*3, c2 = (count_second/3)*3;
     for (int i = 0; i<c1; i++)
         for (int j = 0; j<c2; j++)
-            if (i%3 && j%3) plus(i,j);
-            else minus(i,j);
+        {
+            if (i%3 && j%3)
+                plus(i,j);
+            else
+                minus(i,j);
+        }
     parent->refresh();
 }
 
-void IncludingSurface::addModel(Model * M, int x, int y, bool refresh)
+void IncludingSurface::addModel(Model * _m, int x, int y, bool refresh)
 {
+    int sz = _m->getSize();
     if (refresh)
-    for (int i = 0; i<M->size_m; i++)
-        for (int j = 0; j<M->size_m; j++) minus(x+i,j+y);
+    {
+        for (int i = 0; i < sz; i++)
+            for (int j = 0; j < sz; j++)
+                minus(x + i, j + y);
+    }
 
-    for (int i = 0; i<M->size_m; i++)
-        for (int j = 0; j<M->size_m; j++)
-            if (M->isCell(i,j)) plus(x+i,j+y);
+    for (int i = 0; i < sz; i++)
+        for (int j = 0; j < sz; j++)
+        {
+            if (_m->isCell(i, j))
+                plus(x + i, j + y);
+        }
 
     parent->refresh();
 }
 
-bool IncludingSurface::addModel(Model * M, Cell * C, bool refresh)
+bool IncludingSurface::addModel(Model * _m, Cell * _c, bool refresh)
 {
     Cell * c = cells;
     for (int x = 0; x<count_first; x++)
         for (int y = 0; y<count_second; y++)
-            if (C == c++)
+            if (_c == c++)
             {
-                addModel(M,x,y,refresh);
+                addModel(_m,x,y,refresh);
                 return true;
             }
     return false;
@@ -108,7 +120,9 @@ bool IncludingSurface::addModel(Model * M, Cell * C, bool refresh)
 
 void IncludingSurface::createVertexesByMain()
 {
-    if (count_first<=0) return;
+    if (count_first<=0)
+        return;
+
     for (int i = 0; i<count_first - 1; i++)
         for (int j = 0; j<count_second - 1; j++)
         {
@@ -132,7 +146,9 @@ void IncludingSurface::createVertexesByMain()
 
 void IncludingSurface::surfaceCellsConnect()
 {
-    if (count_first<=0) return;
+    if (count_first<=0)
+        return;
+
     int k=0;
     for (int i = 0; i<count_first; i++)
         for (int j = 0; j<count_second; j++)

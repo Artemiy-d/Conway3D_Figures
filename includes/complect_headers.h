@@ -1,14 +1,8 @@
-/* 
- * File:   complect_headers.h
- * Author: artyom
- *
- * Created on 10 Ноябрь 2011 г., 23:26
- */
 #ifndef COMPLECT_HEADERS_H
 #define	COMPLECT_HEADERS_H
 
 
-#include "QtGui"
+#include <QtGui>
 
 #include <QGLWidget>
 #include <QApplication>

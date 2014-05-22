@@ -1,3 +1,5 @@
+#include <QMouseEvent>
+
 #include "otherGuiClasses.h"
 
 
@@ -93,7 +95,7 @@ void GrawGrid::mousePressEvent(QMouseEvent *e)
     repaint();
 }
 
-GrawGrid& GrawGrid::operator = (Model &model)
+GrawGrid& GrawGrid::operator = (const Model &model)
 {
     Model::operator =(model);
     repaint();
