@@ -14,7 +14,7 @@ class QWidget;
 class Scene3D;
 
 
-class DialogOfCreation : public QDialog
+class DialogNewFigure : public QDialog
 {
     Q_OBJECT
 private:
@@ -34,9 +34,9 @@ public:
 
     bool m_result;
 
-    DialogOfCreation();
-   // DialogOfCreation(const DialogOfCreation& orig);
-    virtual ~DialogOfCreation();
+    DialogNewFigure();
+   // DialogNewFigure(const DialogNewFigure& orig);
+    virtual ~DialogNewFigure();
 
 
 

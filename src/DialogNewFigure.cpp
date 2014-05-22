@@ -6,10 +6,10 @@
 
 #include "otherGuiClasses.h"
 #include "Scene3D.h"
-#include "DialogOfCreation.h"
-#include "Languages.h"
+#include "DialogNewFigure.h"
+#include "LanguageManager.h"
 
-DialogOfCreation::DialogOfCreation()
+DialogNewFigure::DialogNewFigure()
 {
     m_result = false;
     m_widgetsCount = 0;
@@ -59,7 +59,7 @@ DialogOfCreation::DialogOfCreation()
     selectingFigure(0);
 }   
 
-void DialogOfCreation::setLang()
+void DialogNewFigure::setLang()
 {
     this->setWindowTitle(LNG["creating_figure"]);
     m_labelCombo->setText(LNG["type_figure"]);
@@ -75,8 +75,10 @@ void DialogOfCreation::setLang()
     m_labelOffset->setText(LNG["offset"]);
     m_buttonExit->setText(LNG["exit"]);
     m_buttonOK->setText(LNG["create"]);
-    for (int i = 0; i<3; i++) m_labelSize[i]->setText(LNG["size"]+" "+QString::number(i+1));
-    for (int i = 0; i<m_widgetsCount; i++) m_widgets[i]->adjustSize();
+    for (int i = 0; i<3; i++)
+        m_labelSize[i]->setText(LNG["size"]+" "+QString::number(i+1));
+    for (int i = 0; i<m_widgetsCount; i++)
+        m_widgets[i]->adjustSize();
     m_checkBoxDefaultSettings->move(m_combo->pos().x(),m_combo->pos().y() + m_combo->height()+10);
     m_grpBoxSizes->setGeometry(m_combo->pos().x(),m_checkBoxDefaultSettings->pos().y()+m_checkBoxDefaultSettings->height()+10,220,200);
     m_buttonExit->move(15,m_grpBoxSizes->pos().y()+m_grpBoxSizes->height()+10);
@@ -84,9 +86,9 @@ void DialogOfCreation::setLang()
 
 }
 
-void DialogOfCreation::selectingFigure(int index)
+void DialogNewFigure::selectingFigure(int index)
 {
-    switch (m_combo->currentIndex())
+    switch (index)
     {
         case 0:
             m_labelSize[2]->setEnabled(false);
@@ -109,7 +111,7 @@ void DialogOfCreation::selectingFigure(int index)
     }
 }
 
-void DialogOfCreation::pressOK()
+void DialogNewFigure::pressOK()
 {
     if (m_combo->currentIndex()<0)
         return;
@@ -135,7 +137,7 @@ void DialogOfCreation::pressOK()
     m_result = true;
     this->close();
 }
-DialogOfCreation::~DialogOfCreation()
+DialogNewFigure::~DialogNewFigure()
 {
 
 }

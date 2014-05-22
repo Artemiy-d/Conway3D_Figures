@@ -14,18 +14,17 @@ SOURCES += \
     src/main.cpp \
     src/Figure.cpp \
     src/DialogSettings.cpp \
-    src/Languages.cpp \
     src/FigureClasses.cpp \
     src/DialogAbout.cpp \
     src/Modeles.cpp \
     src/BaseSurface.cpp \
     src/Scene3D.cpp \
     src/IncludingSurface.cpp \
-    src/DialogOfCreation.cpp \
-    src/DialogTemplates.cpp
+    src/DialogTemplates.cpp \
+    src/DialogNewFigure.cpp \
+    src/LanguageManager.cpp
 
 HEADERS += includes/otherGuiClasses.h \
-    includes/Languages.h \
     includes/Scene3D.h \
     includes/Modeles.h \
     includes/MainWindow.h \
@@ -34,9 +33,10 @@ HEADERS += includes/otherGuiClasses.h \
     includes/Figure.h \
     includes/complect_headers.h \
     includes/DialogSettings.h \
-    includes/DialogOfCreation.h \
     includes/DialogTemplates.h \
-    includes/StringMap.h
+    includes/StringMap.h \
+    includes/DialogNewFigure.h \
+    includes/LanguageManager.h
 
 FORMS +=
 RESOURCES +=
@@ -48,7 +48,7 @@ UI_DIR =
 #QMAKE_CC = gcc
 #QMAKE_CXX = g++
 DEFINES += 
-LIBS += -lglut -lGL
+LIBS += -lglut
 # -lglu
 
 

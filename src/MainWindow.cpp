@@ -1,9 +1,17 @@
+#include <QSlider>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QPushButton>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QApplication>
+#include <QKeyEvent>
+
 #include "MainWindow.h"
 #include "Figure.h"
 
-#include "complect_headers.h"
 #include "Scene3D.h"
-#include "DialogOfCreation.h"
+#include "DialogNewFigure.h"
 #include "DialogAbout.h"
 #include "DialogSettings.h"
 #include "DialogTemplates.h"
@@ -11,13 +19,11 @@
 #include "FigureClasses.h"
 
 
-#include "Languages.h"
+#include "LanguageManager.h"
 
 
-bool init = false;
-int wPanel = 200;
+int versionSaving = 0;
 
-int version_saving = 0;
 QString file_save_name, path_to_save;
 
 MainWindow::MainWindow()
@@ -29,11 +35,12 @@ MainWindow::MainWindow()
 //    unsigned int p2 = (unsigned int)(x+65537);
 
     m_widgetsCount = 0;
+    m_panelWidth = 200;
     s3d = new Scene3D();
     s3d->setParent(this);
    // s3d->
-    dialogCreating = new DialogOfCreation();
-    dialogCreating->s3d = s3d;
+    dialogNewFigure = new DialogNewFigure();
+    dialogNewFigure->s3d = s3d;
 
     dTemplates = new DialogTemplates();
     connect(dTemplates, SIGNAL(newActive()),this,SLOT(setComboModels()));
@@ -46,7 +53,7 @@ MainWindow::MainWindow()
 
     sliderVelocity = new QSlider(panelSettings);
     sliderVelocity->setOrientation(Qt::Horizontal);
-    sliderVelocity->setGeometry(10,40,wPanel-20,20);
+    sliderVelocity->setGeometry(10,40,m_panelWidth-20,20);
     sliderVelocity->setMaximum(100);
     sliderVelocity->setValue(30);
     
@@ -238,17 +245,19 @@ bool MainWindow::createOpenMenuTreeRec(QMenu * menu, const QString &path, int it
         }
     }
 
-    if (!ret) delete menu;
-    else menuList += menu;
+    if (!ret)
+        delete menu;
+    else
+        menuList += menu;
     return ret;
 }
 
-static QString AddEnd(QString str, QString end, int len = 20)
+QString createMenuText(const QString & _begin, const QString & _end, int _len = 20)
 {
-    QString S;
-    if (str.length()+end.length()<20)
-        S.fill(' ',20-str.length()-end.length());
-    return str+S+end;
+    QString s;
+    if (_begin.length() + _end.length() < _len)
+        s.fill(' ', _len - _begin.length() - _end.length());
+    return _begin + s + _end;
 }
 
 void MainWindow::setLang()
@@ -270,10 +279,10 @@ void MainWindow::setLang()
 
     menuFile->setTitle(LNG["file"]);
 
-        actNewFigure->setText(AddEnd(LNG["new_fig"],tr("  ctrl+N")));
-        actOpen->setText(AddEnd(LNG["open"],tr("  ctrl+O")));
+        actNewFigure->setText(createMenuText(LNG["new_fig"],tr("  ctrl+N")));
+        actOpen->setText(createMenuText(LNG["open"],tr("  ctrl+O")));
         if (menuOpenFinded!=NULL) menuOpenFinded->setTitle(LNG["open_finded"]);
-        actSave->setText(AddEnd(LNG["save"],tr("  ctrl+S")));
+        actSave->setText(createMenuText(LNG["save"],tr("  ctrl+S")));
         actSaveAs->setText(LNG["save_as"]);
         actExit->setText(LNG["exit"]);
     menuEdit->setTitle(LNG["edit"]);
@@ -314,8 +323,8 @@ void MainWindow::setDrawingEnable(int on)
 
 void MainWindow::createNewFigure()
 {
-    dialogCreating->exec();
-    if (dialogCreating->m_result)
+    dialogNewFigure->exec();
+    if (dialogNewFigure->m_result)
     {
         file_save_name = "";
     }
@@ -338,20 +347,15 @@ void MainWindow::changeDrawModel(const QString& name)
 void MainWindow::resize()
 {
     int menuHeight = this->menuBar()->height();
-    s3d->setGeometry(0,menuHeight,this->width()-wPanel,this->height()-menuHeight);
-    panelSettings->setGeometry(this->width()-wPanel,menuHeight,wPanel,this->height()-menuHeight);
+    s3d->setGeometry(0,menuHeight,this->width()-m_panelWidth,this->height()-menuHeight);
+    panelSettings->setGeometry(this->width()-m_panelWidth,menuHeight,m_panelWidth,this->height()-menuHeight);
 }
 
 void MainWindow::setSettingsVisible(bool value)
 {
     panelSettings->setVisible(value);
-    wPanel = value?200:0;
+    m_panelWidth = value ? 200 : 0;
     resize();
-}
-
-void MainWindow::animationChanged(int value)
-{
-  //  s3d.setAnimationEnable(value!=0);
 }
 
 double getVelocity(QSlider * slider)
@@ -392,7 +396,7 @@ void MainWindow::resizeEvent(QResizeEvent * /*e*/)
     resize();
 }
 
-void MainWindow::openFile(QString fn)
+void MainWindow::openFile(const QString & fn)
 {
     if (!isFileValid(fn))
     {
@@ -447,7 +451,7 @@ void MainWindow::saveFile()
         saveFileTo(file_save_name);
 }
 
-bool MainWindow::isFileValid(QString& fn)
+bool MainWindow::isFileValid(const QString & fn)
 {
     FILE * F;
     if (!fn.isNull() && (F = fopen(fn.toLocal8Bit().data(),"rb") )!=NULL )
@@ -475,12 +479,12 @@ bool MainWindow::isFileValid(QString& fn)
     return false;
 }
 
-void MainWindow::saveFileTo(QString fn)
+void MainWindow::saveFileTo(const QString & fn)
 {
     FILE * F;
     if (!fn.isNull() && (F = fopen(fn.toLocal8Bit().data(),"w+b") )!=NULL )
     {
-        fwrite(&version_saving,4,1,F);
+        fwrite(&versionSaving,4,1,F);
         s3d->getFigure()->toFile(F);
         int sz = ftell(F);
         rewind(F);
@@ -508,8 +512,8 @@ void MainWindow::saveFileAs()
         M.exec();
         return;
     }
-    MyFileDialog D;
-    QString fn = D.execSave();
+    MyFileDialog dialog;
+    QString fn = dialog.execSave();
     if (!fn.isNull())
         saveFileTo(fn);
 }
@@ -521,7 +525,7 @@ void MainWindow::keyPressEvent(QKeyEvent* E)
         switch (E->key())
         {
             case Qt::Key_N:
-                dialogCreating->exec();
+                dialogNewFigure->exec();
                 break;
             case Qt::Key_S:
                 saveFile();
@@ -537,7 +541,7 @@ void MainWindow::keyPressEvent(QKeyEvent* E)
 MainWindow::~MainWindow()
 {
     delete dSettings;
-    delete dialogCreating;
+    delete dialogNewFigure;
     delete dAbout;
     delete ButtonStart;
     delete ButtonStep;

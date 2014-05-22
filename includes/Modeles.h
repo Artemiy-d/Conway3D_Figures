@@ -7,25 +7,30 @@ class Model
 {
 public:
 
-    static bool isFileValid(char * fn);
-    Model(int sz);
-    Model(Model& orig);
-    Model(char * fn);
-    bool saveToFile(char * fn);
-    bool openFromFile(char * fn);
+    static bool isFileValid(const char * _fn);
+
+    Model(int _sz);
+    Model(const Model& _orig);
+    Model(const char * _fn);
+
     virtual ~Model();
-    void setCell(int i, int j, bool value = true);
-    virtual void createField(int sz);
-    bool isCell(int i, int j);
-    void rotate(int nmb = 1);
+
+    bool saveToFile(const char * _fn) const;
+    bool openFromFile(const char * _fn);
+
+
+    void setCellFilled(int _i, int _j, bool _value = true);
+    virtual void createField(int _sz);
+    bool isCellFilled(int _i, int _j) const;
+    void rotate(int _nmb = 1);
     void mirrorX();
     void mirrorY();
-    Model& operator = (const Model& M);
+    Model& operator = (const Model& _m);
     int getSize() const;
 protected:
-    int all_size;
-    int size_m;
-    bool * cellEnable;
+    int m_square;
+    int m_size;
+    bool * m_cells;
 };
 
 
@@ -38,26 +43,26 @@ public:
 class modelZSymbol : public Model
 {
 public:
-  modelZSymbol(int s = 5);
+  modelZSymbol(int _s = 5);
 };
 
 class modelXSymbol : public Model
 {
 public:
-  modelXSymbol(int s = 5);
+  modelXSymbol(int _s = 5);
 };
 
 class modelRect : public Model
 {
 public:
-  modelRect(int a = 5);
-  modelRect(int a, int b);
+  modelRect(int _a = 5);
+  modelRect(int _a, int _b);
 };
 
 class modelShip : public Model
 {
 public:
-  modelShip(int a = 5);
+  modelShip(int _a = 5);
 };
 
 class modelPentadecatron : public Model

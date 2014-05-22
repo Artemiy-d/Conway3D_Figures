@@ -1,23 +1,15 @@
-/*
- * File:   main.cpp
- * Author: artyom
- *
- * Created on 1 Ноябрь 2011 г., 1:20
- */
-//#include "complect_headers.h"
+#include <QApplication>
 
 #include "MainWindow.h"
-#include "complect_headers.h"
 #include "Scene3D.h"
-#include "DialogOfCreation.h"
+#include "DialogNewFigure.h"
 #include "DialogAbout.h"
 #include "DialogSettings.h"
 #include "DialogTemplates.h"
 #include "otherGuiClasses.h"
 
 #include "StringMap.h"
-#include "Languages.h"
-#include "complect_headers.h"
+#include "LanguageManager.h"
 
 int main(int argc, char *argv[])
 {

@@ -7,7 +7,7 @@
 #include <QMessageBox>
 
 
-#include "Languages.h"
+#include "LanguageManager.h"
 #include "Modeles.h"
 #include "otherGuiClasses.h"
 #include "DialogTemplates.h"

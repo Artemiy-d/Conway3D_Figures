@@ -7,7 +7,7 @@
 #include "StringMap.h"
 
 
-class Languages : public QObject
+class LanguageManager : public QObject
 {
     Q_OBJECT
 private:
@@ -16,7 +16,7 @@ private:
 
 public:
 
-    static Languages & getInstance();
+    static LanguageManager & getInstance();
 
     void setCurrentLanguage(const QString & _current);
 
@@ -24,8 +24,8 @@ public:
     QList<QString> getLanguagesList() const;
     int count() const;
 private:
-    Languages();
-    ~Languages() {}
+    LanguageManager();
+    ~LanguageManager() {}
 
     void addLanguageFile(const QString & _filename);
 
@@ -38,9 +38,9 @@ private:
     LanguageMap * m_current;
     LanguageMap * m_base;
 
-    static Languages * s_instance;
+    static LanguageManager * s_instance;
 };
 
-#define LNG (Languages::getInstance())
+#define LNG (LanguageManager::getInstance())
 #endif	/* LANGUAGES_H */
 

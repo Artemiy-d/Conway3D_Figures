@@ -1,16 +1,10 @@
-/* 
- * File:   Scene3D.cpp
- * Author: artyom
- * 
- * Created on 1 Ноябрь 2011 г., 15:57
- */
-
-
-
 #include <GL/glu.h>
 
+#include <QTimer>
+#include <QMouseEvent>
+#include <time.h>
+
 #include "Scene3D.h"
-#include "complect_headers.h"
 #include "FigureClasses.h"
 
 

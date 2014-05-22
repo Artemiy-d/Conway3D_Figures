@@ -44,21 +44,21 @@ void MyGroupBox::paintEvent(QPaintEvent * /* e */)
 bool * GrawGrid::getPoint(int x, int y)
 {
 //     int x0, x1 = x_arr , x2
-    return cellEnable + (y * size_m / height()) * size_m + x * size_m / width();
+    return m_cells + (y * m_size / height()) * m_size + x * m_size / width();
 }
 void GrawGrid::createArray(int w, int h)
 {
-    w_cell = w / size_m;
-    h_cell = h / size_m;
-    for (int i = 0; i <= size_m; i++)
+    w_cell = w / m_size;
+    h_cell = h / m_size;
+    for (int i = 0; i <= m_size; i++)
     {
-        x_arr[i] = i * (w-1) / size_m;
-        y_arr[i] = i * (h-1) / size_m;
+        x_arr[i] = i * (w-1) / m_size;
+        y_arr[i] = i * (h-1) / m_size;
     }
 }
 void GrawGrid::createField(int sz)
 {
-    if (sz < 1 || sz == size_m)
+    if (sz < 1 || sz == m_size)
         return;
     Model::createField(sz);
     delete x_arr;
@@ -71,20 +71,20 @@ void GrawGrid::paintEvent(QPaintEvent * /* e */)
 {
     painter.begin(this);
     int k = 0;
-    for (int i = 0; i < size_m; i++)
-        for (int j = 0; j < size_m; j++)
+    for (int i = 0; i < m_size; i++)
+        for (int j = 0; j < m_size; j++)
         {
             painter.fillRect(x_arr[j],
                              y_arr[i],
                              x_arr[j + 1] - x_arr[j],
                              y_arr[i + 1] - y_arr[i],
-                             cellEnable[k++] ? Qt::black : Qt::white);
+                             m_cells[k++] ? Qt::black : Qt::white);
         }
     painter.setPen(Qt::blue);
-    for (int i = 0; i<=size_m; i++)
+    for (int i = 0; i<=m_size; i++)
     {
-        painter.drawLine(x_arr[0], y_arr[i], x_arr[size_m], y_arr[i]);
-        painter.drawLine(x_arr[i], y_arr[0], x_arr[i], y_arr[size_m]);
+        painter.drawLine(x_arr[0], y_arr[i], x_arr[m_size], y_arr[i]);
+        painter.drawLine(x_arr[i], y_arr[0], x_arr[i], y_arr[m_size]);
     }
     painter.end();
 }
@@ -105,7 +105,7 @@ GrawGrid& GrawGrid::operator = (const Model &model)
 GrawGrid::GrawGrid(QWidget * parent) : QWidget(parent), Model(0)
 {
     x_arr = NULL;
-    cellEnable = NULL;
+    m_cells = NULL;
     createField(5);
 }
 GrawGrid::~GrawGrid()
@@ -115,8 +115,8 @@ GrawGrid::~GrawGrid()
 void GrawGrid::setQuadSize(int sz, bool * field)
 {
     createField(sz);
-    for (int i = 0; i<all_size; i++)
-        cellEnable[i] = field[i];
+    for (int i = 0; i<m_square; i++)
+        m_cells[i] = field[i];
     repaint();
 }
 

@@ -1,146 +1,142 @@
-/* 
- * File:   Modeles.cpp
- * Author: artyom
- * 
- * Created on 3 Ноябрь 2011 г., 20:05
- */
-
 #include "Modeles.h"
 #include "Figure.h"
 
 
-Model::Model(int sz)
+Model::Model(int _sz)
 {
-    cellEnable = NULL;
-    createField(sz);
+    m_cells = NULL;
+    createField(_sz);
 }
 
-Model::Model(char * fn)
+Model::Model(const char * _fn)
 {
-    cellEnable = NULL;
-    openFromFile(fn);
+    m_cells = NULL;
+    openFromFile(_fn);
 }
 
-Model::Model(Model& orig)
+Model::Model(const Model& _orig)
 {
-    cellEnable = NULL;
-    operator = (orig);
+    m_cells = NULL;
+    operator = (_orig);
 }
 
 Model::~Model()
 {
-    delete cellEnable;
+    delete m_cells;
 }
 
-void Model::setCell(int i, int j, bool value)
+void Model::setCellFilled(int _i, int _j, bool _value)
 {
-    cellEnable[i*size_m+j]=value;
+    m_cells[_i * m_size + _j] = _value;
 }
 
-void Model::createField(int sz)
+void Model::createField(int _sz)
 {
-    if (sz<1 || sz == size_m)
+    if (_sz < 1 || _sz == m_size)
         return;
-    bool * new_points = new bool[all_size = sz*sz];
-    for (int i = 0; i<all_size; i++)
-        new_points[i] = false;
-    if (cellEnable != NULL)
+    bool * newCells = new bool[m_square = _sz * _sz];
+    for (int i = 0; i < m_square; i++)
+        newCells[i] = false;
+    if (m_cells != NULL)
     {
-        int m_sz = std::min(sz,size_m);
-        for (int i = 0; i<m_sz; i++)
-            for (int j = 0; j<m_sz;j++)
-                new_points[i*sz+j] = cellEnable[i*size_m+j];
-        delete cellEnable;
+        int minSize = std::min(_sz, m_size);
+        for (int i = 0; i < minSize; i++)
+            for (int j = 0; j < minSize;j++)
+                newCells[i * _sz + j] = m_cells[i * m_size + j];
+        delete m_cells;
     }
-    cellEnable = new_points;
-    size_m = sz;
+    m_cells = newCells;
+    m_size = _sz;
 }
 
-bool Model::isCell(int i, int j)
+bool Model::isCellFilled(int _i, int _j) const
 {
-    return cellEnable[i*size_m+j];
+    return m_cells[_i * m_size + _j];
 }
 
 void Model::mirrorX()
 {
-    int s = size_m/2;
-    for (int i = 0; i<s; i++)
-        for (int j = 0; j<size_m; j++)
+    int s = m_size / 2;
+    for (int i = 0; i < s; i++)
+        for (int j = 0; j < m_size; j++)
         {
-            bool b = cellEnable[i*size_m+j];
-            cellEnable[i*size_m+j] = cellEnable[(size_m-i-1)*size_m+j];
-            cellEnable[(size_m-i-1)*size_m+j] = b;
+            bool b = m_cells[i * m_size + j];
+            m_cells[i * m_size + j] = m_cells[(m_size - i - 1) * m_size + j];
+            m_cells[(m_size - i - 1) * m_size + j] = b;
         }
 }
 
 void Model::mirrorY()
 {
-    int s = size_m/2;
-    for (int i = 0; i<s; i++)
-        for (int j = 0; j<size_m; j++)
+    int s = m_size / 2;
+    for (int i = 0; i < s; i++)
+        for (int j = 0; j < m_size; j++)
         {
-            bool b = cellEnable[j*size_m+i];
-            cellEnable[j*size_m+i] = cellEnable[(size_m-j-1)*size_m+i];
-            cellEnable[(size_m-j-1)*size_m+i] = b;
+            bool b = m_cells[j * m_size + i];
+            m_cells[j * m_size + i] = m_cells[(m_size - j - 1) * m_size + i];
+            m_cells[(m_size - j - 1) * m_size + i] = b;
         }
 }
 
-void Model::rotate(int nmb)
+void Model::rotate(int _nmb)
 {
-#define rtt(a,b) { int c = (a); (a)= size_m-(b)-1; (b) = (c); }
-    nmb = ((nmb%4+4))%4;
-    if (cellEnable == NULL)
+    int nmb = (_nmb % 4 + 4) % 4;
+    if (m_cells == NULL)
         return;
-    bool * v = new bool[all_size];
+    bool * v = new bool[m_square];
     int k;
-    for (int i = 0; i<size_m; i++)
-        for (int j = 0; j<size_m; j++)
+    for (int i = 0; i<m_size; i++)
+        for (int j = 0; j<m_size; j++)
         {
             int a = i, b = j;
-            for (k = 0; k<nmb; k++)
-                rtt(a,b)
-            v[a*size_m+b] = cellEnable[i*size_m + j];
+            for (k = 0; k < nmb; k++)
+            {
+                int c = a;
+                a = m_size - b - 1;
+                b = c;
+            }
+            v[a * m_size + b] = m_cells[i * m_size + j];
         }
-    bool * ce = cellEnable;
-    cellEnable = v;
+    bool * ce = m_cells;
+    m_cells = v;
     delete ce;
 }
-Model& Model::operator = (const Model& M)
+Model& Model::operator = (const Model& _m)
 {
-    createField(M.size_m);
-    for (int i = 0; i<all_size; i++)
-        cellEnable[i] = M.cellEnable[i];
+    createField(_m.m_size);
+    for (int i = 0; i < m_square; i++)
+        m_cells[i] = _m.m_cells[i];
     return *this;
 }
 
 int Model::getSize() const
 {
-    return size_m;
+    return m_size;
 }
 
-bool Model::isFileValid(char* fn)
+bool Model::isFileValid(const char * _fn)
 {
-    FILE * F;
-    if ( (F = fopen(fn,"rb") ) != NULL )
+    FILE * file;
+    if ( (file = fopen(_fn, "rb") ) != NULL )
     {
         char s;
-        fseek(F,0,SEEK_END);
-        int sz = ftell(F)-4;
+        fseek(file, 0, SEEK_END);
+        int sz = ftell(file) - 4;
         int sum = -1234;
-        if (sz<=0)
+        if (sz <= 0)
         {
-            fclose(F);
+            fclose(file);
             return false;
         }
-        rewind(F);
+        rewind(file);
 
         while (sz--)
         {
-            fread(&s,1,1,F);
+            fread(&s, 1, 1, file);
             sum += s;
         }
-        fread(&sz,4,1,F);
-        fclose(F);
+        fread(&sz, 4, 1, file);
+        fclose(file);
 
         if (sz == sum)
             return true;
@@ -148,39 +144,39 @@ bool Model::isFileValid(char* fn)
     }
     return false;
 }
-bool Model::saveToFile(char * fn)
+bool Model::saveToFile(const char * _fn) const
 {
-    FILE * F;
-    if ( (F = fopen(fn,"w+b") ) != NULL )
+    FILE * file;
+    if ( (file = fopen(_fn, "w+b") ) != NULL )
     {
-        fwrite(&size_m,4,1,F);
-        fwrite(cellEnable,all_size,1,F);
-        int sz = ftell(F);
-        rewind(F);
+        fwrite(&m_size, 4, 1, file);
+        fwrite(m_cells, m_square, 1, file);
+        int sz = ftell(file);
+        rewind(file);
         char s;
         int sum = -1234;
         while (sz--)
         {
-            fread(&s,1,1,F);
+            fread(&s, 1, 1, file);
             sum += s;
         }
-        fwrite(&sum,4,1,F);
-        fclose(F);
+        fwrite(&sum, 4, 1, file);
+        fclose(file);
         return true;
     }
     return false;
 }
-bool Model::openFromFile(char * fn)
+bool Model::openFromFile(const char * _fn)
 {
    // if (!isFileValid(fn)) return false;
-    FILE * F;
-    if ( (F = fopen(fn,"rb") ) != NULL )
+    FILE * file;
+    if ( (file = fopen(_fn, "rb") ) != NULL )
     {
         int sz;
-        fread(&sz,4,1,F);
+        fread(&sz, 4, 1, file);
         createField(sz);
-        fread(cellEnable,all_size,1,F);
-        fclose(F);
+        fread(m_cells, m_square, 1, file);
+        fclose(file);
         return true;
     }
     return false;
@@ -191,85 +187,86 @@ bool Model::openFromFile(char * fn)
 
 modelPlaner::modelPlaner() : Model(3)
 {
-    this->setCell(0,0);
-    this->setCell(0,1);
-    this->setCell(0,2);
-    this->setCell(1,0);
-    this->setCell(2,1);
+    this->setCellFilled(0, 0);
+    this->setCellFilled(0, 1);
+    this->setCellFilled(0, 2);
+    this->setCellFilled(1, 0);
+    this->setCellFilled(2, 1);
 }
 
-modelZSymbol::modelZSymbol(int s) : Model(s)
+modelZSymbol::modelZSymbol(int _s) : Model(_s)
 {
-    for (int i = 0; i<s; i++)
+    for (int i = 0; i < _s; i++)
     {
-        this->setCell(s-1,i);
-        this->setCell(i,i);
-        this->setCell(0,i);
+        this->setCellFilled(_s - 1, i);
+        this->setCellFilled(i, i);
+        this->setCellFilled(0, i);
     }
 }
 
-modelXSymbol::modelXSymbol(int s) : Model(s)
+modelXSymbol::modelXSymbol(int _s) : Model(_s)
 {
-    for (int i = 0; i<s; i++)
+    for (int i = 0; i < _s; i++)
     {
-        this->setCell(i,i);
-        this->setCell(s - i - 1,i);
+        this->setCellFilled(i, i);
+        this->setCellFilled(_s - i - 1, i);
     }
 }
 
-modelRect::modelRect(int a) : Model(a)
+modelRect::modelRect(int _a) : Model(_a)
 {
-    for (int i = 0; i<a; i++)
-        for (int j = 0; j<a; j++)
-            setCell(i,j);
+    for (int i = 0; i < _a; i++)
+        for (int j = 0; j < _a; j++)
+            setCellFilled(i, j);
 }
 
-modelRect::modelRect(int a, int b) : Model((a>b)?a:b)
+modelRect::modelRect(int _a, int _b) : Model( std::max(_a, _b) )
 {
-    for (int i = 0; i<a; i++)
-        for (int j = 0; j<b; j++)
-            setCell(i,j);
+    for (int i = 0; i < _a; i++)
+        for (int j = 0; j < _b; j++)
+            setCellFilled(i, j);
 }
 
-modelShip::modelShip(int a) : Model(a)
+modelShip::modelShip(int _a) : Model(_a)
 {
-    for (int i = 1; i<a; i++) setCell(0,i);
-    this->setCell(1,0);
-    this->setCell(3,0);
-    this->setCell(1,a-1);
-    this->setCell(2,a-1);
-    this->setCell(3,a-2);
-    for (int i = 2; i<a-3; i++)
-        setCell(4,i);
+    for (int i = 1; i < _a; i++)
+        setCellFilled(0, i);
+    this->setCellFilled(1, 0);
+    this->setCellFilled(3, 0);
+    this->setCellFilled(1, _a - 1);
+    this->setCellFilled(2, _a - 1);
+    this->setCellFilled(3, _a - 2);
+    for (int i = 2; i < _a - 3; i++)
+        setCellFilled(4, i);
 }
 
 modelPentadecatron::modelPentadecatron() : Model(10)
 {
-    setCell(1,0);
-    setCell(1,1);
-    setCell(0,2);
-    setCell(2,2);
-    setCell(1,3);
-    setCell(1,4);
-    setCell(1,5);
-    setCell(1,6);
-    setCell(0,7);
-    setCell(2,7);
-    setCell(1,8);
-    setCell(1,9);
+    setCellFilled(1, 0);
+    setCellFilled(1, 1);
+    setCellFilled(0, 2);
+    setCellFilled(2, 2);
+    setCellFilled(1, 3);
+    setCellFilled(1, 4);
+    setCellFilled(1, 5);
+    setCellFilled(1, 6);
+    setCellFilled(0, 7);
+    setCellFilled(2, 7);
+    setCellFilled(1, 8);
+    setCellFilled(1, 9);
 }
 
 
 modelAcorn::modelAcorn() : Model(7) 
 {
-    setCell(0,0);
-    setCell(0,1);
-    setCell(0,4);
-    setCell(0,5);
-    setCell(0,6);
-    setCell(0,1);
-    setCell(1,3);
-    setCell(2,1);
+    setCellFilled(0, 0);
+    setCellFilled(0, 1);
+    setCellFilled(0, 4);
+    setCellFilled(0, 5);
+    setCellFilled(0, 6);
+    setCellFilled(0, 1);
+    setCellFilled(1, 3);
+    setCellFilled(2, 1);
 }
 
 

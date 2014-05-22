@@ -98,7 +98,7 @@ void IncludingSurface::addModel(Model * _m, int x, int y, bool refresh)
     for (int i = 0; i < sz; i++)
         for (int j = 0; j < sz; j++)
         {
-            if (_m->isCell(i, j))
+            if (_m->isCellFilled(i, j))
                 plus(x + i, j + y);
         }
 

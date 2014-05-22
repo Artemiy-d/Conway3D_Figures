@@ -1,10 +1,3 @@
-/*
- * File:   FigureClasses.cpp
- * Author: artyom
- * 
- * Created on 4 Ноябрь 2011 г., 1:55
- */
-
 #include "FigureClasses.h"
 
 

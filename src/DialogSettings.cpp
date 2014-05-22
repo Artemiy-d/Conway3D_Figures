@@ -1,13 +1,7 @@
-/* 
- * File:   DialogSettings.cpp
- * Author: artyom
- * 
- * Created on 11 Ноябрь 2011 г., 18:11
- */
+#include <QPushButton>
 
 #include "DialogSettings.h"
-#include "Languages.h"
-#include "complect_headers.h"
+#include "LanguageManager.h"
 #include "Scene3D.h"
 
 

@@ -2,11 +2,11 @@
 #include <QTextStream>
 #include <QDebug>
 
-#include "Languages.h"
+#include "LanguageManager.h"
 
-Languages * Languages::s_instance = NULL;
+LanguageManager * LanguageManager::s_instance = NULL;
 
-Languages::Languages()
+LanguageManager::LanguageManager()
     : QObject(),
       m_current(NULL),
       m_base(NULL)
@@ -57,7 +57,7 @@ Languages::Languages()
     BaseLang.AddItem("default_settings",tr("Default settings"));
     BaseLang.AddItem("random_map",tr("Random map"));
     BaseLang.AddItem("about",tr("About"));
-    BaseLang.AddItem("languages",tr("Languages"));
+    BaseLang.AddItem("languages",tr("LanguageManager"));
     BaseLang.AddItem("ok",tr("OK"));
     BaseLang.AddItem("plane",tr("Surface"));
     BaseLang.AddItem("open_finded",tr("Open finded files"));
@@ -100,14 +100,14 @@ Languages::Languages()
     setCurrentLanguage( tr( "Russian" ) );
 }
 
-Languages & Languages::getInstance()
+LanguageManager & LanguageManager::getInstance()
 {
     if ( s_instance == NULL )
-        s_instance = new Languages();
+        s_instance = new LanguageManager();
     return *s_instance;
 }
 
-void Languages::setCurrentLanguage(const QString & _current)
+void LanguageManager::setCurrentLanguage(const QString & _current)
 {
     LanguagesMap::iterator it = m_languages.find(_current);
     if ( it != m_languages.end() )
@@ -118,7 +118,7 @@ void Languages::setCurrentLanguage(const QString & _current)
 }
 
 
-const QString& Languages::operator [] (const QString & _key)
+const QString& LanguageManager::operator [] (const QString & _key)
 {
     LanguageMap * languages[] = { m_current, m_base };
     for ( size_t i = 0; i < sizeof( languages ) / sizeof( LanguageMap* ); ++i )
@@ -131,18 +131,18 @@ const QString& Languages::operator [] (const QString & _key)
     return _key;
 }
 
-QList<QString> Languages::getLanguagesList() const
+QList<QString> LanguageManager::getLanguagesList() const
 {
     return m_languages.keys();
 }
 
-int Languages::count() const
+int LanguageManager::count() const
 {
     return m_languages.size();
 }
 
 
-void Languages::addLanguageFile(const QString & _filename)
+void LanguageManager::addLanguageFile(const QString & _filename)
 {
     QChar * str = NULL, * strValue, * key, * strValuePtr;
     QFile file(_filename);

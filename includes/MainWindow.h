@@ -1,10 +1,3 @@
-/* 
- * File:   widg.h
- * Author: artyom
- *
- * Created on 1 Ноябрь 2011 г., 1:38
- */
-
 #ifndef WIDG_H
 #define	WIDG_H
 
@@ -35,7 +28,7 @@ signals:
 
 
 class DialogSettings;
-class DialogOfCreation;
+class DialogNewFigure;
 class DialogAbout;
 class DialogTemplates;
 class Scene3D;
@@ -57,7 +50,7 @@ Q_OBJECT
 public:
     //void paintEvent(QPaintEvent *event);
     MainWindow();
-    static bool isFileValid(QString& fn);
+    static bool isFileValid(const QString & fn);
     void resizeEvent(QResizeEvent * E);
     void resize();
     virtual ~MainWindow();
@@ -66,16 +59,15 @@ private:
     void startStopNames();
     bool createOpenMenuTreeRec(QMenu * menu, const QString &path, int it = 0);
     void createOpenTree();
-    void saveFileTo(QString fn);
+    void saveFileTo(const QString & fn);
     void keyPressEvent(QKeyEvent* E);
 
 public slots:
     void setComboModels();
     void buttonStartClicked();
     void sliderVelValueChanged(int value);
-    void animationChanged(int value);
     void setSettingsVisible(bool value);
-    void openFile(QString fn);
+    void openFile(const QString & fn);
     void openFile();
     void saveFileAs();
     void saveFile();
@@ -90,7 +82,7 @@ signals:
   //  void menuBar(QAction* arg1);
 private:
     DialogSettings * dSettings;
-    DialogOfCreation * dialogCreating;
+    DialogNewFigure * dialogNewFigure;
     DialogAbout * dAbout;
     DialogTemplates * dTemplates;
     Scene3D *s3d;
@@ -108,6 +100,7 @@ private:
     QMenu * menuFile, * menuEdit, * menuView, * menuModeling, * menuHelp, * menuLang, * menuOpenFinded;
     QWidget * m_widgets[50];
     int m_widgetsCount;
+    int m_panelWidth;
     QList<QMenu*> menuList;
     QList<OpenAction*> actList;
 };
