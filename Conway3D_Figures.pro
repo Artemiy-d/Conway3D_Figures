@@ -48,7 +48,8 @@ UI_DIR =
 #QMAKE_CC = gcc
 #QMAKE_CXX = g++
 DEFINES += 
-#LIBS += -lglut -lGLU
+LIBS += -lglut -lGL
+# -lglu
 
 
 
