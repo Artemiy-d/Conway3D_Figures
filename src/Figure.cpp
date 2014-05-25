@@ -1,4 +1,3 @@
-#include <QDebug>
 #include <assert.h>
 
 #include "Figure.h"
@@ -141,7 +140,7 @@ void Figure::getProbabilities(double * p_live, double * p_dead)
     }
 }
 
-void Figure::selectAndPlus(fpoint p1, fpoint p_1, bool plus_on, Model * M)
+void Figure::selectAndPlus(const Point3F & p1, const Point3F & p_1, bool plus_on, Model * M)
 {
     float min_r = 1000000;
     int min_ind = -1;
@@ -151,7 +150,7 @@ void Figure::selectAndPlus(fpoint p1, fpoint p_1, bool plus_on, Model * M)
         float r2 = normalsToCells[i*4+3] & (p_1 - points_for_draw[i*4]);
         if (r1*r2<0)
         {
-            fpoint ip = p1-(p_1-p1)*(r1/(r2-r1));
+            Point3F ip = p1-(p_1-p1)*(r1/(r2-r1));
             for (int j = 0; j<4; j++)
             {
                 if ( (( (points_for_draw[i*4+(j+1)%4] - points_for_draw[i*4+j]) ^
@@ -250,10 +249,10 @@ void Figure::createCells(int cnt, int cnt_pnt)
         cells[i].neighbors = cells->neighbors + i*maxNeighbors;
     }
 
-    points = new fpoint[cnt_pnt];
-    normalsToCells = new fpoint[cnt*4];
+    points = new Point3F[cnt_pnt];
+    normalsToCells = new Point3F[cnt*4];
 
-    points_for_draw = new fpoint[cnt*4];
+    points_for_draw = new Point3F[cnt*4];
 
     color_array = new bcolor[cnt*4];
     grid_colors = new bcolor[cnt*4];
@@ -343,8 +342,8 @@ void Figure::step()
                 for (j = 0; j<c->cnt_neighbors; j++)
                 {
                     c->neighbors[j]->cnt_active_neighbors_next--;
-                    if (c->neighbors[j]->cnt_active_neighbors_next < 0)
-                        qDebug() << "c->neighbors[j]->cnt_active_neighbors_next";
+                  //  if (c->neighbors[j]->cnt_active_neighbors_next < 0)
+                  //      qDebug() << "c->neighbors[j]->cnt_active_neighbors_next";
                    // assert(c->neighbors[j]->cnt_active_neighbors_next >= 0);
                     if (c->neighbors[j]->step_flag!= stepNmb)
                         (ActiveCellNext[cnt_act_next++] = c->neighbors[j])->step_flag = stepNmb;
@@ -418,10 +417,12 @@ void Figure::clearMap()
 
 void Figure::createRandomMap(float _p)
 {
-    unsigned int uiP = _p * RandomLCG::s_maxValue;
+    RandomLCGDefault::Probability p(_p);
     for (int i = 0; i < cnt_cells; i++)
-        if ( m_random.next() < uiP )
+    {
+        if ( p.simulate( m_random ) )
             plus(i);
+    }
     refresh();
 }
 

@@ -40,10 +40,18 @@ public:
             return _random.next() < m_value;
         }
     }
+
+    bool simulate( ) const
+    {
+        return simulate( s_random );
+    }
 private:
      unsigned int m_value;
+
+     static RandomGenerator s_random;
 };
 
+template <unsigned int a, unsigned int b>
 class RandomLCG
 {
 public:
@@ -53,7 +61,7 @@ public:
     { }
     unsigned int next()
     {
-        return (m_value = m_value * 103515245 + 12345) >> 1;
+        return (m_value = m_value * a + b) >> 1;
     }
 
     static const unsigned int s_maxValue = (~0u) >> 1;
@@ -62,6 +70,6 @@ private:
     unsigned int m_value;
 };
 
-
+typedef RandomLCG<103515245, 12345> RandomLCGDefault;
 
 #endif // RANDOMLCG_H

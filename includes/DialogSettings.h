@@ -3,8 +3,9 @@
 
 #include <QLabel>
 #include <QDoubleSpinBox>
+#include <QDialog>
 
-#include "otherGuiClasses.h"
+#include "GroupBoxCustom.h"
 
 
 class QPushButton;
@@ -30,7 +31,7 @@ private:
     QLabel m_label;
 };
 
-class ProbabilitiesGroup : public MyGroupBox
+class ProbabilitiesGroup : public GroupBoxCustom
 {
     Q_OBJECT
 private:

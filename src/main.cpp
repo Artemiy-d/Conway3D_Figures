@@ -6,7 +6,7 @@
 #include "DialogAbout.h"
 #include "DialogSettings.h"
 #include "DialogTemplates.h"
-#include "otherGuiClasses.h"
+#include "Modeles.h"
 
 #include "StringMap.h"
 #include "LanguageManager.h"

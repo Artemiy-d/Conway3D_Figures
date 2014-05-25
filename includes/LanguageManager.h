@@ -11,7 +11,7 @@ class LanguageManager : public QObject
 {
     Q_OBJECT
 private:
-    typedef StringMap<  QString > LanguageMap;
+    typedef StringMap< QString > LanguageMap;
     typedef StringMap< LanguageMap > LanguagesMap;
 
 public:

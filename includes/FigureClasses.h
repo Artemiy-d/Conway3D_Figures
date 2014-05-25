@@ -41,7 +41,7 @@ public:
     void createAgar();
     void setEllipsoidFormEnable(bool on);
     void addModel(Model * M, Cell * C);
-    virtual void addModel(Model *, int, int, bool){}
+    virtual void addModel(Model *, int, int, bool) { }
     virtual void toFile(FILE * F);
     virtual void fromFile(FILE * F);
 };

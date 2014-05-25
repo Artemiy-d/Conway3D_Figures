@@ -33,7 +33,7 @@ class DialogAbout;
 class DialogTemplates;
 class Scene3D;
 class QPushButton;
-class MyGroupBox;
+class GroupBoxCustom;
 class QSlider;
 class QLabel;
 class QComboBox;
@@ -87,7 +87,7 @@ private:
     DialogTemplates * m_dialogTemplates;
     Scene3D * m_s3d;
     QPushButton * m_buttonStart, * m_buttonStep, * m_buttonClear, * m_buttonAgar, * m_buttonRnd;
-    MyGroupBox * m_panelSettings;
+    GroupBoxCustom * m_panelSettings;
     QSlider * m_sliderVelocity;
     QLabel * m_labelVelocity, * m_lavelDrawType;
     QComboBox * m_comboBoxModels;

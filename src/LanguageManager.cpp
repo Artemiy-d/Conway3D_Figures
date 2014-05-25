@@ -12,7 +12,7 @@ LanguageManager::LanguageManager()
       m_base(NULL)
 {
     qDebug() << QDir::currentPath();
-    QDir dir(tr("languages") );
+    QDir dir(QDir::currentPath() + tr("/languages") );
     QStringList sl = dir.entryList(QDir::Files);
  //   QString basefile = tr("BaseLang.txt");
     if (sl.count())
@@ -124,8 +124,11 @@ void LanguageManager::addLanguageFile(const QString & _filename)
                 }
 
             }
+            if (*str != 0)
+                ++str;
             *strValuePtr = 0;
 
+            qDebug() << "Add: " << QString(key) << "  " << QString(strValue);
             lm[QString(key)] = QString(strValue);
         }
 

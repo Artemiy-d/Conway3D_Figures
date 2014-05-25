@@ -12,7 +12,7 @@ DialogSaveFigure::DialogSaveFigure() :
     setDefaultSuffix( s_conwayFigureSuffix );
 }
 
-QString DialogSaveFigure::execSave()
+QString DialogSaveFigure::execToSave()
 {
     this->setAcceptMode(QFileDialog::AcceptSave);
     if (QFileDialog::exec() != QDialog::Accepted)

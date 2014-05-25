@@ -22,12 +22,13 @@ IncludingSurface::IncludingSurface(Figure * prnt, Cell * c, int c1, int c2)
         c[(count_first - 1)*count_second+j].paintSides |= Side12;
 }
 
-void IncludingSurface::createFullPlaneVertexes(fpoint &pnt0, fpoint &pnt1, fpoint &pnt3,fpoint * pointArray,int &firstIndex)
+void IncludingSurface::createFullPlaneVertexes(Point3F &pnt0, Point3F &pnt1, Point3F &pnt3,Point3F * pointArray,int &firstIndex)
 {
-    if (count_first<=0) return;
+    if (count_first<=0)
+        return;
 #define get4(x0,x1,x3,x2) (x2).x=(x1).x+(x3).x-(x0).x; (x2).y=(x1).y+(x3).y-(x0).y; (x2).z=(x1).z+(x3).z-(x0).z;
 #define divSegment(p1,p2,q,len, px) (px).x=((p1).x*(q)+((len)-(q))*(p2).x)/(len); (px).y=((p1).y*(q)+((len)-(q))*(p2).y)/(len); (px).z=((p1).z*(q)+((len)-(q))*(p2).z)/(len);
-    fpoint pnt2,pnt,pnt1_new,pnt3_new,pnt2_new;
+    Point3F pnt2,pnt,pnt1_new,pnt3_new,pnt2_new;
     get4(pnt0,pnt1,pnt3,pnt2)
     int index = firstIndex;
     for (int i = 0; i<=count_first; i++)

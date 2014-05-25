@@ -3,20 +3,26 @@
 
 
 Model::Model(int _sz)
+    : m_cells(NULL),
+      m_square(0),
+      m_size(0)
 {
-    m_cells = NULL;
     createField(_sz);
 }
 
 Model::Model(const char * _fn)
+    : m_cells(NULL),
+      m_square(0),
+      m_size(0)
 {
-    m_cells = NULL;
     openFromFile(_fn);
 }
 
 Model::Model(const Model& _orig)
+    : m_cells(NULL),
+      m_square(0),
+      m_size(0)
 {
-    m_cells = NULL;
     operator = (_orig);
 }
 

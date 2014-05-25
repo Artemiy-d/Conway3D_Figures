@@ -54,7 +54,7 @@ void ProbabilitiesGroup::refresh()
 
 
 ProbabilitiesGroup::ProbabilitiesGroup()
-    : MyGroupBox(),
+    : GroupBoxCustom(),
       m_xMrgn(15),
       m_yMrgn(20)
 {
@@ -82,7 +82,7 @@ void ProbabilitiesGroup::setValues(double * _values)
 }
 void ProbabilitiesGroup::setGeometry(int _x, int _y, int _w, int _h)
 {
-    MyGroupBox::setGeometry(_x, _y, _w, _h);
+    GroupBoxCustom::setGeometry(_x, _y, _w, _h);
     this->refresh();
 }
     //~ProbabilitiesGroup() {}

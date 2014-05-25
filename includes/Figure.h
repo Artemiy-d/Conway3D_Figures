@@ -1,62 +1,18 @@
 #ifndef FIGURE_H
 #define	FIGURE_H
 
-#include <math.h>
 #include <stdio.h>
 #include <GL/gl.h>
 
 #include "RandomLCG.h"
+#include "Point.h"
 
 class Model;
-
 
 enum CellSides {Side01 = 1, Side12 = 2, Side23 = 4, Side30 = 8 };
 
 static const CellSides ArrayCellSides[] = {Side01, Side12, Side23, Side30};
 
-//struct fpoint {GLfloat x,y,z;};
-struct dpoint {GLdouble x,y,z;};
-
-
-class fpoint
-{
-public:
-    float x, y, z;
-    fpoint()
-    { }
-    fpoint(float _x, float _y, float _z) :
-        x(_x), y(_y), z(_z)
-    { }
-
-    friend fpoint operator - (const fpoint& v)
-    {
-        return fpoint(-v.x,-v.y,-v.z);
-    }
-    float abs()
-    {
-        return sqrt(x*x+y*y+z*z);
-    }
-    fpoint operator + (const fpoint& v)
-    {
-        return fpoint(x+v.x,y+v.y,z+v.z);
-    }
-    fpoint operator - (const fpoint& v)
-    {
-        return fpoint(x-v.x,y-v.y,z-v.z);
-    }
-    float operator & (const fpoint& v)
-    {
-        return x*v.x+y*v.y+z*v.z;
-    }
-    fpoint operator * (float v)
-    {
-        return fpoint(x*v,y*v,z*v);
-    }
-    fpoint operator ^ (const fpoint& v)
-    {
-        return fpoint(y*v.z-z*v.y,z*v.x-x*v.z,x*v.y-y*v.x);
-    }
-};
 
 struct fcolor {GLfloat r,g,b;};
 struct bcolor {GLubyte r,g,b,a;};
@@ -79,7 +35,7 @@ class Figure
 private:
 
     bool all_prob_live_bool,all_prob_dead_bool,all_prob_bool;
-    RandomLCG::Probability probabilities_live[9], probabilities_dead[9];
+    RandomLCGDefault::Probability probabilities_live[9], probabilities_dead[9];
     int stepNmb;
     int maxNeighbors;
     int cnt_act_now, cnt_act_next;
@@ -88,11 +44,11 @@ private:
     Cell ** ActiveCellNow, ** ActiveCellNext;
     GLfloat line_width;
     GLuint listGrid;
-    fpoint * normalsToCells;
-    fpoint * points_for_draw;
+    Point3F * normalsToCells;
+    Point3F * points_for_draw;
     bcolor * color_array, * grid_colors;
 
-    RandomLCG m_random;
+    RandomLCGDefault m_random;
 
 protected:
     int len_grid_points;
@@ -104,7 +60,7 @@ protected:
 public:
 
     Cell * cells;
-    fpoint * points;
+    Point3F * points;
     bool m_gridEnable;
     int cnt_cells, cnt_points;
     bcolor color_live, color_dead, color_grid;
@@ -130,7 +86,7 @@ public:
     void initBegin();
     void drawCells();
     void drawActiveCells();
-    void selectAndPlus(fpoint p1, fpoint p_1, bool plus_on, Model * m = NULL);
+    void selectAndPlus(const Point3F & p1, const Point3F & p_1, bool plus_on, Model * m = NULL);
     void defaultProbabilities();
     virtual void toFile(FILE * F);
     virtual void fromFile(FILE * F);
@@ -160,10 +116,10 @@ public:
     bool addModel(Model * m, Cell * c, bool refresh = true);
     void surfaceCellsConnect();
     void createVertexesByMain();
-    void createFullPlaneVertexes(fpoint &pnt0,
-                                 fpoint &pnt1,
-                                 fpoint &pnt3,
-                                 fpoint * pointArray,
+    void createFullPlaneVertexes(Point3F &pnt0,
+                                 Point3F &pnt1,
+                                 Point3F &pnt3,
+                                 Point3F * pointArray,
                                  int &firstIndex);
 
     static bool ConnectPointsOfSurf(IncludingSurface * surf1,

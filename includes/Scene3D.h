@@ -62,7 +62,7 @@ private:
     void defaultScene();
     void drawAxis();
     void drawStatistic();
-    void getCoord(int mouseX, int mouseY, fpoint * point1, fpoint *point_1);
+    void getCoord(int mouseX, int mouseY, Point3F * point1, Point3F *point_1);
 
 protected:
     void initializeGL();

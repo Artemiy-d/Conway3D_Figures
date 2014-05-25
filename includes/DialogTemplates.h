@@ -5,8 +5,8 @@
 
 
 
-class GrawGrid;
-class MyGroupBox;
+class ModelRedactor;
+class GroupBoxCustom;
 class QLineEdit;
 class QLabel;
 class QSpinBox;
@@ -43,8 +43,8 @@ signals:
 
 private:
 
-    GrawGrid * d_g;
-    MyGroupBox * grid_box;
+    ModelRedactor * d_g;
+    GroupBoxCustom * grid_box;
     QLineEdit * current_name;
     QLabel * current_label, * label_size, * label_all_templates, * label_active_templates;
     QSpinBox * spin_size;

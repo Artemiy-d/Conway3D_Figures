@@ -1,4 +1,3 @@
-
 #include "Figure.h"
 
 BaseSurface::BaseSurface() : Figure()

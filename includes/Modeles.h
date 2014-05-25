@@ -28,9 +28,9 @@ public:
     Model& operator = (const Model& _m);
     int getSize() const;
 protected:
+    bool * m_cells;
     int m_square;
     int m_size;
-    bool * m_cells;
 };
 
 

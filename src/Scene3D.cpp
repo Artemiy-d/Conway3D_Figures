@@ -289,7 +289,7 @@ void Scene3D::setCurrentModel(Model * _model)
     m_currentModel = _model;
 }
 
-void Scene3D::getCoord(int mouse_x, int mouse_y, fpoint * point_1, fpoint * point1)
+void Scene3D::getCoord(int mouse_x, int mouse_y, Point3F * point_1, Point3F * point1)
 {
     GLint    viewport[4];    // ��������� viewport-a.
     GLdouble projection[16]; // ������� ��������.
@@ -356,7 +356,7 @@ void Scene3D::mousePressEvent(QMouseEvent* pe)
    this->setFocus();
    if (m_drawingOn)
    {
-       fpoint p1,p_1;
+       Point3F p1,p_1;
        getCoord(pe->pos().x(), pe->pos().y(), &p1, &p_1);
        m_figure->selectAndPlus(p1, p_1, m_leftButtonPressed, m_currentModel);
        m_figure->refresh();
@@ -375,7 +375,7 @@ void Scene3D::mouseMoveEvent(QMouseEvent* pe)
     }
     else if (m_currentModel == NULL)
     {
-        fpoint p1, p_1;
+        Point3F p1, p_1;
         getCoord(pe->pos().x(), pe->pos().y(), &p1, &p_1);
 
         m_figure->selectAndPlus(p1, p_1, m_leftButtonPressed);

@@ -2,31 +2,18 @@
 #define	OTHERGUICLASSES_H
 #include <QWidget>
 #include <QPainter>
-#include <QFileDialog>
 
 #include "Modeles.h"
 
-class MyGroupBox : public QWidget
-{
-public:
-    MyGroupBox(QWidget * parent = NULL);
-    virtual ~MyGroupBox() {}
-    void setText(const QString & _text);
-    void paintEvent(QPaintEvent * _e);
 
-private:
-    QString m_text;
-};
-
-
-class GrawGrid : public QWidget, public Model
+class ModelRedactor : public QWidget, public Model
 {
     Q_OBJECT
 public:
-    GrawGrid(QWidget * parent = 0);
-    virtual ~GrawGrid();
+    ModelRedactor(QWidget * parent = 0);
+    virtual ~ModelRedactor();
 
-    GrawGrid& operator = (const Model &model);
+    ModelRedactor& operator = (const Model &model);
     inline void setGeometry(int x, int y, int w, int h)
     {
         createArray(w,h);

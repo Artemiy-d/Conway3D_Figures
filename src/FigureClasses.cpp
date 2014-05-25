@@ -1,7 +1,7 @@
 #include "FigureClasses.h"
 
 
-Surface::Surface() : BaseSurface() {}
+Surface::Surface() : BaseSurface() { }
 
 Surface::Surface(int cnt_1, int cnt_2) : BaseSurface(cnt_1,cnt_2)
 {
@@ -28,7 +28,8 @@ void Surface::fromFile(FILE * F)
     fread(&sz_param,4,1,F);
     fread(&cnt_1,4,1,F);
     fread(&cnt_2,4,1,F);
-    if (cnt_1 < 1 || cnt_2 < 1) return;
+    if (cnt_1 < 1 || cnt_2 < 1)
+        return;
     createField(cnt_1, cnt_2);
     Figure::fromFile(F);
 }
@@ -47,9 +48,9 @@ void Surface::setPhisicSize(float s, float)
 {
     r = count_first * s / (count_first+count_second);
     R = count_second * s / (count_first+count_second);
-    fpoint p0(-r,-R,0);
-    fpoint p1(r,-R,0);
-    fpoint p3(-r,R,0);
+    Point3F p0(-r,-R,0);
+    Point3F p1(r,-R,0);
+    Point3F p3(-r,R,0);
     int index = 0;
     this->thisSurface->createFullPlaneVertexes(p0,p1,p3,points,index);
     createGrid();
@@ -263,7 +264,7 @@ void Ellipsoid::setPhisicSize(float s, float)
     size_1 = count_first * scale;
     size_2 = count_second * scale;
     size_3 = count_three * scale;
-    fpoint pnts[8];
+    Point3F pnts[8];
     pnts[0].y = pnts[1].y = pnts[2].y = pnts[3].y = -size_2/2;
     pnts[4].y = pnts[5].y = pnts[6].y = pnts[7].y = size_2/2;
 

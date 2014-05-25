@@ -7,6 +7,8 @@
 #include <QApplication>
 #include <QKeyEvent>
 
+#include "math.h"
+
 #include "MainWindow.h"
 #include "Figure.h"
 
@@ -16,8 +18,8 @@
 #include "DialogSettings.h"
 #include "DialogTemplates.h"
 #include "DialogSaveFigure.h"
-#include "otherGuiClasses.h"
 #include "FigureClasses.h"
+#include "Modeles.h"
 
 
 #include "LanguageManager.h"
@@ -49,7 +51,7 @@ MainWindow::MainWindow()
     m_dialogAbout = new DialogAbout();
     m_dialogSettings = new DialogSettings(m_s3d);
     
-    m_panelSettings = new MyGroupBox();
+    m_panelSettings = new GroupBoxCustom();
 
     m_sliderVelocity = new QSlider(m_panelSettings);
     m_sliderVelocity->setOrientation(Qt::Horizontal);
@@ -139,14 +141,14 @@ MainWindow::MainWindow()
 
         actAgar = menuEdit->addAction(LNG["create_agar"]);
         connect(actAgar,SIGNAL(triggered()),m_s3d,SLOT(createAgar()));
-        actRandomMap = menuEdit->addAction(LNG["create_random"]);
+        actRandomMap = menuEdit->addAction(LNG["create_random_map"]);
         connect(actRandomMap,SIGNAL(triggered()),m_s3d,SLOT(createRandomMap()));
         menuEdit->addSeparator();
         actTemplates = menuEdit->addAction(LNG["templates"]);
         connect(actTemplates,SIGNAL(triggered()),m_dialogTemplates,SLOT(exec()));
         
     menuView = this->menuBar()->addMenu(LNG["view"]);
-        actFullScreen = menuView->addAction(LNG["full_scr"]);
+        actFullScreen = menuView->addAction(LNG["full_screen"]);
         connect(actFullScreen,SIGNAL(triggered()),m_s3d,SLOT(setFullScreen()));
         actPanelSettings = menuView->addAction(LNG["settings_panel"]);
         actPanelSettings->setCheckable(true);
@@ -163,7 +165,7 @@ MainWindow::MainWindow()
             }
         }
     menuModeling = this->menuBar()->addMenu(LNG["modeling"]);
-        actSettings = menuModeling->addAction(LNG["modeling_sett"]);
+        actSettings = menuModeling->addAction(LNG["modeling_settings"]);
         connect(actSettings,SIGNAL(triggered()),m_dialogSettings,SLOT(exec()));
         menuModeling->addSeparator();
         actStep = menuModeling->addAction(LNG["step"]);
@@ -265,7 +267,7 @@ void MainWindow::setLang()
 {
     startStopNames();
     this->setWindowTitle(LNG["conway_game"]);
-    m_panelSettings->setText(LNG["sett"]);
+    m_panelSettings->setText(LNG["settings"]);
     m_labelVelocity->setText(LNG["speed"]);
     m_lavelDrawType->setText(LNG["type_of_draw"]);
     m_checkBoxAnimation->setText(LNG["animation"]);
@@ -280,25 +282,26 @@ void MainWindow::setLang()
 
     menuFile->setTitle(LNG["file"]);
 
-        actNewFigure->setText(createMenuText(LNG["new_fig"],tr("  ctrl+N")));
+        actNewFigure->setText(createMenuText(LNG["new_figure"],tr("  ctrl+N")));
         actOpen->setText(createMenuText(LNG["open"],tr("  ctrl+O")));
-        if (menuOpenFinded!=NULL) menuOpenFinded->setTitle(LNG["open_finded"]);
+        if (menuOpenFinded != NULL)
+            menuOpenFinded->setTitle(LNG["open_finded"]);
         actSave->setText(createMenuText(LNG["save"],tr("  ctrl+S")));
         actSaveAs->setText(LNG["save_as"]);
         actExit->setText(LNG["exit"]);
     menuEdit->setTitle(LNG["edit"]);
         actClearMap->setText(LNG["clear_map"]);
         actAgar->setText(LNG["create_agar"]);
-        actRandomMap->setText(LNG["create_random"]);
+        actRandomMap->setText(LNG["create_random_map"]);
         actTemplates->setText(LNG["templates"]);
     menuView->setTitle(LNG["view"]);
-        actFullScreen->setText(LNG["full_scr"]);
+        actFullScreen->setText(LNG["full_screen"]);
         actPanelSettings->setText(LNG["settings_panel"]);
         if (LNG.count()>1)
             menuLang->setTitle(LNG["languages"]);
 
     menuModeling->setTitle(LNG["modeling"]);
-        actSettings->setText(LNG["modeling_sett"]);
+        actSettings->setText(LNG["modeling_settings"]);
         actStep->setText(LNG["step"]);
         
     menuHelp->setTitle(LNG["help"]);
@@ -515,7 +518,7 @@ void MainWindow::saveFileAs()
         return;
     }
     DialogSaveFigure dialog;
-    QString fn = dialog.execSave();
+    QString fn = dialog.execToSave();
     if (!fn.isNull())
         saveFileTo(fn);
 }

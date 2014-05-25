@@ -8,6 +8,5 @@
 template <typename T>
 struct StringMap : public QMap<QString, T> { };
 
-
 #endif	/* STRINGMAP_H */
 

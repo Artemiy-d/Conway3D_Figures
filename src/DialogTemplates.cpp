@@ -5,11 +5,13 @@
 #include <QLabel>
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QDir>
 
 
 #include "LanguageManager.h"
 #include "Modeles.h"
-#include "otherGuiClasses.h"
+#include "ModelRedactor.h"
+#include "GroupBoxCustom.h"
 #include "DialogTemplates.h"
 
 
@@ -36,7 +38,7 @@ DialogTemplates::DialogTemplates()
     m_widgets[m_widgetsCount++] = label_active_templates = new QLabel(this);
     label_active_templates->move(listActiveModels->x(),label_all_templates->y());
 
-    grid_box = new MyGroupBox(this);
+    grid_box = new GroupBoxCustom(this);
 
     m_widgets[m_widgetsCount++] = current_label = new QLabel(grid_box);
     current_label->move(15,20);
@@ -62,7 +64,7 @@ DialogTemplates::DialogTemplates()
     buttSave->move(14,buttAddToActive->y()+buttAddToActive->height()+1);
     connect(buttSave,SIGNAL(clicked()),this,SLOT(saveTemplate()) );
 
-    d_g = new GrawGrid(grid_box);
+    d_g = new ModelRedactor(grid_box);
     connect(spin_size,SIGNAL(valueChanged(int)),d_g,SLOT(setQuadSize(int) ));
     setLang();
     connect(&LNG,SIGNAL(set_lang()),this,SLOT(setLang()) );

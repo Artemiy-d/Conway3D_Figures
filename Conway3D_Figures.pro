@@ -10,7 +10,6 @@ INCLUDEPATH += ./includes
 
 SOURCES += \
     src/MainWindow.cpp \
-    src/otherGuiClasses.cpp \
     src/main.cpp \
     src/Figure.cpp \
     src/DialogSettings.cpp \
@@ -23,9 +22,11 @@ SOURCES += \
     src/DialogTemplates.cpp \
     src/DialogNewFigure.cpp \
     src/LanguageManager.cpp \
-    src/DialogSaveFigure.cpp
+    src/DialogSaveFigure.cpp \
+    src/GroupBoxCustom.cpp \
+    src/ModelRedactor.cpp
 
-HEADERS += includes/otherGuiClasses.h \
+HEADERS += \
     includes/Scene3D.h \
     includes/Modeles.h \
     includes/MainWindow.h \
@@ -38,7 +39,10 @@ HEADERS += includes/otherGuiClasses.h \
     includes/DialogNewFigure.h \
     includes/LanguageManager.h \
     includes/RandomLCG.h \
-    includes/DialogSaveFigure.h
+    includes/DialogSaveFigure.h \
+    includes/GroupBoxCustom.h \
+    includes/ModelRedactor.h \
+    includes/Point.h
 
 FORMS +=
 RESOURCES +=
@@ -50,8 +54,11 @@ UI_DIR =
 #QMAKE_CC = gcc
 #QMAKE_CXX = g++
 DEFINES += 
-LIBS += -lglut
-# -lglu
+LIBS += -lglut -lGLU
+
+config.path    = $$OUT_PWD
+config.files   = /home/artyom/dev/Conway3D_Figures/Conway3D_Figures/data/*
+INSTALLS += config
 
 
 

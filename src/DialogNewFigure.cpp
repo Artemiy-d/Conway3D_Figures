@@ -4,7 +4,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 
-#include "otherGuiClasses.h"
+#include "GroupBoxCustom.h"
 #include "Scene3D.h"
 #include "DialogNewFigure.h"
 #include "LanguageManager.h"
@@ -22,7 +22,7 @@ DialogNewFigure::DialogNewFigure()
 
     m_widgets[m_widgetsCount++] = m_checkBoxDefaultSettings = new QCheckBox(this);
 
-    m_grpBoxSizes = new MyGroupBox();
+    m_grpBoxSizes = new GroupBoxCustom();
    
     for (int i = 0; i<3; i++)
     {
