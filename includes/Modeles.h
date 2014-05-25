@@ -34,47 +34,47 @@ protected:
 };
 
 
-class modelPlaner : public Model
+class ModelPlaner : public Model
 {
 public:
-  modelPlaner();
+  ModelPlaner();
 };
 
-class modelZSymbol : public Model
+class ModelZSymbol : public Model
 {
 public:
-  modelZSymbol(int _s = 5);
+  ModelZSymbol(int _s = 5);
 };
 
-class modelXSymbol : public Model
+class ModelXSymbol : public Model
 {
 public:
-  modelXSymbol(int _s = 5);
+  ModelXSymbol(int _s = 5);
 };
 
-class modelRect : public Model
+class ModelRect : public Model
 {
 public:
-  modelRect(int _a = 5);
-  modelRect(int _a, int _b);
+  ModelRect(int _a = 5);
+  ModelRect(int _a, int _b);
 };
 
-class modelShip : public Model
+class ModelShip : public Model
 {
 public:
-  modelShip(int _a = 5);
+  ModelShip(int _a = 5);
 };
 
-class modelPentadecatron : public Model
+class ModelPentadecatron : public Model
 {
 public:
-  modelPentadecatron();
+  ModelPentadecatron();
 };
 
-class modelAcorn : public Model
+class ModelAcorn : public Model
 {
 public:
-  modelAcorn();
+  ModelAcorn();
 };
 
 extern StringMap <Model*> modelCollection;

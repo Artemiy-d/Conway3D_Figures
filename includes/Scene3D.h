@@ -1,10 +1,3 @@
-/* 
- * File:   Scene3D.h
- * Author: artyom
- *
- * Created on 1 Ноябрь 2011 г., 15:57
- */
-
 #ifndef SCENE3D_H
 #define	SCENE3D_H
 

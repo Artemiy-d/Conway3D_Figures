@@ -241,8 +241,8 @@ void Scene3D::initializeGL()
  //   this->createFigure(figThor,prm,NULL,true);
     m_figure = new Torus(50,100,20);
 
-  //  modelShip * ship = new modelShip();
-  //  modelPlaner * p = new modelPlaner();
+  //  ModelShip * ship = new ModelShip();
+  //  ModelPlaner * p = new ModelPlaner();
 
    // m_figure->refresh();
 
@@ -291,21 +291,21 @@ void Scene3D::setCurrentModel(Model * _model)
 
 void Scene3D::getCoord(int mouse_x, int mouse_y, fpoint * point_1, fpoint * point1)
 {
-    GLint    viewport[4];    // параметры viewport-a.
-    GLdouble projection[16]; // матрица проекции.
-    GLdouble modelview[16];  // видовая матрица.
-    GLdouble vx,vy,vz;       // координаты курсора мыши в системе координат viewport-a.
+    GLint    viewport[4];    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ viewport-a.
+    GLdouble projection[16]; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+    GLdouble modelview[16];  // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+    GLdouble vx,vy,vz;       // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ viewport-a.
     GLdouble wx,wy,wz;
 
-    glGetIntegerv(GL_VIEWPORT,viewport);           // узнаём параметры viewport-a.
-    glGetDoublev(GL_PROJECTION_MATRIX,projection); // узнаём матрицу проекции.
-    glGetDoublev(GL_MODELVIEW_MATRIX,modelview);   // узнаём видовую матрицу.
-    // переводим оконные координаты курсора в систему координат viewport-a.
+    glGetIntegerv(GL_VIEWPORT,viewport);           // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ viewport-a.
+    glGetDoublev(GL_PROJECTION_MATRIX,projection); // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+    glGetDoublev(GL_MODELVIEW_MATRIX,modelview);   // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ viewport-a.
     vx = mouse_x;
-    vy = height() - mouse_y - 1; // где height - текущая высота окна.
+    vy = height() - mouse_y - 1; // пїЅпїЅпїЅ height - пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ.
 
 
-    // вычисляем ближний конец селектирующего отрезка.
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
  //   glReadPixels(vx, vy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &vz);
     vz = -1;
     gluUnProject(vx, vy, vz, modelview, projection, viewport, &wx, &wy, &wz);
@@ -320,7 +320,7 @@ void Scene3D::getCoord(int mouse_x, int mouse_y, fpoint * point_1, fpoint * poin
     point1->z = wz;
    // ((QWidget*)this->parent())->setWindowTitle(QString::number(point_1->x)+" "+QString::number(point_1->y)+" "+QString::number(point_1->z));
    // p1 = CVector3(wx,wy,wz);
-    // вычисляем дальний конец селектирующего отрезка.
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
    // vz = 1;
    /// gluUnProject(vx, vy, vz, modelview, projection, viewport, &wx, &wy, &wz);
    // p2 = CVector3(wx,wy,wz);
@@ -329,7 +329,8 @@ void Scene3D::getCoord(int mouse_x, int mouse_y, fpoint * point_1, fpoint * poin
 void Scene3D::paintGL()
 {
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   if (!m_animationOn || m_figure == NULL) return;
+   if (!m_animationOn || m_figure == NULL)
+       return;
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
@@ -343,7 +344,8 @@ void Scene3D::paintGL()
    glRotatef(m_xRot, 1.0f, 0.0f, 0.0f);
  //  glRotatef(m_yRot, 0.0f, 1.0f, 0.0f);
    glRotatef(m_zRot, 0.0f, 0.0f, 1.0f);
-   if (m_axesVisible) drawAxis();
+   if (m_axesVisible)
+       drawAxis();
    m_figure->drawCells();
 }
 

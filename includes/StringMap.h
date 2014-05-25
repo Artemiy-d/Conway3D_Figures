@@ -1,5 +1,5 @@
-#ifndef MYCOLLECTION_H
-#define	MYCOLLECTION_H
+#ifndef STRINGMAP_H
+#define	STRINGMAP_H
 
 
 #include <QMap>
@@ -9,5 +9,5 @@ template <typename T>
 struct StringMap : public QMap<QString, T> { };
 
 
-#endif	/* MYCOLLECTION_H */
+#endif	/* STRINGMAP_H */
 

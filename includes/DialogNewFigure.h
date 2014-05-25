@@ -1,5 +1,5 @@
-#ifndef DIALOGOFCREATING_H
-#define	DIALOGOFCREATING_H
+#ifndef DIALOGNEWFIGURE_H
+#define	DIALOGNEWFIGURE_H
 
 #include <QDialog>
 
@@ -30,7 +30,7 @@ private:
 
 
 public:
-    Scene3D * s3d;
+    Scene3D * m_s3d;
 
     bool m_result;
 
@@ -48,5 +48,5 @@ public slots:
 
 };
 
-#endif	/* DIALOGOFCREATING_H */
+#endif	/* DIALOGNEWFIGURE_H */
 

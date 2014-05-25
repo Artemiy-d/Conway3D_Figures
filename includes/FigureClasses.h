@@ -1,10 +1,3 @@
-/* 
- * File:   FigureClasses.h
- * Author: artyom
- *
- * Created on 4 Ноябрь 2011 г., 1:55
- */
-
 #ifndef FIGURECLASSES_H
 #define	FIGURECLASSES_H
 enum FigureType {figSurface, figTorus, figEllipsoid, figParallelepiped};

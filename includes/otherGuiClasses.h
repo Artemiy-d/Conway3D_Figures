@@ -12,11 +12,10 @@ public:
     MyGroupBox(QWidget * parent = NULL);
     virtual ~MyGroupBox() {}
     void setText(const QString & _text);
-    void paintEvent(QPaintEvent * e);
+    void paintEvent(QPaintEvent * _e);
 
 private:
-    QPainter painter;
-    QString text;
+    QString m_text;
 };
 
 
@@ -49,21 +48,6 @@ private:
     int * x_arr, * y_arr;
     int w_cell, h_cell;
     QPainter painter;
-};
-
-
-class MyFileDialog : public QFileDialog
-{
-    Q_OBJECT
-public:
-    MyFileDialog();
-    virtual ~MyFileDialog() {}
-    QString execSave();
-private slots:
-    void filterChanged(const QString& filter);
-
-private:
-    QStringList filters;
 };
 
 #endif	/* OTHERGUICLASSES_H */

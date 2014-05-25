@@ -1,16 +1,11 @@
-/* 
- * File:   Figure.h
- * Author: artyom
- *
- * Created on 1 Ноябрь 2011 г., 21:35
- */
-
 #ifndef FIGURE_H
 #define	FIGURE_H
 
 #include <math.h>
 #include <stdio.h>
 #include <GL/gl.h>
+
+#include "RandomLCG.h"
 
 class Model;
 
@@ -84,7 +79,7 @@ class Figure
 private:
 
     bool all_prob_live_bool,all_prob_dead_bool,all_prob_bool;
-    unsigned int probabilities_live[9],probabilities_dead[9];
+    RandomLCG::Probability probabilities_live[9], probabilities_dead[9];
     int stepNmb;
     int maxNeighbors;
     int cnt_act_now, cnt_act_next;
@@ -96,6 +91,8 @@ private:
     fpoint * normalsToCells;
     fpoint * points_for_draw;
     bcolor * color_array, * grid_colors;
+
+    RandomLCG m_random;
 
 protected:
     int len_grid_points;

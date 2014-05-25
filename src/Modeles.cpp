@@ -185,7 +185,7 @@ bool Model::openFromFile(const char * _fn)
 ///--------------------------------------------------
 
 
-modelPlaner::modelPlaner() : Model(3)
+ModelPlaner::ModelPlaner() : Model(3)
 {
     this->setCellFilled(0, 0);
     this->setCellFilled(0, 1);
@@ -194,7 +194,7 @@ modelPlaner::modelPlaner() : Model(3)
     this->setCellFilled(2, 1);
 }
 
-modelZSymbol::modelZSymbol(int _s) : Model(_s)
+ModelZSymbol::ModelZSymbol(int _s) : Model(_s)
 {
     for (int i = 0; i < _s; i++)
     {
@@ -204,7 +204,7 @@ modelZSymbol::modelZSymbol(int _s) : Model(_s)
     }
 }
 
-modelXSymbol::modelXSymbol(int _s) : Model(_s)
+ModelXSymbol::ModelXSymbol(int _s) : Model(_s)
 {
     for (int i = 0; i < _s; i++)
     {
@@ -213,21 +213,21 @@ modelXSymbol::modelXSymbol(int _s) : Model(_s)
     }
 }
 
-modelRect::modelRect(int _a) : Model(_a)
+ModelRect::ModelRect(int _a) : Model(_a)
 {
     for (int i = 0; i < _a; i++)
         for (int j = 0; j < _a; j++)
             setCellFilled(i, j);
 }
 
-modelRect::modelRect(int _a, int _b) : Model( std::max(_a, _b) )
+ModelRect::ModelRect(int _a, int _b) : Model( std::max(_a, _b) )
 {
     for (int i = 0; i < _a; i++)
         for (int j = 0; j < _b; j++)
             setCellFilled(i, j);
 }
 
-modelShip::modelShip(int _a) : Model(_a)
+ModelShip::ModelShip(int _a) : Model(_a)
 {
     for (int i = 1; i < _a; i++)
         setCellFilled(0, i);
@@ -240,7 +240,7 @@ modelShip::modelShip(int _a) : Model(_a)
         setCellFilled(4, i);
 }
 
-modelPentadecatron::modelPentadecatron() : Model(10)
+ModelPentadecatron::ModelPentadecatron() : Model(10)
 {
     setCellFilled(1, 0);
     setCellFilled(1, 1);
@@ -257,7 +257,7 @@ modelPentadecatron::modelPentadecatron() : Model(10)
 }
 
 
-modelAcorn::modelAcorn() : Model(7) 
+ModelAcorn::ModelAcorn() : Model(7) 
 {
     setCellFilled(0, 0);
     setCellFilled(0, 1);

@@ -22,7 +22,8 @@ SOURCES += \
     src/IncludingSurface.cpp \
     src/DialogTemplates.cpp \
     src/DialogNewFigure.cpp \
-    src/LanguageManager.cpp
+    src/LanguageManager.cpp \
+    src/DialogSaveFigure.cpp
 
 HEADERS += includes/otherGuiClasses.h \
     includes/Scene3D.h \
@@ -31,12 +32,13 @@ HEADERS += includes/otherGuiClasses.h \
     includes/FigureClasses.h \
     includes/DialogAbout.h \
     includes/Figure.h \
-    includes/complect_headers.h \
     includes/DialogSettings.h \
     includes/DialogTemplates.h \
     includes/StringMap.h \
     includes/DialogNewFigure.h \
-    includes/LanguageManager.h
+    includes/LanguageManager.h \
+    includes/RandomLCG.h \
+    includes/DialogSaveFigure.h
 
 FORMS +=
 RESOURCES +=

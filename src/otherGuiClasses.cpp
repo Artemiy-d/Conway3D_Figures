@@ -3,37 +3,39 @@
 #include "otherGuiClasses.h"
 
 
-MyGroupBox::MyGroupBox(QWidget * parent) : QWidget(parent)
+MyGroupBox::MyGroupBox(QWidget * parent)
+    : QWidget(parent)
 { }
+
 void MyGroupBox::setText(const QString &_text)
 {
-    text = _text;
+    m_text = _text;
     this->repaint();
 }
 void MyGroupBox::paintEvent(QPaintEvent * /* e */)
 {
+    QPainter painter(this);
     int mrgn = 7, m2 = 14;
-    painter.begin(this);
-    QPen P;
-    P.setWidth(2);
-    painter.setPen(P);
-    painter.drawRect(5, mrgn, width()-10, height()-5-mrgn);
-    P.setWidth(1);
-    painter.setPen(P);
-    QPainterPath path1,path2;
-    QBrush B(Qt::white);
-    path1.addEllipse(m2,0,m2,m2);
-    path1.addEllipse(this->width()-m2*2,0,m2,m2);
-    painter.fillPath(path1,B);
-    painter.drawEllipse(m2,0,m2,m2);
-    painter.drawEllipse(this->width()-m2*2,0,m2,m2);
+    QPen pen;
+    pen.setWidth(2);
+    painter.setPen(pen);
+    painter.drawRect(5, mrgn, width() - 10, height() - 5 - mrgn);
+    pen.setWidth(1);
+    painter.setPen(pen);
+    QPainterPath path1 ,path2;
 
-    path2.addRect(mrgn*3,0,this->width()-mrgn*6,m2);
-    painter.fillPath(path2,B);
-    painter.drawLine(mrgn*3,0,this->width()-mrgn*3,0);
-    painter.drawLine(mrgn*3,m2,this->width()-mrgn*3,m2);
-    painter.drawText(mrgn*3,m2-1,text);
-    painter.end();
+    QBrush brush(Qt::white);
+    path1.addEllipse(m2, 0, m2, m2);
+    path1.addEllipse(this->width() - m2 * 2, 0, m2, m2);
+    painter.fillPath(path1, brush);
+    painter.drawEllipse(m2, 0, m2, m2);
+    painter.drawEllipse(this->width() - m2 * 2, 0, m2, m2);
+
+    path2.addRect(mrgn * 3, 0, this->width() - mrgn * 6, m2);
+    painter.fillPath(path2, brush);
+    painter.drawLine(mrgn * 3, 0, this->width() - mrgn * 3, 0);
+    painter.drawLine(mrgn * 3, m2, this->width() - mrgn * 3, m2);
+    painter.drawText(mrgn * 3, m2 - 1, m_text);
 }
 
 
@@ -126,32 +128,3 @@ void GrawGrid::setQuadSize(int sz)
     repaint();
 }
 
-
-///------------------------------------------------------
-// MyFileDialogClass
-
-MyFileDialog::MyFileDialog() :
-    QFileDialog()
-{
-    filters += tr("Figure files (*.cf)");
-    filters += tr("All files (*)");
-    setNameFilters(filters);
-    connect(this,SIGNAL(filterSelected(const QString&) ),this,SLOT(filterChanged(const QString&) ) );
-    setDefaultSuffix(tr("cf"));
-}
-QString MyFileDialog::execSave()
-{
-    this->setAcceptMode(QFileDialog::AcceptSave);
-    QString ret;
-    if (QFileDialog::exec() != QDialog::Accepted)
-        return ret;
-    return selectedFiles()[0];
-}
-
-void MyFileDialog::filterChanged(const QString& filter)
-{
-    if (filter == filters[0])
-        this->setDefaultSuffix(tr("cf"));
-    else
-        this->setDefaultSuffix("");
-}

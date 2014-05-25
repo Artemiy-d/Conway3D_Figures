@@ -120,17 +120,17 @@ void DialogNewFigure::pressOK()
     switch (m_combo->currentIndex())
     {
         case 0:
-            s3d->createFigure(figSurface,p,NULL,c_s);
+            m_s3d->createFigure(figSurface,p,NULL,c_s);
             break;
         case 1:
             p[2] = m_spinBoxOffset->value();
-            s3d->createFigure(figTorus,p,NULL,c_s);
+            m_s3d->createFigure(figTorus,p,NULL,c_s);
             break;
         case 2:
-            s3d->createFigure(figParallelepiped,p,NULL,c_s);
+            m_s3d->createFigure(figParallelepiped,p,NULL,c_s);
             break;
         case 3:
-            s3d->createFigure(figEllipsoid,p,NULL,c_s);
+            m_s3d->createFigure(figEllipsoid,p,NULL,c_s);
             break;
     }
 

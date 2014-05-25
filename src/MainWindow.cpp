@@ -15,6 +15,7 @@
 #include "DialogAbout.h"
 #include "DialogSettings.h"
 #include "DialogTemplates.h"
+#include "DialogSaveFigure.h"
 #include "otherGuiClasses.h"
 #include "FigureClasses.h"
 
@@ -36,83 +37,82 @@ MainWindow::MainWindow()
 
     m_widgetsCount = 0;
     m_panelWidth = 200;
-    s3d = new Scene3D();
-    s3d->setParent(this);
-   // s3d->
-    dialogNewFigure = new DialogNewFigure();
-    dialogNewFigure->s3d = s3d;
+    m_s3d = new Scene3D();
+    m_s3d->setParent(this);
+   // m_s3d->
+    m_dialogNewFigure = new DialogNewFigure();
+    m_dialogNewFigure->m_s3d = m_s3d;
 
-    dTemplates = new DialogTemplates();
-    connect(dTemplates, SIGNAL(newActive()),this,SLOT(setComboModels()));
+    m_dialogTemplates = new DialogTemplates();
+    connect(m_dialogTemplates, SIGNAL(newActive()),this,SLOT(setComboModels()));
 
-    dAbout = new DialogAbout();
-    dSettings = new DialogSettings();
-    dSettings->s3d = s3d;
+    m_dialogAbout = new DialogAbout();
+    m_dialogSettings = new DialogSettings(m_s3d);
     
-    panelSettings = new MyGroupBox();
+    m_panelSettings = new MyGroupBox();
 
-    sliderVelocity = new QSlider(panelSettings);
-    sliderVelocity->setOrientation(Qt::Horizontal);
-    sliderVelocity->setGeometry(10,40,m_panelWidth-20,20);
-    sliderVelocity->setMaximum(100);
-    sliderVelocity->setValue(30);
+    m_sliderVelocity = new QSlider(m_panelSettings);
+    m_sliderVelocity->setOrientation(Qt::Horizontal);
+    m_sliderVelocity->setGeometry(10,40,m_panelWidth-20,20);
+    m_sliderVelocity->setMaximum(100);
+    m_sliderVelocity->setValue(30);
     
-    m_widgets[m_widgetsCount++] = labelV = new QLabel(panelSettings);
-   // labelV->set
-    labelV->move(sliderVelocity->pos().x(),sliderVelocity->pos().y()-20);
-    connect(sliderVelocity,SIGNAL(valueChanged(int)),this,SLOT(sliderVelValueChanged(int)));
+    m_widgets[m_widgetsCount++] = m_labelVelocity = new QLabel(m_panelSettings);
+   // m_labelVelocity->set
+    m_labelVelocity->move(m_sliderVelocity->pos().x(),m_sliderVelocity->pos().y()-20);
+    connect(m_sliderVelocity,SIGNAL(valueChanged(int)),this,SLOT(sliderVelValueChanged(int)));
 
-    m_widgets[m_widgetsCount++] = checkAnimation = new QCheckBox(panelSettings);
-    checkAnimation->setChecked(true);
-    checkAnimation->move(10,70);
-    connect(checkAnimation,SIGNAL(stateChanged(int)),s3d,SLOT(setAnimationEnable(int)));
+    m_widgets[m_widgetsCount++] = m_checkBoxAnimation = new QCheckBox(m_panelSettings);
+    m_checkBoxAnimation->setChecked(true);
+    m_checkBoxAnimation->move(10,70);
+    connect(m_checkBoxAnimation,SIGNAL(stateChanged(int)),m_s3d,SLOT(setAnimationEnable(int)));
 
-    m_widgets[m_widgetsCount++] = checkGrid = new QCheckBox(panelSettings);
-    checkGrid->move(10,90);
-    connect(checkGrid,SIGNAL(stateChanged(int)),s3d,SLOT(setGridEnable(int)));
+    m_widgets[m_widgetsCount++] = m_checkBoxGrid = new QCheckBox(m_panelSettings);
+    m_checkBoxGrid->move(10,90);
+    connect(m_checkBoxGrid,SIGNAL(stateChanged(int)),m_s3d,SLOT(setGridEnable(int)));
 
-    m_widgets[m_widgetsCount++] = checkAxes = new QCheckBox(panelSettings);
-    checkAxes->setChecked(true);
-    checkAxes->move(10,110);
-    connect(checkAxes,SIGNAL(stateChanged(int)),s3d,SLOT(setAxesVisible(int)));
+    m_widgets[m_widgetsCount++] = m_checkBoxAxes = new QCheckBox(m_panelSettings);
+    m_checkBoxAxes->setChecked(true);
+    m_checkBoxAxes->move(10,110);
+    connect(m_checkBoxAxes,SIGNAL(stateChanged(int)),m_s3d,SLOT(setAxesVisible(int)));
 
-    m_widgets[m_widgetsCount++] = checkStatistic = new QCheckBox(panelSettings);
-    checkStatistic->setChecked(true);
-    checkStatistic->move(10,130);
-    connect(checkStatistic,SIGNAL(stateChanged(int)),s3d,SLOT(setStatisticVisible(int)));
+    m_widgets[m_widgetsCount++] = m_checkBoxStatistic = new QCheckBox(m_panelSettings);
+    m_checkBoxStatistic->setChecked(true);
+    m_checkBoxStatistic->move(10,130);
+    connect(m_checkBoxStatistic,SIGNAL(stateChanged(int)),m_s3d,SLOT(setStatisticVisible(int)));
 
-    m_widgets[m_widgetsCount++] = checkDraw = new QCheckBox(panelSettings);
-    checkDraw->move(10,150);
-    connect(checkDraw,SIGNAL(stateChanged(int)),s3d,SLOT(setDrawingEnable(int)));
-    connect(checkDraw,SIGNAL(stateChanged(int)),this,SLOT(setDrawingEnable(int)));
+    m_widgets[m_widgetsCount++] = m_checkBoxDraw = new QCheckBox(m_panelSettings);
+    m_checkBoxDraw->move(10,150);
+    connect(m_checkBoxDraw,SIGNAL(stateChanged(int)),m_s3d,SLOT(setDrawingEnable(int)));
+    connect(m_checkBoxDraw,SIGNAL(stateChanged(int)),this,SLOT(setDrawingEnable(int)));
     
 
-    m_widgets[m_widgetsCount++] = lavelTypeDraw = new QLabel(panelSettings);
-    lavelTypeDraw->move(15,175);
+    m_widgets[m_widgetsCount++] = m_lavelDrawType = new QLabel(m_panelSettings);
+    m_lavelDrawType->move(15,175);
 
-    comboModels = new QComboBox(panelSettings);
-    comboModels->move(10,195);
-    connect(comboModels,SIGNAL(currentIndexChanged(const QString&) ),s3d,SLOT(changeDrawModel(const QString&) ));
+    m_comboBoxModels = new QComboBox(m_panelSettings);
+    m_comboBoxModels->move(10,195);
+    connect(m_comboBoxModels, SIGNAL(currentIndexChanged(const QString&) ), this, SLOT(changeDrawModel(const QString&) ));
 
-    m_widgets[m_widgetsCount++] = ButtonStart = new QPushButton(panelSettings);
-    ButtonStart->move(20,checkDraw->pos().y()+100);
-    connect(ButtonStart,SIGNAL(clicked()),this,SLOT(buttonStartClicked()));
+    m_widgets[m_widgetsCount++] = m_buttonStart = new QPushButton(m_panelSettings);
+    m_buttonStart->move(20,m_checkBoxDraw->pos().y()+100);
+    connect(m_buttonStart,SIGNAL(clicked()),this,SLOT(buttonStartClicked()));
 
-    m_widgets[m_widgetsCount++] = ButtonStep = new QPushButton(panelSettings);
-    ButtonStep->move(20,ButtonStart->pos().y()+ButtonStart->height()+5);
-    connect(ButtonStep,SIGNAL(clicked()),s3d,SLOT(stepFigure()));
+    m_widgets[m_widgetsCount++] = m_buttonStep = new QPushButton(m_panelSettings);
+    m_buttonStep->move(20,m_buttonStart->pos().y()+m_buttonStart->height()+5);
+    connect(m_buttonStep,SIGNAL(clicked()),m_s3d,SLOT(stepFigure()));
 
-    m_widgets[m_widgetsCount++] = ButtonClear = new QPushButton(panelSettings);
-    ButtonClear->move(20,ButtonStep->pos().y()+ButtonStep->height()+20);
-    connect(ButtonClear,SIGNAL(clicked()),s3d,SLOT(clearMap()));
+    m_widgets[m_widgetsCount++] = m_buttonClear = new QPushButton(m_panelSettings);
+    m_buttonClear->move(20,m_buttonStep->pos().y()+m_buttonStep->height()+20);
+    connect(m_buttonClear,SIGNAL(clicked()),m_s3d,SLOT(clearMap()));
 
-    m_widgets[m_widgetsCount++] = ButtonAgar = new QPushButton(panelSettings);
-    ButtonAgar->move(20,ButtonClear->pos().y()+ButtonClear->height()+5);
-    connect(ButtonAgar,SIGNAL(clicked()),s3d,SLOT(createAgar()));
+    m_widgets[m_widgetsCount++] = m_buttonAgar = new QPushButton(m_panelSettings);
+    m_buttonAgar->move(20,m_buttonClear->pos().y()+m_buttonClear->height()+5);
+    connect(m_buttonAgar,SIGNAL(clicked()),m_s3d,SLOT(createAgar()));
 
-    m_widgets[m_widgetsCount++] = ButtonRnd = new QPushButton(panelSettings);
-    ButtonRnd->move(20,ButtonAgar->pos().y()+ButtonAgar->height()+5);
-    connect(ButtonRnd,SIGNAL(clicked()),s3d,SLOT(createRandomMap()));
+    m_widgets[m_widgetsCount++] = m_buttonRnd = new QPushButton(m_panelSettings);
+    m_buttonRnd->move(20,m_buttonAgar->pos().y()+m_buttonAgar->height()+5);
+    connect(m_buttonRnd,SIGNAL(clicked()),m_s3d,SLOT(createRandomMap()));
     //list.
 
     menuFile = this->menuBar()->addMenu(LNG["file"]);
@@ -135,19 +135,19 @@ MainWindow::MainWindow()
     menuEdit = this->menuBar()->addMenu(LNG["edit"]);
 
         actClearMap = menuEdit->addAction(LNG["clear_map"]);
-        connect(actClearMap,SIGNAL(triggered()),s3d,SLOT(clearMap()));
+        connect(actClearMap,SIGNAL(triggered()),m_s3d,SLOT(clearMap()));
 
         actAgar = menuEdit->addAction(LNG["create_agar"]);
-        connect(actAgar,SIGNAL(triggered()),s3d,SLOT(createAgar()));
+        connect(actAgar,SIGNAL(triggered()),m_s3d,SLOT(createAgar()));
         actRandomMap = menuEdit->addAction(LNG["create_random"]);
-        connect(actRandomMap,SIGNAL(triggered()),s3d,SLOT(createRandomMap()));
+        connect(actRandomMap,SIGNAL(triggered()),m_s3d,SLOT(createRandomMap()));
         menuEdit->addSeparator();
         actTemplates = menuEdit->addAction(LNG["templates"]);
-        connect(actTemplates,SIGNAL(triggered()),dTemplates,SLOT(exec()));
+        connect(actTemplates,SIGNAL(triggered()),m_dialogTemplates,SLOT(exec()));
         
     menuView = this->menuBar()->addMenu(LNG["view"]);
         actFullScreen = menuView->addAction(LNG["full_scr"]);
-        connect(actFullScreen,SIGNAL(triggered()),s3d,SLOT(setFullScreen()));
+        connect(actFullScreen,SIGNAL(triggered()),m_s3d,SLOT(setFullScreen()));
         actPanelSettings = menuView->addAction(LNG["settings_panel"]);
         actPanelSettings->setCheckable(true);
         actPanelSettings->setChecked(true);
@@ -164,20 +164,20 @@ MainWindow::MainWindow()
         }
     menuModeling = this->menuBar()->addMenu(LNG["modeling"]);
         actSettings = menuModeling->addAction(LNG["modeling_sett"]);
-        connect(actSettings,SIGNAL(triggered()),dSettings,SLOT(exec()));
+        connect(actSettings,SIGNAL(triggered()),m_dialogSettings,SLOT(exec()));
         menuModeling->addSeparator();
         actStep = menuModeling->addAction(LNG["step"]);
-        connect(actStep,SIGNAL(triggered()),s3d,SLOT(stepFigure()));
+        connect(actStep,SIGNAL(triggered()),m_s3d,SLOT(stepFigure()));
         actStartStop = menuModeling->addAction(LNG["start"]);
         
         connect(actStartStop,SIGNAL(triggered()),this,SLOT(buttonStartClicked()));
 
     menuHelp = this->menuBar()->addMenu(LNG["help"]);
         actAbout = menuHelp->addAction(LNG["about"]);
-        connect(actAbout,SIGNAL(triggered()),dAbout,SLOT(exec()));
+        connect(actAbout,SIGNAL(triggered()),m_dialogAbout,SLOT(exec()));
  
        
-    panelSettings->setParent(this);
+    m_panelSettings->setParent(this);
 
     menuOpenFinded = NULL;
     createOpenTree();
@@ -208,47 +208,48 @@ void MainWindow::createOpenTree()
         menuOpenFinded = NULL;
 }
 
-bool MainWindow::createOpenMenuTreeRec(QMenu * menu, const QString &path, int it)
+bool MainWindow::createOpenMenuTreeRec(QMenu * _menu, const QString & _path, int _it)
 {
-    if (it == 3)
+    if (_it == 3)
         return false;
     bool ret = false;
 
-    QDir d(path);
+    QDir d(_path);
     QStringList filt(tr("*.cf"));
-    QStringList l_file = d.entryList(filt,QDir::Files);
+    QStringList fileList = d.entryList(filt,QDir::Files);
 
-    if (l_file.count()!=0)
+    if (fileList.count()!=0)
     {
-        foreach (QString s, l_file)
+        foreach (QString s, fileList)
         {
             QString absPath = d.absoluteFilePath(s);
             if (isFileValid(absPath))
             {
-                OpenAction * A = new OpenAction(s,absPath,NULL);
-                connect(A,SIGNAL(fileSelected(QString)),this,SLOT(openFile(QString)));
-                menu->addAction(A);
-                actList += A;
+                OpenAction * a = new OpenAction(s, absPath, NULL);
+                connect(a, SIGNAL(fileSelected(const QString &)), this, SLOT(openFile(const QString &)));
+                _menu->addAction(a);
+                actList += a;
                 ret = true;
             }
         }
     }
 
-    QStringList l_dir = d.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    QStringList dirList = d.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    if (l_dir.count()!=0)
+    if (dirList.count() != 0)
     {
-        foreach (QString s, l_dir)
+        foreach (QString s, dirList)
         {
-            QMenu * M = menu->addMenu(s);
-            ret |= createOpenMenuTreeRec(M,d.absoluteFilePath(s),it+1);
+            QMenu * m = _menu->addMenu(s);
+            ret |= createOpenMenuTreeRec(m, d.absoluteFilePath(s), _it + 1);
         }
     }
 
     if (!ret)
-        delete menu;
+        delete _menu;
     else
-        menuList += menu;
+        menuList += _menu;
+
     return ret;
 }
 
@@ -264,18 +265,18 @@ void MainWindow::setLang()
 {
     startStopNames();
     this->setWindowTitle(LNG["conway_game"]);
-    panelSettings->setText(LNG["sett"]);
-    labelV->setText(LNG["speed"]);
-    lavelTypeDraw->setText(LNG["type_of_draw"]);
-    checkAnimation->setText(LNG["animation"]);
-    checkGrid->setText(LNG["grid"]);
-    checkAxes->setText(LNG["axes"]);
-    checkStatistic->setText(LNG["statistic"]);
-    checkDraw->setText(LNG["drawing"]);
-    ButtonStep->setText(LNG["step"]);
-    ButtonClear->setText(LNG["clear_map"]);
-    ButtonAgar->setText(LNG["create_agar"]);
-    ButtonRnd->setText(LNG["random_map"]);
+    m_panelSettings->setText(LNG["sett"]);
+    m_labelVelocity->setText(LNG["speed"]);
+    m_lavelDrawType->setText(LNG["type_of_draw"]);
+    m_checkBoxAnimation->setText(LNG["animation"]);
+    m_checkBoxGrid->setText(LNG["grid"]);
+    m_checkBoxAxes->setText(LNG["axes"]);
+    m_checkBoxStatistic->setText(LNG["statistic"]);
+    m_checkBoxDraw->setText(LNG["drawing"]);
+    m_buttonStep->setText(LNG["step"]);
+    m_buttonClear->setText(LNG["clear_map"]);
+    m_buttonAgar->setText(LNG["create_agar"]);
+    m_buttonRnd->setText(LNG["random_map"]);
 
     menuFile->setTitle(LNG["file"]);
 
@@ -293,7 +294,8 @@ void MainWindow::setLang()
     menuView->setTitle(LNG["view"]);
         actFullScreen->setText(LNG["full_scr"]);
         actPanelSettings->setText(LNG["settings_panel"]);
-        if (LNG.count()>1) menuLang->setTitle(LNG["languages"]);
+        if (LNG.count()>1)
+            menuLang->setTitle(LNG["languages"]);
 
     menuModeling->setTitle(LNG["modeling"]);
         actSettings->setText(LNG["modeling_sett"]);
@@ -308,23 +310,23 @@ void MainWindow::setLang()
 
 void MainWindow::setComboModels()
 {
-    comboModels->clear();
-    comboModels->addItem(strPen);
+    m_comboBoxModels->clear();
+    m_comboBoxModels->addItem(strPen);
     for ( StringMap<Model*>::iterator it = currentModelCollection.begin(); it != currentModelCollection.end(); ++it )
-        comboModels->addItem( it.key() );
-    comboModels->adjustSize();
+        m_comboBoxModels->addItem( it.key() );
+    m_comboBoxModels->adjustSize();
 }
 
 void MainWindow::setDrawingEnable(int on)
 {
-    comboModels->setEnabled(on!=0);
-    lavelTypeDraw->setEnabled(on!=0);
+    m_comboBoxModels->setEnabled(on!=0);
+    m_lavelDrawType->setEnabled(on!=0);
 }
 
 void MainWindow::createNewFigure()
 {
-    dialogNewFigure->exec();
-    if (dialogNewFigure->m_result)
+    m_dialogNewFigure->exec();
+    if (m_dialogNewFigure->m_result)
     {
         file_save_name = "";
     }
@@ -339,7 +341,7 @@ void MainWindow::actionLanguageClicked()
 
 void MainWindow::changeDrawModel(const QString& name)
 {
-    s3d->setCurrentModel( name == strPen
+    m_s3d->setCurrentModel( name == strPen
         ? NULL
         : currentModelCollection[name] );
 }
@@ -347,13 +349,13 @@ void MainWindow::changeDrawModel(const QString& name)
 void MainWindow::resize()
 {
     int menuHeight = this->menuBar()->height();
-    s3d->setGeometry(0,menuHeight,this->width()-m_panelWidth,this->height()-menuHeight);
-    panelSettings->setGeometry(this->width()-m_panelWidth,menuHeight,m_panelWidth,this->height()-menuHeight);
+    m_s3d->setGeometry(0,menuHeight,this->width()-m_panelWidth,this->height()-menuHeight);
+    m_panelSettings->setGeometry(this->width()-m_panelWidth,menuHeight,m_panelWidth,this->height()-menuHeight);
 }
 
 void MainWindow::setSettingsVisible(bool value)
 {
-    panelSettings->setVisible(value);
+    m_panelSettings->setVisible(value);
     m_panelWidth = value ? 200 : 0;
     resize();
 }
@@ -365,30 +367,30 @@ double getVelocity(QSlider * slider)
 
 void MainWindow::startStopNames()
 {
-    if (s3d != NULL && s3d->isExecute())
+    if (m_s3d != NULL && m_s3d->isExecute())
     {
         actStartStop->setText(LNG["stop"]);
-        ButtonStart->setText(LNG["stop"]);
+        m_buttonStart->setText(LNG["stop"]);
     }
     else
     {
         actStartStop->setText(LNG["start"]);
-        ButtonStart->setText(LNG["start"]);
+        m_buttonStart->setText(LNG["start"]);
     }
 }
 
 void MainWindow::buttonStartClicked()
 {
-    if (s3d->isExecute())
-        s3d->stop();
+    if (m_s3d->isExecute())
+        m_s3d->stop();
     else
-        s3d->start( getVelocity( sliderVelocity ) );
+        m_s3d->start( getVelocity( m_sliderVelocity ) );
     startStopNames();
 
 }
 void MainWindow::sliderVelValueChanged(int)
 {
-    s3d->setInterval( getVelocity( sliderVelocity ) );
+    m_s3d->setInterval( getVelocity( m_sliderVelocity ) );
 }
 
 void MainWindow::resizeEvent(QResizeEvent * /*e*/)
@@ -396,38 +398,38 @@ void MainWindow::resizeEvent(QResizeEvent * /*e*/)
     resize();
 }
 
-void MainWindow::openFile(const QString & fn)
+void MainWindow::openFile(const QString & _fn)
 {
-    if (!isFileValid(fn))
+    if (!isFileValid(_fn))
     {
-        QMessageBox M;
-        M.setWindowTitle(LNG["file_not_correct"]);
-        M.setText(LNG["cannot_open_this_file"]);
-        M.exec();
+        QMessageBox messageBox;
+        messageBox.setWindowTitle(LNG["file_not_correct"]);
+        messageBox.setText(LNG["cannot_open_this_file"]);
+        messageBox.exec();
         return;
     }
-    FILE * F;
-    if (!fn.isNull() && (F = fopen(fn.toLocal8Bit().data(),"rb") ) != NULL )
+    FILE * file;
+    if (!_fn.isNull() && (file = fopen(_fn.toLocal8Bit().data(),"rb") ) != NULL )
     {
         int vers, type;
-        fread(&vers,4,1,F);
-        fread(&type,4,1,F);
+        fread(&vers, 4, 1, file);
+        fread(&type, 4, 1, file);
 
         switch ((FigureType)type)
         {
             case figTorus:
-                s3d->setFigure( new Torus(F) );
+                m_s3d->setFigure( new Torus(file) );
                 break;
             case figSurface:
-                s3d->setFigure( new Surface(F) );
+                m_s3d->setFigure( new Surface(file) );
                 break;
             case figEllipsoid:
             case figParallelepiped:
-                s3d->setFigure( new Ellipsoid(F) );
+                m_s3d->setFigure( new Ellipsoid(file) );
                 break;
         }
-        fclose(F);
-        file_save_name = fn;
+        fclose(file);
+        file_save_name = _fn;
     }
 }
 
@@ -485,7 +487,7 @@ void MainWindow::saveFileTo(const QString & fn)
     if (!fn.isNull() && (F = fopen(fn.toLocal8Bit().data(),"w+b") )!=NULL )
     {
         fwrite(&versionSaving,4,1,F);
-        s3d->getFigure()->toFile(F);
+        m_s3d->getFigure()->toFile(F);
         int sz = ftell(F);
         rewind(F);
         char s;
@@ -504,28 +506,28 @@ void MainWindow::saveFileTo(const QString & fn)
 
 void MainWindow::saveFileAs()
 {
-    if (s3d == NULL || s3d->getFigure() == NULL )
+    if (m_s3d == NULL || m_s3d->getFigure() == NULL )
     {
-        QMessageBox M;
-        M.setText(tr("Figure hasn't been created") );
-        M.setWindowTitle(tr("Cannot save"));
-        M.exec();
+        QMessageBox messageBox;
+        messageBox.setText(tr("Figure hasn't been created") );
+        messageBox.setWindowTitle(tr("Cannot save"));
+        messageBox.exec();
         return;
     }
-    MyFileDialog dialog;
+    DialogSaveFigure dialog;
     QString fn = dialog.execSave();
     if (!fn.isNull())
         saveFileTo(fn);
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* E)
+void MainWindow::keyPressEvent(QKeyEvent * _e)
 {
     if (QApplication::keyboardModifiers() == Qt::ControlModifier)
     {
-        switch (E->key())
+        switch (_e->key())
         {
             case Qt::Key_N:
-                dialogNewFigure->exec();
+                m_dialogNewFigure->exec();
                 break;
             case Qt::Key_S:
                 saveFile();
@@ -540,22 +542,22 @@ void MainWindow::keyPressEvent(QKeyEvent* E)
 
 MainWindow::~MainWindow()
 {
-    delete dSettings;
-    delete dialogNewFigure;
-    delete dAbout;
-    delete ButtonStart;
-    delete ButtonStep;
+    delete m_dialogSettings;
+    delete m_dialogNewFigure;
+    delete m_dialogAbout;
+    delete m_buttonStart;
+    delete m_buttonStep;
 
-    delete sliderVelocity;
-    delete labelV;
-    delete checkAnimation;
-    delete checkGrid;
-    delete checkStatistic;
-    delete checkDraw;
-    delete checkAxes;
-    delete panelSettings;
-    delete s3d;
-    delete dTemplates;
+    delete m_sliderVelocity;
+    delete m_labelVelocity;
+    delete m_checkBoxAnimation;
+    delete m_checkBoxGrid;
+    delete m_checkBoxStatistic;
+    delete m_checkBoxDraw;
+    delete m_checkBoxAxes;
+    delete m_panelSettings;
+    delete m_s3d;
+    delete m_dialogTemplates;
  //       QMessageBox X;
   //  X.exec();
   //  DELETE(menuHelp);

@@ -1,5 +1,5 @@
-#ifndef MODELTEMPLATES_H
-#define	MODELTEMPLATES_H
+#ifndef DIALOGTEMPLATES_H
+#define	DIALOGTEMPLATES_H
 
 #include <QDialog>
 
@@ -18,7 +18,7 @@ class Model;
 class QResizeEvent;
 
 template <class T>
-struct StringMap;
+class StringMap;
 
 class DialogTemplates : public QDialog
 {
@@ -55,5 +55,5 @@ private:
     int m_widgetsCount;
 };
 
-#endif	/* MODELTEMPLATES_H */
+#endif	/* DIALOGTEMPLATES_H */
 

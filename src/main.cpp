@@ -16,19 +16,19 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     strPen = QObject::tr("Pen");
-    modelCollection["Glider"] = new modelPlaner();
-    modelCollection["Z-symbol"] = new modelZSymbol();
-    modelCollection["X-symbol"] = new modelXSymbol();
-    modelCollection["LWSS"] = new modelShip();
-    modelCollection["MWSS"] = new modelShip(6);
-    modelCollection["HWSS"] = new modelShip(7);
-    modelCollection["Pentadecatron"] = new modelPentadecatron();
-    modelCollection["Acorn"]  = new modelAcorn();
+    modelCollection["Glider"] = new ModelPlaner();
+    modelCollection["Z-symbol"] = new ModelZSymbol();
+    modelCollection["X-symbol"] = new ModelXSymbol();
+    modelCollection["LWSS"] = new ModelShip();
+    modelCollection["MWSS"] = new ModelShip(6);
+    modelCollection["HWSS"] = new ModelShip(7);
+    modelCollection["Pentadecatron"] = new ModelPentadecatron();
+    modelCollection["Acorn"]  = new ModelAcorn();
 
     currentModelCollection = modelCollection;
 
     MainWindow mw;
-    mw.setGeometry(10,10,1000,650);
+    mw.setGeometry(10, 10, 1000, 650);
     mw.show();
 
     return app.exec();

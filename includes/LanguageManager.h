@@ -1,5 +1,5 @@
-#ifndef LANGUAGES_H
-#define	LANGUAGES_H
+#ifndef LANGUAGEMANAGER_H
+#define	LANGUAGEMANAGER_H
 
 #include <QObject>
 #include <QList>
@@ -20,7 +20,7 @@ public:
 
     void setCurrentLanguage(const QString & _current);
 
-    const QString & operator [] (const QString & _key);
+    const QString & operator [] (const QString & _key) const;
     QList<QString> getLanguagesList() const;
     int count() const;
 private:
@@ -42,5 +42,5 @@ private:
 };
 
 #define LNG (LanguageManager::getInstance())
-#endif	/* LANGUAGES_H */
+#endif	/* LANGUAGEMANAGER_H */
 

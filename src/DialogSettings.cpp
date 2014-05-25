@@ -5,7 +5,9 @@
 #include "Scene3D.h"
 
 
-ProbabilitySpinBox::ProbabilitySpinBox(QWidget * parent) : QDoubleSpinBox(parent)
+ProbabilitySpinBox::ProbabilitySpinBox(QWidget * _parent)
+    : QDoubleSpinBox(_parent),
+      m_label(_parent)
 {
     setRange(0,1);
     setSingleStep(0.001);
@@ -14,151 +16,154 @@ ProbabilitySpinBox::ProbabilitySpinBox(QWidget * parent) : QDoubleSpinBox(parent
 }
 
 
-void ProbabilitySpinBox::setParent(QWidget * parent)
+void ProbabilitySpinBox::setParent(QWidget * _parent)
 {
-    label.setParent(parent);
-    QDoubleSpinBox::setParent(parent);
+    m_label.setParent(_parent);
+    QDoubleSpinBox::setParent(_parent);
 }
 
-void ProbabilitySpinBox::setGeometry(int x, int y, int w, int h)
+void ProbabilitySpinBox::setGeometry(int _x, int _y, int _w, int _h)
 {
-    label.move(x + 3,y - 18);
-    QDoubleSpinBox::setGeometry(x, y, w, h);
+    m_label.move(_x + 3, _y - 18);
+    QDoubleSpinBox::setGeometry(_x, _y, _w, _h);
 }
 
-void ProbabilitySpinBox::setText(const QString & text)
+void ProbabilitySpinBox::setText(const QString & _text)
 {
-    label.setText(text);
+    m_label.setText(_text);
 }
 
-void ProbabilitySpinBox::newVal(double val)
+void ProbabilitySpinBox::newVal(double _val)
 {
     QPalette p = this->palette();
-    if (val == 0)
-        p.setColor(QPalette::Text,Qt::blue);
-    else if (val == this->maximum())
-        p.setColor(QPalette::Text,QColor(0, 100, 0));
+    if (_val == 0)
+        p.setColor(QPalette::Text, Qt::blue);
+    else if (_val == this->maximum())
+        p.setColor(QPalette::Text, QColor(0, 100, 0));
     else
-        p.setColor(QPalette::Text,Qt::black);
+        p.setColor(QPalette::Text, Qt::black);
     this->setPalette(p);
 }
 
-void possGroup::refresh()
+void ProbabilitiesGroup::refresh()
 {
-    int w_box = (width() - xMrgn - 5)/cnt;
+    int boxWidth = (width() - m_xMrgn - 5) / cnt;
     for (int i = 0; i < cnt; i++)
-        boxes[i].setGeometry(xMrgn + i*w_box, yMrgn+20, w_box-2, 25);
+        m_boxes[i].setGeometry(m_xMrgn + i * boxWidth, m_yMrgn + 20, boxWidth - 2, 25);
 }
 
 
-possGroup::possGroup()
+ProbabilitiesGroup::ProbabilitiesGroup()
+    : MyGroupBox(),
+      m_xMrgn(15),
+      m_yMrgn(20)
 {
-    xMrgn = 15;
-    yMrgn = 20;
     for (int i = 0; i < cnt; i++)
     {
-        boxes[i].setParent(this);
-        boxes[i].setRange(0,1);
-        boxes[i].setSingleStep(0.01);
-        boxes[i].setDecimals(3);
-        boxes[i].setText("N: " + QString::number(i));
+        m_boxes[i].setParent(this);
+        m_boxes[i].setRange(0,1);
+        m_boxes[i].setSingleStep(0.01);
+        m_boxes[i].setDecimals(3);
+        m_boxes[i].setText("N: " + QString::number(i));
     }
     this->refresh();
 }
 
-double * possGroup::getValues()
+double * ProbabilitiesGroup::getValues()
 {
     for (int i = 0; i < cnt; i++)
-        values[i] = boxes[i].value();
-    return values;
+        m_values[i] = m_boxes[i].value();
+    return m_values;
 }
-void possGroup::setValues(double * values)
+void ProbabilitiesGroup::setValues(double * _values)
 {
     for (int i = 0; i < cnt; i++)
-        boxes[i].setValue(values[i]);
+        m_boxes[i].setValue(_values[i]);
 }
-void possGroup::setGeometry(int x, int y, int w, int h)
+void ProbabilitiesGroup::setGeometry(int _x, int _y, int _w, int _h)
 {
-    MyGroupBox::setGeometry(x, y, w, h);
+    MyGroupBox::setGeometry(_x, _y, _w, _h);
     this->refresh();
 }
-    //~possGroup() {}
+    //~ProbabilitiesGroup() {}
 
-DialogSettings::DialogSettings()
+DialogSettings::DialogSettings(Scene3D * _s3d)
+    : QDialog(),
+      m_s3d(_s3d)
 {
     int w = 700;
-    group_live = new possGroup();
-    group_dead = new possGroup();
-    group_live->setGeometry(0, 5, w, 100);
+    m_groupLive = new ProbabilitiesGroup();
+    m_groupDead = new ProbabilitiesGroup();
+    m_groupLive->setGeometry(0, 5, w, 100);
    
-    group_dead->setGeometry(0, 105, w, 100);
-    group_live->setParent(this);
-    group_dead->setParent(this);
+    m_groupDead->setGeometry(0, 105, w, 100);
+    m_groupLive->setParent(this);
+    m_groupDead->setParent(this);
 
-    buttApply = new QPushButton(this);
-    buttApply->move(10,210);
-    connect(buttApply, SIGNAL(clicked()), this, SLOT(apply()));
+    m_buttonApply = new QPushButton(this);
+    m_buttonApply->move(10, 210);
+    connect(m_buttonApply, SIGNAL(clicked()), this, SLOT(apply()));
 
-    buttOK = new QPushButton(this);
-    connect(buttOK, SIGNAL(clicked()), this, SLOT(apply()));
-    connect(buttOK, SIGNAL(clicked()), this, SLOT(close()));
+    m_buttonOK = new QPushButton(this);
+    connect(m_buttonOK, SIGNAL(clicked()), this, SLOT(apply()));
+    connect(m_buttonOK, SIGNAL(clicked()), this, SLOT(close()));
 
-    buttCancel = new QPushButton(this);
-    connect(buttCancel, SIGNAL(clicked()), this, SLOT(close()));
+    m_buttonCancel = new QPushButton(this);
+    connect(m_buttonCancel, SIGNAL(clicked()), this, SLOT(close()));
 
-    buttDefault = new QPushButton(this);
-    connect(buttDefault, SIGNAL(clicked()), this, SLOT(setDefault()));
+    m_buttonDefault = new QPushButton(this);
+    connect(m_buttonDefault, SIGNAL(clicked()), this, SLOT(setDefault()));
 
     
     connect(&LNG, SIGNAL(set_lang()), this, SLOT(setLang()) );
     setLang();
-    this->setFixedSize(w, buttCancel->pos().y()+buttCancel->height()+10);
+    this->setFixedSize(w, m_buttonCancel->pos().y() + m_buttonCancel->height() + 10);
 }
 
 void DialogSettings::setLang()
 {
     this->setWindowTitle(LNG["modeling_settings"]);
-    group_dead->setText(LNG["probabilities_d"]);
-    group_live->setText(LNG["probabilities_r"]);
-    buttDefault->setText(LNG["set_def"]);
-    buttCancel->setText(LNG["cancel"]);
-    buttOK->setText(LNG["ok"]);
-    buttApply->setText(LNG["apply"]);
-    buttCancel->adjustSize();
-    buttOK->adjustSize();
-    buttDefault->adjustSize();
-    buttOK->move(buttApply->pos().x() + buttApply->width() + 10, 210);
-    buttCancel->move(buttOK->pos().x() + buttOK->width() + 10, 210);
-    buttDefault->move(40+buttCancel->width()+buttCancel->pos().x(), buttCancel->pos().y());
+    m_groupDead->setText(LNG["probabilities_d"]);
+    m_groupLive->setText(LNG["probabilities_r"]);
+    m_buttonDefault->setText(LNG["set_def"]);
+    m_buttonCancel->setText(LNG["cancel"]);
+    m_buttonOK->setText(LNG["ok"]);
+    m_buttonApply->setText(LNG["apply"]);
+    m_buttonCancel->adjustSize();
+    m_buttonOK->adjustSize();
+    m_buttonDefault->adjustSize();
+    m_buttonOK->move(m_buttonApply->pos().x() + m_buttonApply->width() + 10, 210);
+    m_buttonCancel->move(m_buttonOK->pos().x() + m_buttonOK->width() + 10, 210);
+    m_buttonDefault->move(40 + m_buttonCancel->width() + m_buttonCancel->pos().x(), m_buttonCancel->pos().y());
 }
 
 void DialogSettings::setDefault()
 {
-    s3d->getFigure()->defaultProbabilities();
+    m_s3d->getFigure()->defaultProbabilities();
     fromFigure();
 }
 
 
 DialogSettings::~DialogSettings()
 {
-    delete buttApply;
-    delete buttOK;
-    delete buttCancel;
-    delete group_dead;
-    delete group_live;
-    delete buttDefault;
+    delete m_buttonApply;
+    delete m_buttonOK;
+    delete m_buttonCancel;
+    delete m_groupDead;
+    delete m_groupLive;
+    delete m_buttonDefault;
 }
 
 void DialogSettings::apply()
 {
-    s3d->getFigure()->setProbabilities(group_live->getValues(),group_dead->getValues());
+    m_s3d->getFigure()->setProbabilities(m_groupLive->getValues(), m_groupDead->getValues());
 }
 void DialogSettings::fromFigure()
 {
-    double p_live[9],p_dead[9];
-    s3d->getFigure()->getProbabilities(p_live,p_dead);
-    group_live->setValues(p_live);
-    group_dead->setValues(p_dead);
+    double pLive[9], pDead[9];
+    m_s3d->getFigure()->getProbabilities(pLive, pDead);
+    m_groupLive->setValues(pLive);
+    m_groupDead->setValues(pDead);
 }
 void DialogSettings::showEvent(QShowEvent * /* e */)
 {

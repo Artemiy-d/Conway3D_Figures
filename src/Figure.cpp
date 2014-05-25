@@ -1,10 +1,11 @@
-#include <time.h>
+#include <QDebug>
+#include <assert.h>
+
 #include "Figure.h"
 
 
 Figure::Figure()
 {
-    srand(time(0));
     m_gridEnable = false;
     line_width = 2.0f;
     cells = NULL;
@@ -94,31 +95,33 @@ void Figure::defaultProbabilities()
 {
     for (int i = 0; i < 9; i++)
     {
-        probabilities_live[i] = 0;
-        probabilities_dead[i] = RAND_MAX;
+        probabilities_live[i] = 0.;
+        probabilities_dead[i] = 1.;
     }
     all_prob_live_bool = all_prob_dead_bool = all_prob_bool = true;
-    probabilities_live[3] = RAND_MAX;
-    probabilities_dead[2]=probabilities_dead[3]=0;
+    probabilities_live[3] = 1.;
+    probabilities_dead[2] = 0.;
+    probabilities_dead[3] = 0.;
 }
 
 void Figure::setProbabilities(double * p_live, double * p_dead)
 {
-    for (int i = 0; i<9; i++)
+    for (int i = 0; i < 9; i++)
     {
-        probabilities_live[i] = floor(p_live[i]*RAND_MAX+0.2);
-        probabilities_dead[i] = floor(p_dead[i]*RAND_MAX+0.2);
+        probabilities_live[i] = p_live[i];
+        probabilities_dead[i] = p_dead[i];
     }
     calcAllProbBool();
 }
 void Figure::calcAllProbBool()
 {
     all_prob_bool = true;
-    for (int i = 0; i<9; i++)
+    for (int i = 0; i < 9 && all_prob_bool; i++)
     {
-        if ((probabilities_live[i]!=0 && probabilities_live[i]!=RAND_MAX) ||
-            (probabilities_dead[i]!=0 && probabilities_dead[i]!=RAND_MAX) )
-        all_prob_bool = false;
+       // if ((probabilities_live[i]!=0 && probabilities_live[i] != RandomLCG::s_maxValue) ||
+       //     (probabilities_dead[i]!=0 && probabilities_dead[i] != RandomLCG::s_maxValue) )
+        if ( !probabilities_live[i].isLimit() || !probabilities_dead[i].isLimit() )
+            all_prob_bool = false;
     }
     if (!all_prob_bool)
     {
@@ -133,8 +136,8 @@ void Figure::getProbabilities(double * p_live, double * p_dead)
 {
     for (int i = 0; i<9; i++)
     {
-        p_live[i] = 1.*probabilities_live[i]/RAND_MAX;
-        p_dead[i] = 1.*probabilities_dead[i]/RAND_MAX;
+        p_live[i] = probabilities_live[i].get();
+        p_dead[i] = probabilities_dead[i].get();
     }
 }
 
@@ -273,7 +276,7 @@ void Figure::refresh()
 {
     for (int i = 0; i<cnt_act_now; i++)
     {
-        ActiveCellNow[i]->livingStatusNext= ActiveCellNow[i]->livingStatusNow;
+        ActiveCellNow[i]->livingStatusNext = ActiveCellNow[i]->livingStatusNow;
         ActiveCellNow[i]->cnt_active_neighbors_next = ActiveCellNow[i]->cnt_active_neighbors_now;
     }
 }
@@ -296,7 +299,7 @@ void Figure::plus(Cell * c)
 
 void Figure::plus(int ind)
 {
-    plus(&cells[(ind+cnt_cells*4)%cnt_cells]);
+    plus(&cells[(ind + cnt_cells * 4) % cnt_cells]);
 }
 
 void Figure::minus(Cell * c)
@@ -324,35 +327,39 @@ void Figure::step()
     stepNmb++;
     cnt_act_next = 0;
     Cell * c;
-    int j, u;
+    int j;
+    unsigned int u;
 
     for (int i = 0; i<cnt_act_now; i++)
     {
         c = ActiveCellNow[i];
         if (c->livingStatusNow)
         {
-            u = probabilities_dead[c->cnt_active_neighbors_now];
-            if (u!=0 && (u == RAND_MAX || rand()<u))
+           // u = probabilities_dead[c->cnt_active_neighbors_now];
+            if ( probabilities_dead[c->cnt_active_neighbors_now].simulate( m_random ) )//(u != 0 && (u == RandomLCG::s_maxValue || m_random.next() < u))
             {
                 c->livingStatusNext = false;
-                cnt_users--;
+                --cnt_users;
                 for (j = 0; j<c->cnt_neighbors; j++)
                 {
                     c->neighbors[j]->cnt_active_neighbors_next--;
+                    if (c->neighbors[j]->cnt_active_neighbors_next < 0)
+                        qDebug() << "c->neighbors[j]->cnt_active_neighbors_next";
+                   // assert(c->neighbors[j]->cnt_active_neighbors_next >= 0);
                     if (c->neighbors[j]->step_flag!= stepNmb)
                         (ActiveCellNext[cnt_act_next++] = c->neighbors[j])->step_flag = stepNmb;
                 }
-                if (c->step_flag!= stepNmb)
+                if (c->step_flag != stepNmb)
                     (ActiveCellNext[cnt_act_next++] = c)->step_flag = stepNmb;
             }
         }
         else
         {
-            u = probabilities_live[c->cnt_active_neighbors_now];
-            if (u!=0 && (u == RAND_MAX || rand()<u))
+          //  u = probabilities_live[c->cnt_active_neighbors_now];
+            if ( probabilities_live[c->cnt_active_neighbors_now].simulate( m_random ) )//(u != 0 && (u == RandomLCG::s_maxValue || m_random.next() < u))
             {
                 c->livingStatusNext = true;
-                cnt_users++;
+                ++cnt_users;
                 for (j = 0; j<c->cnt_neighbors; j++)
                 {
                     c->neighbors[j]->cnt_active_neighbors_next++;
@@ -370,9 +377,10 @@ void Figure::step()
         for (int i = 0; i<cnt_act_now; i++)
         {
             u = ActiveCellNow[i]->cnt_active_neighbors_now;
-            if (ActiveCellNow[i]->step_flag!=stepNmb &&
-                    ( (probabilities_dead[u]!=0 && probabilities_dead[u]!=RAND_MAX) ||
-                      (probabilities_live[u]!=0 && probabilities_live[u]!=RAND_MAX) ) )
+            if (ActiveCellNow[i]->step_flag != stepNmb &&
+                    !( probabilities_dead[u].isLimit() && probabilities_live[u].isLimit() ) )
+                   // ( (probabilities_dead[u] != 0 && probabilities_dead[u] != RandomLCG::s_maxValue) ||
+                   //   (probabilities_live[u] != 0 && probabilities_live[u] != RandomLCG::s_maxValue) ) )
             {
                 (ActiveCellNext[cnt_act_next++] = ActiveCellNow[i])->step_flag = stepNmb;
             }
@@ -393,6 +401,7 @@ void Figure::step()
         ActiveCellNext[i]->cnt_active_neighbors_now = ActiveCellNext[i]->cnt_active_neighbors_next;
     }
 
+
     Cell ** acn = ActiveCellNow;
     ActiveCellNow = ActiveCellNext;
     ActiveCellNext = acn;
@@ -402,13 +411,17 @@ void Figure::step()
 
 void Figure::clearMap()
 {
-    for (int i = 0; i<cnt_cells; i++) minus(i);
+    for (int i = 0; i < cnt_cells; i++)
+        minus(i);
     refresh();
 }
 
-void Figure::createRandomMap(float p)
+void Figure::createRandomMap(float _p)
 {
-    for (int i = 0; i<cnt_cells; i++) if (1.0*rand()/RAND_MAX<p) plus(i);
+    unsigned int uiP = _p * RandomLCG::s_maxValue;
+    for (int i = 0; i < cnt_cells; i++)
+        if ( m_random.next() < uiP )
+            plus(i);
     refresh();
 }
 
@@ -446,7 +459,6 @@ void Figure::gridToList()
     }
 }
 
-bool g = false;
 void Figure::drawCells()
 {
 
@@ -474,7 +486,7 @@ void Figure::drawCells()
 
    // glDisableClientState(GL_NORMAL_ARRAY);
   //  if (line_width!=0.0f) glCallList(listGrid);
-    if (m_gridEnable && line_width!=0.0f)
+    if (m_gridEnable && line_width != 0.0f)
     {
         glDisable(GL_LIGHTING);
        // glDisableClientState(GL_NORMAL_ARRAY);
@@ -511,7 +523,8 @@ void Figure::drawCells()
 
 void Figure::drawActiveCells()
 {
-   if (cells == NULL) return;
+   if (cells == NULL)
+       return;
 
     //glNewList(1,GL_COMPILE);
 
