@@ -25,10 +25,10 @@ private:
             STATISTIC_ITEMS_COUNT
         };
     public:
-        StatisticWidget(QWidget * parent);
-        void resizeEvent(QResizeEvent * e);
-        void paintEvent(QPaintEvent * e);
-        void setText(const QString & text, int stringNumber, bool refresh = true);
+        StatisticWidget(QWidget * _parent);
+        void resizeEvent(QResizeEvent * _e);
+        void paintEvent(QPaintEvent * _e);
+        void setText(const QString & _text, int _stringNumber, bool _refresh = true);
     private:
         QString m_text[STATISTIC_ITEMS_COUNT];
         QPainter m_painter;
@@ -36,14 +36,14 @@ private:
     };
 
 public:
-    Scene3D(QWidget* parent = 0);
+    Scene3D(QWidget* _parent = 0);
     virtual ~Scene3D();
 
     bool isExecute();
-    void start(int interval = 500);
+    void start(int _interval = 500);
     void stop();
-    void setInterval(int interval = 500);
-    void createFigure(FigureType typeFigure, int * sizeParams, float * phizParams, bool copy_settings);
+    void setInterval(int _interval = 500);
+    void createFigure(FigureType _figureType, int * _sizeParams, float * _phizParams, bool _copySettings);
 
     void setFigure(Figure * _figure);
 
@@ -62,26 +62,26 @@ private:
     void defaultScene();
     void drawAxis();
     void drawStatistic();
-    void getCoord(int mouseX, int mouseY, Point3F * point1, Point3F *point_1);
+    void getCoord(int _mouseX, int _mouseY, Point3F * _point1, Point3F * _point_1);
 
 protected:
     void initializeGL();
-    void resizeGL(int nWidth, int nHeight);
+    void resizeGL(int _nWidth, int _nHeight);
     void paintGL();
-    void mousePressEvent(QMouseEvent* pe);
-    void mouseMoveEvent(QMouseEvent* pe);
-    void mouseDoubleClickEvent(QMouseEvent * e);
-    void wheelEvent(QWheelEvent* pe);
-    void keyPressEvent(QKeyEvent* pe);
-    void hideEvent(QHideEvent * e);
+    void mousePressEvent(QMouseEvent* _e);
+    void mouseMoveEvent(QMouseEvent* _e);
+    void mouseDoubleClickEvent(QMouseEvent * _e);
+    void wheelEvent(QWheelEvent* _e);
+    void keyPressEvent(QKeyEvent* _e);
+    void hideEvent(QHideEvent * _e);
 
 public slots:
     void stepFigure();
-    void setAnimationEnable(int on);
-    void setGridEnable(int on);
-    void setDrawingEnable(int on);
-    void setStatisticVisible(int on);
-    void setAxesVisible(int on);
+    void setAnimationEnable(int _on);
+    void setGridEnable(int _on);
+    void setDrawingEnable(int _on);
+    void setStatisticVisible(int _on);
+    void setAxesVisible(int _on);
     void createAgar();
     void clearMap();
     void createRandomMap();

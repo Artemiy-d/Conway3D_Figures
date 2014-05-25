@@ -15,9 +15,12 @@ IncludingSurface::IncludingSurface(Figure * prnt, Cell * c, int c1, int c2)
     count_second = c2;
     int s = Side01 | Side30;
     for (int i = 0; i<count_first; i++)
-        for (int j = 0; j<count_second; j++) c[i*count_second+j].paintSides = s;
+        for (int j = 0; j<count_second; j++)
+            c[i*count_second+j].paintSides = s;
+
     for (int i = 0; i<count_first; i++)
         c[i*count_second+count_second - 1].paintSides |= Side23;
+
     for (int j = 0; j<count_second; j++)
         c[(count_first - 1)*count_second+j].paintSides |= Side12;
 }

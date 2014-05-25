@@ -67,16 +67,16 @@ void DialogNewFigure::setLang()
 
     m_combo->addItem(LNG["plane"]);
     m_combo->addItem(LNG["torus"]);
-    m_combo->addItem(LNG["parallel"]);
-    m_combo->addItem(LNG["ellip"]);
+    m_combo->addItem(LNG["parallelepiped"]);
+    m_combo->addItem(LNG["ellipsoid"]);
 
-    m_checkBoxDefaultSettings->setText(LNG["default_sett"]);
+    m_checkBoxDefaultSettings->setText(LNG["default_settings"]);
     m_grpBoxSizes->setText(LNG["geometry"]);
     m_labelOffset->setText(LNG["offset"]);
     m_buttonExit->setText(LNG["exit"]);
     m_buttonOK->setText(LNG["create"]);
     for (int i = 0; i<3; i++)
-        m_labelSize[i]->setText(LNG["size"]+" "+QString::number(i+1));
+        m_labelSize[i]->setText(LNG["size"] + " " + QString::number(i + 1));
     for (int i = 0; i<m_widgetsCount; i++)
         m_widgets[i]->adjustSize();
     m_checkBoxDefaultSettings->move(m_combo->pos().x(),m_combo->pos().y() + m_combo->height()+10);

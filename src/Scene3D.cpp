@@ -9,18 +9,19 @@
 
 
 
-Scene3D::StatisticWidget::StatisticWidget(QWidget * parent) : QWidget(parent)
+Scene3D::StatisticWidget::StatisticWidget(QWidget * _parent)
+    : QWidget(_parent)
 {
     m_text[STEPS] = tr("Step 0");
     m_text[LIVING_CELLS] = tr("Users: ");
     m_font.setWeight(10);
 }
-void Scene3D::Scene3D::StatisticWidget::resizeEvent(QResizeEvent * /*e*/)
+void Scene3D::Scene3D::StatisticWidget::resizeEvent(QResizeEvent * /*_e*/)
 {
     if (height() != (m_font.weight() + 3) * STATISTIC_ITEMS_COUNT + 10)
         setGeometry(pos().x(), pos().y(), width(), (m_font.weight() + 3) * STATISTIC_ITEMS_COUNT + 10);
 }
-void Scene3D::StatisticWidget::paintEvent(QPaintEvent * /*e*/)
+void Scene3D::StatisticWidget::paintEvent(QPaintEvent * /*_e*/)
 {
     m_painter.begin(this);
     m_painter.setFont(m_font);
@@ -29,12 +30,12 @@ void Scene3D::StatisticWidget::paintEvent(QPaintEvent * /*e*/)
         m_painter.drawText(5, (m_font.weight() + 3) * (i + 1), m_text[i]);
     m_painter.end();
 }
-void Scene3D::StatisticWidget::setText(const QString & _text, int stringNumber, bool refresh)
+void Scene3D::StatisticWidget::setText(const QString & _text, int _stringNumber, bool _refresh)
 {
-    if (stringNumber < 0 || stringNumber >= STATISTIC_ITEMS_COUNT)
+    if (_stringNumber < 0 || _stringNumber >= STATISTIC_ITEMS_COUNT)
         return;
-    m_text[stringNumber] = _text;
-    if (refresh)
+    m_text[_stringNumber] = _text;
+    if (_refresh)
         this->repaint();
 }
 
@@ -53,7 +54,8 @@ void Scene3D::stepFigure()
     m_stepsNumber++;
 }
 
-Scene3D::Scene3D(QWidget* parent) : QGLWidget(parent)
+Scene3D::Scene3D(QWidget* _parent)
+    : QGLWidget(_parent)
 {
     m_stepsNumber = 0;
     m_statisticWidget = new StatisticWidget(this);
@@ -97,33 +99,33 @@ void Scene3D::createRandomMap()
     updateGL();
 }
 
-void Scene3D::setGridEnable(int on)
+void Scene3D::setGridEnable(int _on)
 {
-    m_figure->m_gridEnable = m_gridEnable = on != 0;
+    m_figure->m_gridEnable = m_gridEnable = _on != 0;
     this->updateGL();
 }
-void Scene3D::setDrawingEnable(int on)
+void Scene3D::setDrawingEnable(int _on)
 {
-    m_drawingOn = on != 0;
-    QCursor C;
-    C.setShape(m_drawingOn
+    m_drawingOn = _on != 0;
+    QCursor cursor;
+    cursor.setShape(m_drawingOn
                ? Qt::PointingHandCursor
                : Qt::OpenHandCursor);
-    this->setCursor(C);
+    this->setCursor(cursor);
 }
 
-void Scene3D::setAnimationEnable(int on)
+void Scene3D::setAnimationEnable(int _on)
 {
-    m_animationOn = on != 0;
+    m_animationOn = _on != 0;
     this->updateGL();
 }
-void Scene3D::setStatisticVisible(int on)
+void Scene3D::setStatisticVisible(int _on)
 {
-    m_statisticWidget->setVisible(m_statisticVisible = (on != 0));
+    m_statisticWidget->setVisible(m_statisticVisible = (_on != 0));
 }
-void Scene3D::setAxesVisible(int on)
+void Scene3D::setAxesVisible(int _on)
 {
-    m_axesVisible = on != 0;
+    m_axesVisible = _on != 0;
     updateGL();
 }
 
@@ -137,47 +139,47 @@ void Scene3D::drawStatistic()
 }
 
 
-void Scene3D::createFigure(FigureType typeFigure, int * sizeParams, float * /*phizParams*/, bool copy_settings)
+void Scene3D::createFigure(FigureType _figuretype, int * _sizeParams, float * /*_phizParams*/, bool _copySettings)
 {
-    double p_live[9], p_dead[9];
-    bool grid_on = false;
+    double pLive[9], pDead[9];
+    bool gridOn = false;
 
     if (m_figure != NULL)
     {
-        if (copy_settings)
+        if (_copySettings)
         {
-            m_figure->getProbabilities(p_live, p_dead);
-            grid_on = m_figure->m_gridEnable;
+            m_figure->getProbabilities(pLive, pDead);
+            gridOn = m_figure->m_gridEnable;
         }
         delete m_figure;
         m_figure = NULL;
     }
     else
     {
-        copy_settings = false;
+        _copySettings = false;
     }
 
-    switch (typeFigure)
+    switch (_figuretype)
     {
         case figSurface:
-            m_figure = new Surface(sizeParams[0], sizeParams[1]);
+            m_figure = new Surface(_sizeParams[0], _sizeParams[1]);
             break;
         case figTorus:
-            m_figure = new Torus(sizeParams[0], sizeParams[1], sizeParams[2]);
+            m_figure = new Torus(_sizeParams[0], _sizeParams[1], _sizeParams[2]);
             break;
         case figEllipsoid:
-            m_figure = new Ellipsoid(sizeParams[0], sizeParams[1], sizeParams[2]);
+            m_figure = new Ellipsoid(_sizeParams[0], _sizeParams[1], _sizeParams[2]);
             break;
         case figParallelepiped:
-            m_figure = new Ellipsoid(sizeParams[0], sizeParams[1], sizeParams[2], false);
+            m_figure = new Ellipsoid(_sizeParams[0], _sizeParams[1], _sizeParams[2], false);
             break;
     }
 
     m_stepsNumber = 0;
-    if (copy_settings)
+    if (_copySettings)
     {
-        m_figure->m_gridEnable = grid_on;
-        m_figure->setProbabilities(p_live, p_dead);
+        m_figure->m_gridEnable = gridOn;
+        m_figure->setProbabilities(pLive, pDead);
     }
 
     updateGL();
@@ -196,7 +198,7 @@ Figure * Scene3D::getFigure()
     return m_figure;
 }
 
-void Scene3D::hideEvent(QHideEvent * /*E*/)
+void Scene3D::hideEvent(QHideEvent * /*_e*/)
 {
     if (m_savedParent == NULL)
         return;
@@ -206,7 +208,7 @@ void Scene3D::hideEvent(QHideEvent * /*E*/)
 }
 
 
-void Scene3D::mouseDoubleClickEvent(QMouseEvent * /*E*/)
+void Scene3D::mouseDoubleClickEvent(QMouseEvent * /*_e*/)
 {
     if (this->parent() == NULL)
         this->hide();
@@ -254,9 +256,9 @@ bool Scene3D::isExecute()
     return m_executed;
 }
 
-void Scene3D::start(int interval)
+void Scene3D::start(int _interval)
 {
-    m_timer->start(interval);
+    m_timer->start(_interval);
     m_executed = true;
 }
 void Scene3D::stop()
@@ -264,24 +266,24 @@ void Scene3D::stop()
     m_timer->stop();
     m_executed = false;
 }
-void Scene3D::setInterval(int interval)
+void Scene3D::setInterval(int _interval)
 {
-    m_timer->setInterval(interval);
+    m_timer->setInterval(_interval);
 }
 
-void Scene3D::resizeGL(int nWidth, int nHeight)
+void Scene3D::resizeGL(int _nWidth, int _nHeight)
 {
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
 
-   GLfloat ratio=(GLfloat)nHeight / (GLfloat)nWidth;
+   GLfloat ratio=(GLfloat)_nHeight / (GLfloat)_nWidth;
 
-   if (nWidth >= nHeight)
+   if (_nWidth >= _nHeight)
       glOrtho(-1.0 / ratio, 1.0 / ratio, -1.0, 1.0, -5.0, 2.0);
    else
       glOrtho(-1.0, 1.0, -1.0 * ratio, 1.0 * ratio, -5.0, 2.0);
 
-   glViewport(0, 0, (GLint)nWidth, (GLint)nHeight);
+   glViewport(0, 0, (GLint)_nWidth, (GLint)_nHeight);
 }
 
 void Scene3D::setCurrentModel(Model * _model)
@@ -289,7 +291,7 @@ void Scene3D::setCurrentModel(Model * _model)
     m_currentModel = _model;
 }
 
-void Scene3D::getCoord(int mouse_x, int mouse_y, Point3F * point_1, Point3F * point1)
+void Scene3D::getCoord(int _mouseX, int _mouseY, Point3F * _point1, Point3F * _point_1)
 {
     GLint    viewport[4];    // ��������� viewport-a.
     GLdouble projection[16]; // ������� ��������.
@@ -297,32 +299,32 @@ void Scene3D::getCoord(int mouse_x, int mouse_y, Point3F * point_1, Point3F * po
     GLdouble vx,vy,vz;       // ���������� ������� ���� � ������� ��������� viewport-a.
     GLdouble wx,wy,wz;
 
-    glGetIntegerv(GL_VIEWPORT,viewport);           // ������ ��������� viewport-a.
-    glGetDoublev(GL_PROJECTION_MATRIX,projection); // ������ ������� ��������.
-    glGetDoublev(GL_MODELVIEW_MATRIX,modelview);   // ������ ������� �������.
+    glGetIntegerv(GL_VIEWPORT, viewport);           // ������ ��������� viewport-a.
+    glGetDoublev(GL_PROJECTION_MATRIX, projection); // ������ ������� ��������.
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);   // ������ ������� �������.
     // ��������� ������� ���������� ������� � ������� ��������� viewport-a.
-    vx = mouse_x;
-    vy = height() - mouse_y - 1; // ��� height - ������� ������ ����.
+    vx = _mouseX;
+    vy = height() - _mouseY - 1; // ��� height - ������� ������ ����.
 
 
     // ��������� ������� ����� �������������� �������.
  //   glReadPixels(vx, vy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &vz);
     vz = -1;
     gluUnProject(vx, vy, vz, modelview, projection, viewport, &wx, &wy, &wz);
-    point_1->x = wx;
-    point_1->y = wy;
-    point_1->z = wz;
+    _point1->x = wx;
+    _point1->y = wy;
+    _point1->z = wz;
 
     vz = 1;
     gluUnProject(vx, vy, vz, modelview, projection, viewport, &wx, &wy, &wz);
-    point1->x = wx;
-    point1->y = wy;
-    point1->z = wz;
+    _point_1->x = wx;
+    _point_1->y = wy;
+    _point_1->z = wz;
    // ((QWidget*)this->parent())->setWindowTitle(QString::number(point_1->x)+" "+QString::number(point_1->y)+" "+QString::number(point_1->z));
    // p1 = CVector3(wx,wy,wz);
     // ��������� ������� ����� �������������� �������.
    // vz = 1;
-   /// gluUnProject(vx, vy, vz, modelview, projection, viewport, &wx, &wy, &wz);
+   // gluUnProject(vx, vy, vz, modelview, projection, viewport, &wx, &wy, &wz);
    // p2 = CVector3(wx,wy,wz);
 }
 
@@ -349,34 +351,34 @@ void Scene3D::paintGL()
    m_figure->drawCells();
 }
 
-void Scene3D::mousePressEvent(QMouseEvent* pe)
+void Scene3D::mousePressEvent(QMouseEvent* _e)
 {
-   m_mousePosition = pe->pos();
-   m_leftButtonPressed = pe->button() == Qt::LeftButton;
+   m_mousePosition = _e->pos();
+   m_leftButtonPressed = _e->button() == Qt::LeftButton;
    this->setFocus();
    if (m_drawingOn)
    {
-       Point3F p1,p_1;
-       getCoord(pe->pos().x(), pe->pos().y(), &p1, &p_1);
+       Point3F p1, p_1;
+       getCoord(_e->pos().x(), _e->pos().y(), &p1, &p_1);
        m_figure->selectAndPlus(p1, p_1, m_leftButtonPressed, m_currentModel);
        m_figure->refresh();
    }
    updateGL();
 }
 
-void Scene3D::mouseMoveEvent(QMouseEvent* pe)
+void Scene3D::mouseMoveEvent(QMouseEvent* _e)
 {
 
     if (!m_drawingOn)
     {
-        m_xRot += 180 / m_nSca * (GLfloat)(pe->y() - m_mousePosition.y()) / height();
-        m_zRot += 180 / m_nSca * (GLfloat)(pe->x() - m_mousePosition.x()) / width();
-        m_mousePosition = pe->pos();
+        m_xRot += 180 / m_nSca * (GLfloat)(_e->y() - m_mousePosition.y()) / height();
+        m_zRot += 180 / m_nSca * (GLfloat)(_e->x() - m_mousePosition.x()) / width();
+        m_mousePosition = _e->pos();
     }
     else if (m_currentModel == NULL)
     {
         Point3F p1, p_1;
-        getCoord(pe->pos().x(), pe->pos().y(), &p1, &p_1);
+        getCoord(_e->pos().x(), _e->pos().y(), &p1, &p_1);
 
         m_figure->selectAndPlus(p1, p_1, m_leftButtonPressed);
         m_figure->refresh();
@@ -385,65 +387,65 @@ void Scene3D::mouseMoveEvent(QMouseEvent* pe)
    updateGL();
 }
 
-void Scene3D::wheelEvent(QWheelEvent* pe)
+void Scene3D::wheelEvent(QWheelEvent* _e)
 {
-   if (pe->delta() > 0)
+   if (_e->delta() > 0)
        scalePlus();
-   else if (pe->delta() < 0)
+   else if (_e->delta() < 0)
        scaleMinus();
    updateGL();
 }
 
-void Scene3D::keyPressEvent(QKeyEvent* pe)
+void Scene3D::keyPressEvent(QKeyEvent* _e)
 {
-   switch (pe->key())
-   {
-      case Qt::Key_Plus:
-         scalePlus();
-      break;
+    switch (_e->key())
+    {
+    case Qt::Key_Plus:
+        scalePlus();
+        break;
 
-      case Qt::Key_Equal:
-         scalePlus();
-      break;
+    case Qt::Key_Equal:
+        scalePlus();
+        break;
 
-      case Qt::Key_Minus:
-         scaleMinus();
-      break;
+    case Qt::Key_Minus:
+        scaleMinus();
+        break;
 
-      case Qt::Key_Up:
-         rotateUp();
-      break;
+    case Qt::Key_Up:
+        rotateUp();
+        break;
 
-      case Qt::Key_Down:
-         rotateDown();
-      break;
+    case Qt::Key_Down:
+        rotateDown();
+        break;
 
-      case Qt::Key_Left:
+    case Qt::Key_Left:
         rotateLeft();
-      break;
+        break;
 
-      case Qt::Key_Right:
-         rotateRight();
-      break;
+    case Qt::Key_Right:
+        rotateRight();
+        break;
 
-      case Qt::Key_Z:
-         translateDown();
-      break;
+    case Qt::Key_Z:
+        translateDown();
+        break;
 
-      case Qt::Key_X:
-         translateUp();
-      break;
+    case Qt::Key_X:
+        translateUp();
+        break;
 
-      case Qt::Key_Space:
-         defaultScene();
-      break;
+    case Qt::Key_Space:
+        defaultScene();
+        break;
 
-      case Qt::Key_Escape:
-         this->close();
-      break;
-   }
-   QWidget::keyPressEvent(pe);
-   updateGL();
+    case Qt::Key_Escape:
+        this->close();
+        break;
+    }
+    QWidget::keyPressEvent(_e);
+    updateGL();
 }
 
 void Scene3D::scalePlus()

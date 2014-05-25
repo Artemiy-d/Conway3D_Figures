@@ -54,10 +54,11 @@ UI_DIR =
 #QMAKE_CC = gcc
 #QMAKE_CXX = g++
 DEFINES += 
-LIBS += -lglut -lGLU
+LIBS += -lglut
+unix: LIBS += -lGLU
 
 config.path    = $$OUT_PWD
-config.files   = /home/artyom/dev/Conway3D_Figures/Conway3D_Figures/data/*
+config.files   = data/*
 INSTALLS += config
 
 
