@@ -1,89 +1,129 @@
 #include <QMouseEvent>
+#include <QPainter>
 
 #include "ModelRedactor.h"
+#include "Modeles.h"
 
-bool * ModelRedactor::getPoint(int x, int y)
+ModelRedactor::View::View(const QSize & _visibleSize, const Model * _model) :
+    m_visibleSize(_visibleSize),
+    m_model(_model),
+    m_XPoints(NULL),
+    m_YPoints(NULL)
 {
-//     int x0, x1 = x_arr , x2
-    return m_cells + (y * m_size / height()) * m_size + x * m_size / width();
+    updateBorders();
 }
-void ModelRedactor::createArray(int w, int h)
+
+ModelRedactor::View::~View()
 {
-    w_cell = w / m_size;
-    h_cell = h / m_size;
-    for (int i = 0; i <= m_size; i++)
-    {
-        x_arr[i] = i * (w-1) / m_size;
-        y_arr[i] = i * (h-1) / m_size;
-    }
+    delete m_XPoints;
 }
-void ModelRedactor::createField(int sz)
+
+void ModelRedactor::View::getModelPointByVisiblePoint(const QPoint & _visiblePoint, int & _x, int & _y) const
 {
-    if (sz < 1 || sz == m_size)
+    int sz = m_model->getSize();
+    _x = _visiblePoint.x() * sz / m_visibleSize.width();
+    _y = _visiblePoint.y() * sz / m_visibleSize.height();
+}
+
+void ModelRedactor::View::draw(QPaintDevice * _device)
+{
+    int sz = m_model->getSize();
+    if (sz <= 0)
         return;
-    Model::createField(sz);
-    delete x_arr;
-    x_arr = new int[sz * 2 + 2];
-    y_arr = x_arr + sz + 1;
-    createArray(width(),height());
-}
 
-void ModelRedactor::paintEvent(QPaintEvent * /* e */)
-{
-    painter.begin(this);
-    int k = 0;
-    for (int i = 0; i < m_size; i++)
-        for (int j = 0; j < m_size; j++)
+    QPainter painter(_device);
+
+    for (int i = 0; i < sz; i++)
+        for (int j = 0; j < sz; j++)
         {
-            painter.fillRect(x_arr[j],
-                             y_arr[i],
-                             x_arr[j + 1] - x_arr[j],
-                             y_arr[i + 1] - y_arr[i],
-                             m_cells[k++] ? Qt::black : Qt::white);
+            painter.fillRect(m_XPoints[j],
+                             m_YPoints[i],
+                             m_XPoints[j + 1] - m_XPoints[j],
+                             m_YPoints[i + 1] - m_YPoints[i],
+                             m_model->isCellFilled( j, i ) ? Qt::black : Qt::white);
         }
     painter.setPen(Qt::blue);
-    for (int i = 0; i<=m_size; i++)
+    for (int i = 0; i <= sz; i++)
     {
-        painter.drawLine(x_arr[0], y_arr[i], x_arr[m_size], y_arr[i]);
-        painter.drawLine(x_arr[i], y_arr[0], x_arr[i], y_arr[m_size]);
+        painter.drawLine(m_XPoints[0], m_YPoints[i], m_XPoints[sz], m_YPoints[i]);
+        painter.drawLine(m_XPoints[i], m_YPoints[0], m_XPoints[i], m_YPoints[sz]);
     }
     painter.end();
 }
 
-void ModelRedactor::mousePressEvent(QMouseEvent *e)
+void ModelRedactor::View::updateBorders()
 {
-    *getPoint(e->x(),e->y()) = e->button() == Qt::LeftButton;
+    int sz = m_model->getSize();
+    if (sz <= 0)
+        return;
+    delete m_XPoints;
+    m_XPoints = new int[sz * 2 + 2];
+    m_YPoints = m_XPoints + sz + 1;
+    for (int i = 0; i <= sz; i++)
+    {
+        m_XPoints[i] = i * ( m_visibleSize.width() - 1) / sz;
+        m_YPoints[i] = i * ( m_visibleSize.height() - 1) / sz;
+    }
+}
+
+void ModelRedactor::View::update(const QSize & _visibleSize, const Model * _model)
+{
+    m_visibleSize = _visibleSize;
+    m_model = _model;
+    updateBorders();
+}
+
+void ModelRedactor::createField(int _sz)
+{
+    if (_sz < 1 || _sz == m_model->getSize())
+        return;
+    m_model->createField( _sz );
+    m_view->update( size(), m_model );
+}
+
+void ModelRedactor::paintEvent(QPaintEvent * /* _e */)
+{
+    m_view->draw( this );
+}
+
+void ModelRedactor::mousePressEvent(QMouseEvent *_e)
+{
+    int i = 0, j = 0;
+    m_view->getModelPointByVisiblePoint( _e->pos(), i, j );
+    m_model->setCellFilled( i, j, _e->button() == Qt::LeftButton );
     repaint();
 }
 
-ModelRedactor& ModelRedactor::operator = (const Model &model)
+void ModelRedactor::resizeEvent(QResizeEvent * /*_e*/ )
 {
-    Model::operator = (model);
-    repaint();
-    return *this;
+    m_view->update( size(), m_model );
 }
 
-ModelRedactor::ModelRedactor(QWidget * parent) : QWidget(parent), Model(0)
+void ModelRedactor::setModel(const Model * _model)
 {
-    x_arr = NULL;
-    m_cells = NULL;
+    delete m_model;
+    m_model = _model->clone();
+    m_view->update( size(), m_model );
+    repaint();
+}
+
+ModelRedactor::ModelRedactor(QWidget * _parent)
+    : QWidget(_parent),
+      m_model(new Model(0)),
+      m_view( new View(size(), m_model) )
+{
     createField(5);
 }
+
 ModelRedactor::~ModelRedactor()
 {
-    delete x_arr;
-}
-void ModelRedactor::setQuadSize(int sz, bool * field)
-{
-    createField(sz);
-    for (int i = 0; i<m_square; i++)
-        m_cells[i] = field[i];
-    repaint();
+    delete m_model;
+    delete m_view;
 }
 
-void ModelRedactor::setQuadSize(int sz)
+void ModelRedactor::setQuadSize(int _sz)
 {
-    createField(sz);
+    createField(_sz);
     repaint();
 }
 

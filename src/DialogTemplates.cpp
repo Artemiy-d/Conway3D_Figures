@@ -115,7 +115,7 @@ void DialogTemplates::selectModel(QListWidgetItem *item)
     Model * model = QObject::sender() == listModels ?
         modelCollection[item->text()] : currentModelCollection[item->text()];
     spin_size->setValue(model->getSize());
-    *d_g = *model;
+    d_g->setModel( model );
     current_name->setText(item->text());
 }
 

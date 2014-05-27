@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     currentModelCollection = modelCollection;
 
     MainWindow mw;
-    mw.setGeometry(10, 10, 1000, 650);
+    mw.setGeometry(10, 100, 1000, 650);
     mw.show();
 
     return app.exec();

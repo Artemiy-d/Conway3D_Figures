@@ -84,6 +84,11 @@ void Model::mirrorY()
         }
 }
 
+Model * Model::clone() const
+{
+    return new Model(*this);
+}
+
 void Model::rotate(int _nmb)
 {
     int nmb = (_nmb % 4 + 4) % 4;

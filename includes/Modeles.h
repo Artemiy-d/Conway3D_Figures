@@ -25,6 +25,8 @@ public:
     void rotate(int _nmb = 1);
     void mirrorX();
     void mirrorY();
+
+    virtual Model * clone() const;
     Model& operator = (const Model& _m);
     int getSize() const;
 protected:
