@@ -8,7 +8,6 @@
 #include "FigureClasses.h"
 
 
-
 Scene3D::StatisticWidget::StatisticWidget(QWidget * _parent)
     : QWidget(_parent)
 {
@@ -65,7 +64,7 @@ Scene3D::Scene3D(QWidget* _parent)
     m_axesVisible = true;
     m_gridEnable = false;
     m_statisticVisible = true;
-    m_xRot = 0; m_yRot = 0; m_zRot = 0; m_zTra = 0; m_nSca = 1;
+    m_nSca = 1.f;
     setDrawingEnable(false);
     srand(time(0));
     m_figure = NULL;
@@ -235,18 +234,8 @@ void Scene3D::initializeGL()
     glLightfv(GL_LIGHT0,GL_DIFFUSE,color);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_DEPTH_TEST);
-   // float sp[4] = {2,2,2,2};
-  //  float mat_specular[] = {1,1,1,1};
-    
 
-   // int prm[3] = {50,100,0};
- //   this->createFigure(figThor,prm,NULL,true);
     m_figure = new Torus(50,100,20);
-
-  //  ModelShip * ship = new ModelShip();
-  //  ModelPlaner * p = new ModelPlaner();
-
-   // m_figure->refresh();
 
     drawStatistic();
 }
@@ -279,7 +268,7 @@ void Scene3D::resizeGL(int _nWidth, int _nHeight)
    GLfloat ratio=(GLfloat)_nHeight / (GLfloat)_nWidth;
 
    if (_nWidth >= _nHeight)
-      glOrtho(-1.0 / ratio, 1.0 / ratio, -1.0, 1.0, -5.0, 2.0);
+       glOrtho(-1.0 / ratio, 1.0 / ratio, -1.0, 1.0, -5.0, 2.0);
    else
       glOrtho(-1.0, 1.0, -1.0 * ratio, 1.0 * ratio, -5.0, 2.0);
 
@@ -340,12 +329,12 @@ void Scene3D::paintGL()
    float pos[4] = {5,0,5,0};
    glLightfv(GL_LIGHT0,GL_POSITION,pos);
 
-   glScalef(m_nSca, m_nSca, m_nSca);
-   glTranslatef(0.0f, 0, 0.0f);
 
-   glRotatef(m_xRot, 1.0f, 0.0f, 0.0f);
- //  glRotatef(m_yRot, 0.0f, 1.0f, 0.0f);
-   glRotatef(m_zRot, 0.0f, 0.0f, 1.0f);
+  // glTranslatef(0.0f, 0, 0.0f);
+
+   m_camera.apply();
+   glScalef(m_nSca, m_nSca, m_nSca);
+
    if (m_axesVisible)
        drawAxis();
    m_figure->drawCells();
@@ -368,11 +357,10 @@ void Scene3D::mousePressEvent(QMouseEvent* _e)
 
 void Scene3D::mouseMoveEvent(QMouseEvent* _e)
 {
-
     if (!m_drawingOn)
     {
-        m_xRot += 180 / m_nSca * (GLfloat)(_e->y() - m_mousePosition.y()) / height();
-        m_zRot += 180 / m_nSca * (GLfloat)(_e->x() - m_mousePosition.x()) / width();
+        m_camera.rotate( 2.f * M_PI * (  _e->x() - m_mousePosition.x() ) / width(),
+                         2.f * M_PI * ( -_e->y() + m_mousePosition.y() ) / height() );
         m_mousePosition = _e->pos();
     }
     else if (m_currentModel == NULL)
@@ -401,9 +389,6 @@ void Scene3D::keyPressEvent(QKeyEvent* _e)
     switch (_e->key())
     {
     case Qt::Key_Plus:
-        scalePlus();
-        break;
-
     case Qt::Key_Equal:
         scalePlus();
         break;
@@ -413,35 +398,23 @@ void Scene3D::keyPressEvent(QKeyEvent* _e)
         break;
 
     case Qt::Key_Up:
-        rotateUp();
+        m_camera.rotateUp();
         break;
 
     case Qt::Key_Down:
-        rotateDown();
+        m_camera.rotateDown();
         break;
 
     case Qt::Key_Left:
-        rotateLeft();
+        m_camera.rotateLeft();
         break;
 
     case Qt::Key_Right:
-        rotateRight();
-        break;
-
-    case Qt::Key_Z:
-        translateDown();
-        break;
-
-    case Qt::Key_X:
-        translateUp();
+        m_camera.rotateRight();
         break;
 
     case Qt::Key_Space:
         defaultScene();
-        break;
-
-    case Qt::Key_Escape:
-        this->close();
         break;
     }
     QWidget::keyPressEvent(_e);
@@ -450,47 +423,17 @@ void Scene3D::keyPressEvent(QKeyEvent* _e)
 
 void Scene3D::scalePlus()
 {
-   m_nSca = m_nSca * 1.1;
+    m_nSca *= 1.1;
 }
 
 void Scene3D::scaleMinus()
 {
-   m_nSca = m_nSca / 1.1;
-}
-
-void Scene3D::rotateUp()
-{
-   m_xRot += 1.0;
-}
-
-void Scene3D::rotateDown()
-{
-   m_xRot -= 1.0;
-}
-
-void Scene3D::rotateLeft()
-{
-   m_zRot += 1.0;
-}
-
-void Scene3D::rotateRight()
-{
-   m_zRot -= 1.0;
-}
-
-void Scene3D::translateDown()
-{
-   m_zTra -= 0.05;
-}
-
-void Scene3D::translateUp()
-{
-   m_zTra += 0.05;
+    m_nSca /= 1.1;
 }
 
 void Scene3D::defaultScene()
 {
-   m_xRot = 0; m_yRot = 0; m_zRot = 0; m_zTra = 0; m_nSca = 1;
+    m_nSca = 1;
 }
 
 void Scene3D::drawAxis()

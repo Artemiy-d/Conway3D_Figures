@@ -5,6 +5,8 @@
 #include <QPainter>
 
 #include "FigureClasses.h"
+#include "Camera.h"
+
 
 class QTimer;
 
@@ -53,12 +55,6 @@ public:
 private:
     void scalePlus();
     void scaleMinus();
-    void rotateUp();
-    void rotateDown();
-    void rotateLeft();
-    void rotateRight();
-    void translateDown();
-    void translateUp();
     void defaultScene();
     void drawAxis();
     void drawStatistic();
@@ -101,11 +97,15 @@ private:
             m_statisticVisible;
 
     bool m_leftButtonPressed;
-    GLfloat m_xRot, m_yRot, m_zRot, m_zTra, m_nSca;
+    GLfloat m_nSca;
     QPoint m_mousePosition;
     int m_stepsNumber;
     QWidget * m_savedParent;
     Figure * m_figure;
+
+
+
+    Camera m_camera;
 };
 
 #endif	/* SCENE3D_H */

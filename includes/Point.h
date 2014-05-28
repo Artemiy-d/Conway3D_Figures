@@ -23,6 +23,14 @@ public:
     {
         return sqrt(x * x + y * y + z * z);
     }
+    void normalize()
+    {
+        Type a = abs();
+        x /= a;
+        y /= a;
+        z /= a;
+    }
+
     Point<Type> operator + (const Point<Type> & v) const
     {
         return Point<Type>(x + v.x, y + v.y, z + v.z);

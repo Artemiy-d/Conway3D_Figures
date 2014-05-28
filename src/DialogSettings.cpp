@@ -122,7 +122,7 @@ DialogSettings::DialogSettings(Scene3D * _s3d)
 
 void DialogSettings::setLang()
 {
-    this->setWindowTitle(LNG["modeling_settings"]);
+    this->setWindowTitle(LNG["modelling_settings"]);
     m_groupDead->setText(LNG["probabilities_d"]);
     m_groupLive->setText(LNG["probabilities_r"]);
     m_buttonDefault->setText(LNG["set_def"]);

@@ -161,11 +161,11 @@ MainWindow::MainWindow()
             for ( QList<QString>::const_iterator it = languages.begin(); it != languages.end(); ++it )
             {
                 QAction * action = menuLang->addAction( *it );
-                connect( action, SIGNAL(triggered()), this, SLOT( actionLanguageClicked ) );
+                connect( action, SIGNAL(triggered()), this, SLOT( actionLanguageClicked() ) );
             }
         }
-    menuModeling = this->menuBar()->addMenu(LNG["modeling"]);
-        actSettings = menuModeling->addAction(LNG["modeling_settings"]);
+    menuModeling = this->menuBar()->addMenu(LNG["modelling"]);
+        actSettings = menuModeling->addAction(LNG["modelling_settings"]);
         connect(actSettings,SIGNAL(triggered()),m_dialogSettings,SLOT(exec()));
         menuModeling->addSeparator();
         actStep = menuModeling->addAction(LNG["step"]);
@@ -204,7 +204,7 @@ void MainWindow::createOpenTree()
 
     QString P = QDir::homePath()+tr("/Save Conway");
     delete menuOpenFinded;
-    menuOpenFinded = new QMenu(LNG["open_finded"],this);
+    menuOpenFinded = new QMenu(LNG["open_founded"],this);
     menuFile->insertMenu(actSave,menuOpenFinded);
     if (!createOpenMenuTreeRec(menuOpenFinded,P))
         menuOpenFinded = NULL;
@@ -285,7 +285,7 @@ void MainWindow::setLang()
         actNewFigure->setText(createMenuText(LNG["new_figure"],tr("  ctrl+N")));
         actOpen->setText(createMenuText(LNG["open"],tr("  ctrl+O")));
         if (menuOpenFinded != NULL)
-            menuOpenFinded->setTitle(LNG["open_finded"]);
+            menuOpenFinded->setTitle(LNG["open_founded"]);
         actSave->setText(createMenuText(LNG["save"],tr("  ctrl+S")));
         actSaveAs->setText(LNG["save_as"]);
         actExit->setText(LNG["exit"]);
@@ -300,8 +300,8 @@ void MainWindow::setLang()
         if (LNG.count()>1)
             menuLang->setTitle(LNG["languages"]);
 
-    menuModeling->setTitle(LNG["modeling"]);
-        actSettings->setText(LNG["modeling_settings"]);
+    menuModeling->setTitle(LNG["modelling"]);
+        actSettings->setText(LNG["modelling_settings"]);
         actStep->setText(LNG["step"]);
         
     menuHelp->setTitle(LNG["help"]);
@@ -438,14 +438,15 @@ void MainWindow::openFile(const QString & _fn)
 
 void MainWindow::openFile()
 {
-   QString fn = QFileDialog::getOpenFileName(this,
-              tr("Open Figure"),
-              path_to_save,
-              tr("Figure files (*.cf);;All files (*.*)"),
-              0,
-              QFileDialog::DontUseNativeDialog );
-   if (!fn.isNull())
-       openFile(fn);
+    QString filters = LNG["figure_files"] +  tr(" (*.cf);;") + LNG["all_files"] + tr(" (*.*)");
+    QString fn = QFileDialog::getOpenFileName(this,
+                          tr("Open Figure"),
+                          path_to_save,
+                          filters,
+                          0,
+                          QFileDialog::DontUseNativeDialog );
+    if (!fn.isNull())
+        openFile(fn);
 }
 
 void MainWindow::saveFile()
@@ -456,53 +457,53 @@ void MainWindow::saveFile()
         saveFileTo(file_save_name);
 }
 
-bool MainWindow::isFileValid(const QString & fn)
+bool MainWindow::isFileValid(const QString & _fn)
 {
-    FILE * F;
-    if (!fn.isNull() && (F = fopen(fn.toLocal8Bit().data(),"rb") )!=NULL )
+    FILE * file;
+    if (!_fn.isNull() && (file = fopen(_fn.toLocal8Bit().data(), "rb") )!=NULL )
     {
         char s;
-        int sum =-1000;
-        fseek(F,0,SEEK_END);
-        int sz = ftell(F) - 4;
+        int sum = -1000;
+        fseek(file, 0, SEEK_END);
+        int sz = ftell(file) - 4;
         if (sz <= 0)
         {
-            fclose(F);
+            fclose(file);
             return false;
         }
-        rewind(F);
+        rewind(file);
         while (sz--)
         {
-            fread(&s,1,1,F);
-            sum+=s;
+            fread(&s, 1, 1, file);
+            sum += s;
         }
-        fread(&sz,4,1,F);
-        fclose(F);
+        fread(&sz, 4, 1, file);
+        fclose(file);
         if (sum == sz)
             return true;
     }
     return false;
 }
 
-void MainWindow::saveFileTo(const QString & fn)
+void MainWindow::saveFileTo(const QString & _fn)
 {
-    FILE * F;
-    if (!fn.isNull() && (F = fopen(fn.toLocal8Bit().data(),"w+b") )!=NULL )
+    FILE * file;
+    if (!_fn.isNull() && (file = fopen(_fn.toLocal8Bit().data(), "w+b") )!=NULL )
     {
-        fwrite(&versionSaving,4,1,F);
-        m_s3d->getFigure()->toFile(F);
-        int sz = ftell(F);
-        rewind(F);
+        fwrite(&versionSaving, 4, 1, file);
+        m_s3d->getFigure()->toFile(file);
+        int sz = ftell(file);
+        rewind(file);
         char s;
         int sum = -1000;
         while (sz--)
         {
-            fread(&s,1,1,F);
-            sum+=s;
+            fread(&s, 1, 1, file);
+            sum += s;
         }
-        fwrite(&sum,4,1,F);
-        fclose(F);
-        file_save_name = fn;
+        fwrite(&sum, 4, 1, file);
+        fclose(file);
+        file_save_name = _fn;
         createOpenTree();
     }
 }
