@@ -128,7 +128,6 @@ void LanguageManager::addLanguageFile(const QString & _filename)
                 ++str;
             *strValuePtr = 0;
 
-            qDebug() << "Add: " << QString(key) << "  " << QString(strValue);
             lm[QString(key)] = QString(strValue);
         }
 

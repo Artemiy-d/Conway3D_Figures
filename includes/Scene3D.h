@@ -5,7 +5,7 @@
 #include <QPainter>
 
 #include "FigureClasses.h"
-#include "Camera.h"
+#include "Scene3DView.h"
 
 
 class QTimer;
@@ -41,7 +41,7 @@ public:
     Scene3D(QWidget* _parent = 0);
     virtual ~Scene3D();
 
-    bool isExecute();
+    bool isExecuted();
     void start(int _interval = 500);
     void stop();
     void setInterval(int _interval = 500);
@@ -53,12 +53,8 @@ public:
     void setCurrentModel(Model * _model);
 
 private:
-    void scalePlus();
-    void scaleMinus();
-    void defaultScene();
-    void drawAxis();
     void drawStatistic();
-    void getCoord(int _mouseX, int _mouseY, Point3F * _point1, Point3F * _point_1);
+    void drawModel(const QPoint & _point);
 
 protected:
     void initializeGL();
@@ -69,7 +65,6 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent * _e);
     void wheelEvent(QWheelEvent* _e);
     void keyPressEvent(QKeyEvent* _e);
-    void hideEvent(QHideEvent * _e);
 
 public slots:
     void stepFigure();
@@ -82,6 +77,7 @@ public slots:
     void clearMap();
     void createRandomMap();
     void setFullScreen();
+    void restoreNormal();
 
 private:
     QTimer * m_timer;
@@ -89,23 +85,18 @@ private:
     StatisticWidget * m_statisticWidget;
     Model * m_currentModel;
 
-    bool m_executed,
-            m_animationOn,
+    bool m_animationOn,
             m_drawingOn,
             m_axesVisible,
-            m_gridEnable,
             m_statisticVisible;
 
     bool m_leftButtonPressed;
-    GLfloat m_nSca;
     QPoint m_mousePosition;
-    int m_stepsNumber;
+    unsigned long long m_stepsNumber;
     QWidget * m_savedParent;
     Figure * m_figure;
 
-
-
-    Camera m_camera;
+    Scene3DView m_view;
 };
 
 #endif	/* SCENE3D_H */

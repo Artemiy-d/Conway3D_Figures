@@ -370,7 +370,7 @@ double getVelocity(QSlider * slider)
 
 void MainWindow::startStopNames()
 {
-    if (m_s3d != NULL && m_s3d->isExecute())
+    if (m_s3d != NULL && m_s3d->isExecuted())
     {
         actStartStop->setText(LNG["stop"]);
         m_buttonStart->setText(LNG["stop"]);
@@ -384,7 +384,7 @@ void MainWindow::startStopNames()
 
 void MainWindow::buttonStartClicked()
 {
-    if (m_s3d->isExecute())
+    if (m_s3d->isExecuted())
         m_s3d->stop();
     else
         m_s3d->start( getVelocity( m_sliderVelocity ) );

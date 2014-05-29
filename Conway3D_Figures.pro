@@ -25,7 +25,7 @@ SOURCES += \
     src/DialogSaveFigure.cpp \
     src/GroupBoxCustom.cpp \
     src/ModelRedactor.cpp \
-    src/Camera.cpp
+    src/Scene3DView.cpp
 
 HEADERS += \
     includes/Scene3D.h \
@@ -44,7 +44,7 @@ HEADERS += \
     includes/GroupBoxCustom.h \
     includes/ModelRedactor.h \
     includes/Point.h \
-    includes/Camera.h
+    includes/Scene3DView.h
 
 FORMS +=
 RESOURCES +=

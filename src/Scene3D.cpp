@@ -1,8 +1,5 @@
-#include <GL/glu.h>
-
 #include <QTimer>
 #include <QMouseEvent>
-#include <time.h>
 
 #include "Scene3D.h"
 #include "FigureClasses.h"
@@ -59,14 +56,10 @@ Scene3D::Scene3D(QWidget* _parent)
     m_stepsNumber = 0;
     m_statisticWidget = new StatisticWidget(this);
     m_statisticWidget->setGeometry(0, 0, 100, 20);
-    m_executed = false;
     m_animationOn = true;
     m_axesVisible = true;
-    m_gridEnable = false;
     m_statisticVisible = true;
-    m_nSca = 1.f;
     setDrawingEnable(false);
-    srand(time(0));
     m_figure = NULL;
     m_timer = new QTimer(this);
     m_timer->stop();
@@ -100,7 +93,7 @@ void Scene3D::createRandomMap()
 
 void Scene3D::setGridEnable(int _on)
 {
-    m_figure->m_gridEnable = m_gridEnable = _on != 0;
+    m_figure->m_gridEnable = _on != 0;
     this->updateGL();
 }
 void Scene3D::setDrawingEnable(int _on)
@@ -197,82 +190,58 @@ Figure * Scene3D::getFigure()
     return m_figure;
 }
 
-void Scene3D::hideEvent(QHideEvent * /*_e*/)
-{
-    if (m_savedParent == NULL)
-        return;
-    this->setParent(m_savedParent);
-    m_savedParent->resize(m_savedParent->width() + 1, m_savedParent->height());
-    this->setVisible(true);
-}
-
-
 void Scene3D::mouseDoubleClickEvent(QMouseEvent * /*_e*/)
 {
-    if (this->parent() == NULL)
-        this->hide();
+    if (parent() == NULL)
+        restoreNormal();
     else
         setFullScreen();
 }
+
+void Scene3D::restoreNormal()
+{
+    if ( m_savedParent )
+    {
+        setParent(m_savedParent);
+    }
+    showNormal();
+}
+
 void Scene3D::setFullScreen()
 {
-    m_savedParent = (QWidget*)this->parent();
-    this->setParent(NULL);
-    this->showFullScreen();
+    m_savedParent = (QWidget*)parent();
+    setParent(NULL);
+    showFullScreen();
 }
 void Scene3D::initializeGL()
 {
-    qglClearColor(Qt::white);
-    glShadeModel(GL_FLAT);
-    glEnable(GL_DEPTH_TEST);
-  // glEnable(GL_CULL_FACE);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-
-    float color[4] = {0.7,0.7,1,1};
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-    glLightfv(GL_LIGHT0,GL_DIFFUSE,color);
-    glEnable(GL_COLOR_MATERIAL);
-    glEnable(GL_DEPTH_TEST);
-
+    m_view.init();
     m_figure = new Torus(50,100,20);
 
     drawStatistic();
 }
 
-bool Scene3D::isExecute()
+bool Scene3D::isExecuted()
 {
-    return m_executed;
+    return m_timer && m_timer->isActive();
 }
 
 void Scene3D::start(int _interval)
 {
     m_timer->start(_interval);
-    m_executed = true;
 }
 void Scene3D::stop()
 {
     m_timer->stop();
-    m_executed = false;
 }
 void Scene3D::setInterval(int _interval)
 {
     m_timer->setInterval(_interval);
 }
 
-void Scene3D::resizeGL(int _nWidth, int _nHeight)
+void Scene3D::resizeGL(int _width, int _height)
 {
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-
-   GLfloat ratio=(GLfloat)_nHeight / (GLfloat)_nWidth;
-
-   if (_nWidth >= _nHeight)
-       glOrtho(-1.0 / ratio, 1.0 / ratio, -1.0, 1.0, -5.0, 2.0);
-   else
-      glOrtho(-1.0, 1.0, -1.0 * ratio, 1.0 * ratio, -5.0, 2.0);
-
-   glViewport(0, 0, (GLint)_nWidth, (GLint)_nHeight);
+    m_view.resize( _width, _height );
 }
 
 void Scene3D::setCurrentModel(Model * _model)
@@ -280,64 +249,25 @@ void Scene3D::setCurrentModel(Model * _model)
     m_currentModel = _model;
 }
 
-void Scene3D::getCoord(int _mouseX, int _mouseY, Point3F * _point1, Point3F * _point_1)
-{
-    GLint    viewport[4];    // ��������� viewport-a.
-    GLdouble projection[16]; // ������� ��������.
-    GLdouble modelview[16];  // ������� �������.
-    GLdouble vx,vy,vz;       // ���������� ������� ���� � ������� ��������� viewport-a.
-    GLdouble wx,wy,wz;
-
-    glGetIntegerv(GL_VIEWPORT, viewport);           // ������ ��������� viewport-a.
-    glGetDoublev(GL_PROJECTION_MATRIX, projection); // ������ ������� ��������.
-    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);   // ������ ������� �������.
-    // ��������� ������� ���������� ������� � ������� ��������� viewport-a.
-    vx = _mouseX;
-    vy = height() - _mouseY - 1; // ��� height - ������� ������ ����.
-
-
-    // ��������� ������� ����� �������������� �������.
- //   glReadPixels(vx, vy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &vz);
-    vz = -1;
-    gluUnProject(vx, vy, vz, modelview, projection, viewport, &wx, &wy, &wz);
-    _point1->x = wx;
-    _point1->y = wy;
-    _point1->z = wz;
-
-    vz = 1;
-    gluUnProject(vx, vy, vz, modelview, projection, viewport, &wx, &wy, &wz);
-    _point_1->x = wx;
-    _point_1->y = wy;
-    _point_1->z = wz;
-   // ((QWidget*)this->parent())->setWindowTitle(QString::number(point_1->x)+" "+QString::number(point_1->y)+" "+QString::number(point_1->z));
-   // p1 = CVector3(wx,wy,wz);
-    // ��������� ������� ����� �������������� �������.
-   // vz = 1;
-   // gluUnProject(vx, vy, vz, modelview, projection, viewport, &wx, &wy, &wz);
-   // p2 = CVector3(wx,wy,wz);
-}
-
 void Scene3D::paintGL()
 {
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   m_view.clear();
    if (!m_animationOn || m_figure == NULL)
        return;
 
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
-
-   float pos[4] = {5,0,5,0};
-   glLightfv(GL_LIGHT0,GL_POSITION,pos);
-
-
-  // glTranslatef(0.0f, 0, 0.0f);
-
-   m_camera.apply();
-   glScalef(m_nSca, m_nSca, m_nSca);
+   m_view.prepareDrawing();
 
    if (m_axesVisible)
-       drawAxis();
-   m_figure->drawCells();
+       m_view.drawAxes();
+   m_view.drawFigure( m_figure );
+}
+
+void Scene3D::drawModel(const QPoint & _point)
+{
+    Point3F pNear, pFar;
+    m_view.getNearFarByPoints( _point.x(), height() - _point.y(), &pNear, &pFar );
+    m_figure->selectAndPlus(pNear, pFar, m_leftButtonPressed, m_currentModel);
+    m_figure->refresh();
 }
 
 void Scene3D::mousePressEvent(QMouseEvent* _e)
@@ -347,10 +277,7 @@ void Scene3D::mousePressEvent(QMouseEvent* _e)
    this->setFocus();
    if (m_drawingOn)
    {
-       Point3F p1, p_1;
-       getCoord(_e->pos().x(), _e->pos().y(), &p1, &p_1);
-       m_figure->selectAndPlus(p1, p_1, m_leftButtonPressed, m_currentModel);
-       m_figure->refresh();
+       drawModel( _e->pos() );
    }
    updateGL();
 }
@@ -359,17 +286,13 @@ void Scene3D::mouseMoveEvent(QMouseEvent* _e)
 {
     if (!m_drawingOn)
     {
-        m_camera.rotate( 2.f * M_PI * (  _e->x() - m_mousePosition.x() ) / width(),
-                         2.f * M_PI * ( -_e->y() + m_mousePosition.y() ) / height() );
+        m_view.rotate( 2.f * M_PI * (  _e->x() - m_mousePosition.x() ) / width(),
+                       2.f * M_PI * ( -_e->y() + m_mousePosition.y() ) / height() );
         m_mousePosition = _e->pos();
     }
     else if (m_currentModel == NULL)
     {
-        Point3F p1, p_1;
-        getCoord(_e->pos().x(), _e->pos().y(), &p1, &p_1);
-
-        m_figure->selectAndPlus(p1, p_1, m_leftButtonPressed);
-        m_figure->refresh();
+        drawModel( _e->pos() );
     }
    
    updateGL();
@@ -378,9 +301,9 @@ void Scene3D::mouseMoveEvent(QMouseEvent* _e)
 void Scene3D::wheelEvent(QWheelEvent* _e)
 {
    if (_e->delta() > 0)
-       scalePlus();
+       m_view.scalePlus();
    else if (_e->delta() < 0)
-       scaleMinus();
+       m_view.scaleMinus();
    updateGL();
 }
 
@@ -390,74 +313,32 @@ void Scene3D::keyPressEvent(QKeyEvent* _e)
     {
     case Qt::Key_Plus:
     case Qt::Key_Equal:
-        scalePlus();
+        m_view.scalePlus();
         break;
-
     case Qt::Key_Minus:
-        scaleMinus();
+        m_view.scaleMinus();
         break;
-
     case Qt::Key_Up:
-        m_camera.rotateUp();
+        m_view.rotateUp();
         break;
-
     case Qt::Key_Down:
-        m_camera.rotateDown();
+        m_view.rotateDown();
         break;
-
     case Qt::Key_Left:
-        m_camera.rotateLeft();
+        m_view.rotateLeft();
         break;
-
     case Qt::Key_Right:
-        m_camera.rotateRight();
+        m_view.rotateRight();
         break;
-
     case Qt::Key_Space:
-        defaultScene();
+        m_view.setDefault();
+        break;
+    case Qt::Key_Escape:
+        restoreNormal();
         break;
     }
     QWidget::keyPressEvent(_e);
     updateGL();
-}
-
-void Scene3D::scalePlus()
-{
-    m_nSca *= 1.1;
-}
-
-void Scene3D::scaleMinus()
-{
-    m_nSca /= 1.1;
-}
-
-void Scene3D::defaultScene()
-{
-    m_nSca = 1;
-}
-
-void Scene3D::drawAxis()
-{
-  //auxSwapBuffers();
-  
-   glLineWidth(3.0f);
-
-   glColor4f(1.00f, 0.00f, 0.00f, 1.0f);
-   glBegin(GL_LINES);
-      glVertex3f( 2.0f,  0.0f,  0.0f);
-      glVertex3f(-2.0f,  0.0f,  0.0f);
-   glEnd();
-
-   QColor halfGreen(0, 128, 0, 255);
-   qglColor(halfGreen);
-   glBegin(GL_LINES);
-      glVertex3f( 0.0f,  2.0f,  0.0f);
-      glVertex3f( 0.0f, -2.0f,  0.0f);
-
-      glColor4f(0.00f, 0.00f, 1.00f, 1.0f);
-      glVertex3f( 0.0f,  0.0f,  2.0f);
-      glVertex3f( 0.0f,  0.0f, -2.0f);
-   glEnd();
 }
 
 

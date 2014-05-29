@@ -1,6 +1,6 @@
 #ifndef FIGURECLASSES_H
 #define	FIGURECLASSES_H
-enum FigureType {figSurface, figTorus, figEllipsoid, figParallelepiped};
+typedef enum {figSurface, figTorus, figEllipsoid, figParallelepiped} FigureType;
 
 #include "Figure.h"
 
