@@ -63,6 +63,7 @@ MainWindow::MainWindow()
    // m_labelVelocity->set
     m_labelVelocity->move(m_sliderVelocity->pos().x(),m_sliderVelocity->pos().y()-20);
     connect(m_sliderVelocity,SIGNAL(valueChanged(int)),this,SLOT(sliderVelValueChanged(int)));
+    sliderVelValueChanged( m_sliderVelocity->value() );
 
     m_widgets[m_widgetsCount++] = m_checkBoxAnimation = new QCheckBox(m_panelSettings);
     m_checkBoxAnimation->setChecked(true);
@@ -393,7 +394,9 @@ void MainWindow::buttonStartClicked()
 }
 void MainWindow::sliderVelValueChanged(int)
 {
-    m_s3d->setInterval( getVelocity( m_sliderVelocity ) );
+    int interval = (int)getVelocity( m_sliderVelocity );
+    m_sliderVelocity->setToolTip( LNG["delay"] + ": " + QString::number(interval) );
+    m_s3d->setInterval( interval );
 }
 
 void MainWindow::resizeEvent(QResizeEvent * /*e*/)

@@ -7,11 +7,7 @@ typedef enum {figSurface, figTorus, figEllipsoid, figParallelepiped} FigureType;
 
 class Torus : public BaseSurface
 {
-private:
-    int offset;
-    GLfloat angle;
 public:
-    
     virtual ~Torus() {}
     Torus();
     Torus(FILE * F);
@@ -20,18 +16,15 @@ public:
     void createField(int cnt_1, int cnt_2, int offset_1 = 0);
     virtual void toFile(FILE * F);
     virtual void fromFile(FILE * F);
+
+private:
+    int m_offset;
+    GLfloat m_angle;
 };
 
 class Ellipsoid : public Figure
 {
-private:
-    float scale;
-    float size_1, size_2, size_3;
-    bool ellipseFormOn;
 public:
-    int count_first, count_second, count_three;
-    IncludingSurface * surf[6];
-    float Size;
     virtual ~Ellipsoid() {}
     Ellipsoid();
     Ellipsoid(FILE * F);
@@ -44,6 +37,15 @@ public:
     virtual void addModel(Model *, int, int, bool) { }
     virtual void toFile(FILE * F);
     virtual void fromFile(FILE * F);
+
+private:
+    float m_size;
+    int m_firstSideCount, m_secondSideCount, m_thirdSideCount;
+    IncludingSurface * m_surfaces[6];
+
+    float m_scale;
+    float m_firstSize, m_secondSize, m_thirdSize;
+    bool m_ellipsoidForm;
 };
 
 class Surface : public BaseSurface
@@ -52,7 +54,7 @@ public:
     virtual ~Surface() {}
     Surface();
     Surface(int cnt_1, int cnt_2);
-    Surface(FILE * F);
+    Surface(FILE * _file);
     void createField(int cnt_1, int cnt_2);
     void setPhisicSize(float s, float);
 

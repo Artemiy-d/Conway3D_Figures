@@ -43,14 +43,13 @@ signals:
 
 private:
 
-    ModelRedactor * d_g;
-    GroupBoxCustom * grid_box;
-    QLineEdit * current_name;
-    QLabel * current_label, * label_size, * label_all_templates, * label_active_templates;
-    QSpinBox * spin_size;
-    QListWidget * listModels, * listActiveModels;
-    QPushButton * buttAddToActive, * buttSave, * buttToActive, * buttRotR,
-        * buttRotL, * butMirrX, * buttMirrY;
+    ModelRedactor * m_modelRedactor;
+    GroupBoxCustom * m_gridBox;
+    QLineEdit * m_editCurrentName;
+    QLabel * m_labelCurrent, * m_labelSize, * m_labelAllTemplates, * m_labelActiveTemplates;
+    QSpinBox * m_spinBoxTemplateSize;
+    QListWidget * m_listWidgetModels, * m_listWidgetActiveModels;
+    QPushButton * m_btnAddToActive, * m_btnSave, * m_btnToActive;
     QWidget * m_widgets[20];
     int m_widgetsCount;
 };

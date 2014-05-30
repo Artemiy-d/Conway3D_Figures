@@ -203,12 +203,14 @@ void Scene3D::restoreNormal()
     if ( m_savedParent )
     {
         setParent(m_savedParent);
+        setGeometry( m_savedGeometry );
     }
     showNormal();
 }
 
 void Scene3D::setFullScreen()
 {
+    m_savedGeometry = geometry();
     m_savedParent = (QWidget*)parent();
     setParent(NULL);
     showFullScreen();

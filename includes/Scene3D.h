@@ -94,6 +94,7 @@ private:
     QPoint m_mousePosition;
     unsigned long long m_stepsNumber;
     QWidget * m_savedParent;
+    QRect m_savedGeometry;
     Figure * m_figure;
 
     Scene3DView m_view;

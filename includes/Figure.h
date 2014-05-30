@@ -14,56 +14,23 @@ enum CellSides {Side01 = 1, Side12 = 2, Side23 = 4, Side30 = 8 };
 static const CellSides ArrayCellSides[] = {Side01, Side12, Side23, Side30};
 
 
-struct fcolor {GLfloat r,g,b;};
-struct bcolor {GLubyte r,g,b,a;};
+struct Color3F {GLfloat r,g,b;};
+struct Color4B {GLubyte r,g,b,a;};
 struct Cell
 {
-
-    GLuint indexes[4];
+    GLuint indices[4];
     Cell ** neighbors;
     bool livingStatusNow, livingStatusNext;
     int paintSides;
-    int cnt_active_neighbors_now, cnt_active_neighbors_next;
-    int step_flag;
-    int cnt_neighbors;
-    int fict_neighbors;
+    int currentCountActiveNeighbours, nextCountActiveNeighbours;
+    int steps;
+    int neighboursCount;
 };
 
 
 class Figure
 {
-private:
-
-    bool all_prob_live_bool,all_prob_dead_bool,all_prob_bool;
-    RandomLCGDefault::Probability probabilities_live[9], probabilities_dead[9];
-    int stepNmb;
-    int maxNeighbors;
-    int cnt_act_now, cnt_act_next;
-    GLuint * drawIndexes, * gridPoints;
-    int cnt_users;
-    Cell ** ActiveCellNow, ** ActiveCellNext;
-    GLfloat line_width;
-    GLuint listGrid;
-    Point3F * normalsToCells;
-    Point3F * points_for_draw;
-    bcolor * color_array, * grid_colors;
-
-    RandomLCGDefault m_random;
-
-protected:
-    int len_grid_points;
-    void createCells(int cnt, int cnt_pnt);
-    void createGrid();
-    void gridToList();
-    void calcAllProbBool();
-    
 public:
-
-    Cell * cells;
-    Point3F * points;
-    bool m_gridEnable;
-    int cnt_cells, cnt_points;
-    bcolor color_live, color_dead, color_grid;
     Figure();
     virtual ~Figure();
     virtual void setPhisicSize(float s1, float s2) = 0;
@@ -90,6 +57,41 @@ public:
     void defaultProbabilities();
     virtual void toFile(FILE * F);
     virtual void fromFile(FILE * F);
+
+protected:
+    void createCells(int cnt, int cnt_pnt);
+    void createGrid();
+    void gridToList();
+    void calcAllProbBool();
+
+public:
+    bool m_gridEnable;
+
+protected:
+    int len_grid_points;
+    int m_cellsCount, m_pointsCount;
+    Point3F * m_points;
+    Cell * m_cells;
+
+private:
+
+    bool m_probabilitiesDisabled;
+    RandomLCGDefault::Probability m_probabilitiesLive[9], m_probabilitiesDead[9];
+    int m_stepNumber;
+    int m_maxNeighborsCount;
+    int m_activeCountNow, m_activeCountNext;
+    GLuint * m_drawingIndices, * m_gridPoints;
+    int m_usersCount;
+    Cell ** m_activeCellsNow, ** m_activeCellsNext;
+    GLfloat m_lineWidth;
+    GLuint m_listGridId;
+    Point3F * m_normalsToCells;
+    Point3F * m_pointsToDraw;
+    Color4B * m_colorArray, * m_gridColors;
+
+    RandomLCGDefault m_random;
+
+    Color4B m_colorLive, m_colorDead, m_colorGrid;
 };
 
 
@@ -103,9 +105,6 @@ private:
                                   int offset = 0,
                                   bool invert = false);
 public:
-    Cell * cells;
-    int count_first, count_second;
-    Figure * parent;
     IncludingSurface(Figure * prnt);
     IncludingSurface(Figure * prnt, Cell * c, int c1, int c2);
     void plus(int x, int y);
@@ -133,16 +132,16 @@ public:
                                         CellSides side1,
                                         IncludingSurface * surf2,
                                         CellSides side2);
+private:
+    Figure * m_parent;
+    Cell * m_cells;
+    int m_firstSideCount, m_secondSideCount;
 };
 
 
 class BaseSurface : public Figure
 {
-protected:
-    GLfloat r,R;
 public:
-    int count_first, count_second;
-    IncludingSurface * thisSurface;
     BaseSurface();
     BaseSurface(int cnt_1, int cnt_2);
     void addModel(Model * m, int x, int y, bool refresh = true);
@@ -157,6 +156,12 @@ public:
 protected:
     void createField(int cnt_1, int cnt_2);
     void createIncludingSurface();
+
+public:
+    int m_firstSideCount, m_secondSideCount;
+    IncludingSurface * thisSurface;
+protected:
+    GLfloat r, R;
 };
 
 #endif	/* FIGURE_H */

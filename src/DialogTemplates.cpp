@@ -17,67 +17,67 @@
 
 DialogTemplates::DialogTemplates()
 {
-    grid_box = NULL;
+    m_gridBox = NULL;
     m_widgetsCount = 0;
-    m_widgets[m_widgetsCount++] = label_all_templates = new QLabel(this);
-    label_all_templates->move(15,12);
-    listModels = new QListWidget(this);
-    listModels->setGeometry(15,label_all_templates->y()+18,200,180);
-    listModels->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    m_widgets[m_widgetsCount++] = m_labelAllTemplates = new QLabel(this);
+    m_labelAllTemplates->move(15,12);
+    m_listWidgetModels = new QListWidget(this);
+    m_listWidgetModels->setGeometry(15,m_labelAllTemplates->y()+18,200,180);
+    m_listWidgetModels->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    buttToActive = new QPushButton(this);
-    buttToActive->setGeometry(listModels->x()+listModels->width()+10,
-                             listModels->y()+listModels->height()/2-13,26,26);
-    buttToActive->setText(">");
-    connect(buttToActive,SIGNAL(clicked()),this,SLOT(modelsToActive()));
+    m_btnToActive = new QPushButton(this);
+    m_btnToActive->setGeometry(m_listWidgetModels->x()+m_listWidgetModels->width()+10,
+                             m_listWidgetModels->y()+m_listWidgetModels->height()/2-13,26,26);
+    m_btnToActive->setText(">");
+    connect(m_btnToActive,SIGNAL(clicked()),this,SLOT(modelsToActive()));
 
-    listActiveModels = new QListWidget(this);
-    listActiveModels->setGeometry(buttToActive->x()+buttToActive->width()+10,listModels->y(),listModels->width(),listModels->height() );
-    listActiveModels->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    m_listWidgetActiveModels = new QListWidget(this);
+    m_listWidgetActiveModels->setGeometry(m_btnToActive->x()+m_btnToActive->width()+10,m_listWidgetModels->y(),m_listWidgetModels->width(),m_listWidgetModels->height() );
+    m_listWidgetActiveModels->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    m_widgets[m_widgetsCount++] = label_active_templates = new QLabel(this);
-    label_active_templates->move(listActiveModels->x(),label_all_templates->y());
+    m_widgets[m_widgetsCount++] = m_labelActiveTemplates = new QLabel(this);
+    m_labelActiveTemplates->move(m_listWidgetActiveModels->x(),m_labelAllTemplates->y());
 
-    grid_box = new GroupBoxCustom(this);
+    m_gridBox = new GroupBoxCustom(this);
 
-    m_widgets[m_widgetsCount++] = current_label = new QLabel(grid_box);
-    current_label->move(15,20);
+    m_widgets[m_widgetsCount++] = m_labelCurrent = new QLabel(m_gridBox);
+    m_labelCurrent->move(15,20);
 
-    current_name = new QLineEdit(grid_box);
-    current_name->setGeometry(14,current_label->y()+18,120,24);
-    current_name->setMaxLength(150);
-    current_name->setText(tr("My template"));
+    m_editCurrentName = new QLineEdit(m_gridBox);
+    m_editCurrentName->setGeometry(14,m_labelCurrent->y()+18,120,24);
+    m_editCurrentName->setMaxLength(150);
+    m_editCurrentName->setText(tr("My template"));
 
-    m_widgets[m_widgetsCount++] = label_size = new QLabel(grid_box);
-    label_size->move(15,current_name->y()+current_name->height()+10);
+    m_widgets[m_widgetsCount++] = m_labelSize = new QLabel(m_gridBox);
+    m_labelSize->move(15,m_editCurrentName->y()+m_editCurrentName->height()+10);
 
-    spin_size = new QSpinBox(grid_box);
-    spin_size->setGeometry(14,label_size->y()+18,120,25);
-    spin_size->setRange(2,100);
-    spin_size->setValue(5);
+    m_spinBoxTemplateSize = new QSpinBox(m_gridBox);
+    m_spinBoxTemplateSize->setGeometry(14,m_labelSize->y()+18,120,25);
+    m_spinBoxTemplateSize->setRange(2,100);
+    m_spinBoxTemplateSize->setValue(5);
 
-    m_widgets[m_widgetsCount++] = buttAddToActive = new QPushButton(grid_box);
-    buttAddToActive->move(14,spin_size->y()+spin_size->height()+15);
-    connect(buttAddToActive,SIGNAL(clicked()),this,SLOT(addToActive()) );
+    m_widgets[m_widgetsCount++] = m_btnAddToActive = new QPushButton(m_gridBox);
+    m_btnAddToActive->move(14,m_spinBoxTemplateSize->y()+m_spinBoxTemplateSize->height()+15);
+    connect(m_btnAddToActive,SIGNAL(clicked()),this,SLOT(addToActive()) );
 
-    m_widgets[m_widgetsCount++] = buttSave = new QPushButton(grid_box);
-    buttSave->move(14,buttAddToActive->y()+buttAddToActive->height()+1);
-    connect(buttSave,SIGNAL(clicked()),this,SLOT(saveTemplate()) );
+    m_widgets[m_widgetsCount++] = m_btnSave = new QPushButton(m_gridBox);
+    m_btnSave->move(14,m_btnAddToActive->y()+m_btnAddToActive->height()+1);
+    connect(m_btnSave,SIGNAL(clicked()),this,SLOT(saveTemplate()) );
 
-    d_g = new ModelRedactor(grid_box);
-    connect(spin_size,SIGNAL(valueChanged(int)),d_g,SLOT(setQuadSize(int) ));
+    m_modelRedactor = new ModelRedactor(m_gridBox);
+    connect(m_spinBoxTemplateSize,SIGNAL(valueChanged(int)),m_modelRedactor,SLOT(setQuadSize(int) ));
     setLang();
     connect(&LNG,SIGNAL(set_lang()),this,SLOT(setLang()) );
     this->resize(700,500);
     this->setMinimumSize(600,400);
 
-    connect(listModels,SIGNAL(itemDoubleClicked(QListWidgetItem*) ),this,SLOT(selectModel(QListWidgetItem*) ) );
-    connect(listActiveModels,SIGNAL(itemDoubleClicked(QListWidgetItem*) ),this,SLOT(selectModel(QListWidgetItem*) ) );
+    connect(m_listWidgetModels,SIGNAL(itemDoubleClicked(QListWidgetItem*) ),this,SLOT(selectModel(QListWidgetItem*) ) );
+    connect(m_listWidgetActiveModels,SIGNAL(itemDoubleClicked(QListWidgetItem*) ),this,SLOT(selectModel(QListWidgetItem*) ) );
 
-   // listActiveModels->setDragEnabled(true);
-  //  listModels->setDragEnabled(true);
-  //  listModels->setDragDropMode(QAbstractItemView::DragDrop);
-  //  listActiveModels->setDragDropMode(QAbstractItemView::DragDrop);
+   // m_listWidgetActiveModels->setDragEnabled(true);
+  //  m_listWidgetModels->setDragEnabled(true);
+  //  m_listWidgetModels->setDragDropMode(QAbstractItemView::DragDrop);
+  //  m_listWidgetActiveModels->setDragDropMode(QAbstractItemView::DragDrop);
     QDir dir(QDir::currentPath());
     dir.mkdir(tr("modeles"));
     QDir dir_mod(QDir::currentPath()+tr("/modeles"));
@@ -103,30 +103,30 @@ DialogTemplates::DialogTemplates()
             }
         }
     }
-    refreshList(modelCollection,listModels);
-    refreshList(currentModelCollection,listActiveModels);
+    refreshList(modelCollection,m_listWidgetModels);
+    refreshList(currentModelCollection,m_listWidgetActiveModels);
 
-    listModels->installEventFilter(this);
-    listActiveModels->installEventFilter(this);
+    m_listWidgetModels->installEventFilter(this);
+    m_listWidgetActiveModels->installEventFilter(this);
 }
 
 void DialogTemplates::selectModel(QListWidgetItem *item)
 {
-    Model * model = QObject::sender() == listModels ?
+    Model * model = QObject::sender() == m_listWidgetModels ?
         modelCollection[item->text()] : currentModelCollection[item->text()];
-    spin_size->setValue(model->getSize());
-    d_g->setModel( model );
-    current_name->setText(item->text());
+    m_spinBoxTemplateSize->setValue(model->getSize());
+    m_modelRedactor->setModel( model );
+    m_editCurrentName->setText(item->text());
 }
 
-bool DialogTemplates::eventFilter(QObject * obj, QEvent * E)
+bool DialogTemplates::eventFilter(QObject * obj, QEvent *E)
 {
     if (E->type() == QEvent::KeyPress && (reinterpret_cast<QKeyEvent*>(E) )->key() == Qt::Key_Delete)
     {
-        if (obj == listModels)
-            deleteModels(modelCollection,listModels);
-        else if (obj == listActiveModels)
-            deleteModels(currentModelCollection,listActiveModels);
+        if (obj == m_listWidgetModels)
+            deleteModels(modelCollection,m_listWidgetModels);
+        else if (obj == m_listWidgetActiveModels)
+            deleteModels(currentModelCollection,m_listWidgetActiveModels);
     }
     return QDialog::eventFilter(obj,E);
 }
@@ -156,24 +156,27 @@ static void normalizeStr(char * str)
         while ( *(++s1) == ' ' );
         while ( !!(*(str++) = *(s1++)) );
     }
-    else while (*(str++));
-    str--;
+    else
+    {
+        while (*(str++));
+    }
+    --str;
     while ( *(--str) == ' ' );
     *(++str)=0;
 }
 
 bool DialogTemplates::beginAddTemplate(StringMap<Model*> &coll)
 {
-    if (current_name->text().length()==0)
+    if (m_editCurrentName->text().length()==0)
     {
-        QMessageBox M;
-        M.setText(LNG["input_name"]);
-        M.setWindowTitle(LNG["empty_name"]);
-        M.exec();
+        QMessageBox messageBox;
+        messageBox.setText(LNG["input_name"]);
+        messageBox.setWindowTitle(LNG["empty_name"]);
+        messageBox.exec();
         return false;
     }
     char str[200];
-    strcpy(str,current_name->text().toLocal8Bit().data());
+    strcpy(str,m_editCurrentName->text().toLocal8Bit().data());
     normalizeStr(str);
     if (coll.find(str) != coll.end())
     {
@@ -186,7 +189,7 @@ bool DialogTemplates::beginAddTemplate(StringMap<Model*> &coll)
         if (M.exec() == QMessageBox::No)
             return false;
     }
-    coll[str] = new Model(*(Model*)d_g);
+    coll[str] = new Model(*(Model*)m_modelRedactor);
     this->setWindowTitle(QString::fromLocal8Bit(str) );
     return true;
 }
@@ -195,16 +198,16 @@ void DialogTemplates::saveTemplate()
 {
     if (!beginAddTemplate(modelCollection))
         return;
-    QString fn = QDir::currentPath()+tr("/modeles/")+current_name->text()+tr(".mdl");
-    modelCollection[current_name->text()]->saveToFile(fn.toLocal8Bit().data());
-    refreshList(modelCollection,listModels);
+    QString fn = QDir::currentPath()+tr("/modeles/")+m_editCurrentName->text()+tr(".mdl");
+    modelCollection[m_editCurrentName->text()]->saveToFile(fn.toLocal8Bit().data());
+    refreshList(modelCollection,m_listWidgetModels);
 }
 
 void DialogTemplates::addToActive()
 {
     if (!beginAddTemplate(currentModelCollection))
         return;
-    refreshList(currentModelCollection,listActiveModels);
+    refreshList(currentModelCollection,m_listWidgetActiveModels);
     emit newActive();
 }
 
@@ -218,36 +221,36 @@ DialogTemplates::~DialogTemplates()
 void DialogTemplates::setLang()
 {
     this->setWindowTitle(LNG["templates"]);
-    grid_box->setText(LNG["current_template"]);
-    current_label->setText(LNG["template_name"]);
-    label_size->setText(LNG["size_template"]);
-    label_all_templates->setText(LNG["all_templates"]);
-    label_active_templates->setText(LNG["active_templates"] );
-    buttAddToActive->setText(LNG["add_to_active"]);
-    buttSave->setText(LNG["save_template"]);
+    m_gridBox->setText(LNG["current_template"]);
+    m_labelCurrent->setText(LNG["template_name"]);
+    m_labelSize->setText(LNG["size_template"]);
+    m_labelAllTemplates->setText(LNG["all_templates"]);
+    m_labelActiveTemplates->setText(LNG["active_templates"] );
+    m_btnAddToActive->setText(LNG["add_to_active"]);
+    m_btnSave->setText(LNG["save_template"]);
     for (int i = 0; i < m_widgetsCount; i++)
         m_widgets[i]->adjustSize();
 }
 
 void DialogTemplates::resizeEvent(QResizeEvent * /*e*/)
 {
-    if (grid_box == NULL)
+    if (m_gridBox == NULL)
         return;
-    int offset = 150, h = listModels->y()+listModels->height()+15;
-    grid_box->setGeometry(0,h,this->width(),this->height()-h);
-    int w = std::min(grid_box->width()- offset - 20, grid_box->height()-30);
-    d_g->setGeometry(offset,20,w,w);
+    int offset = 150, h = m_listWidgetModels->y()+m_listWidgetModels->height()+15;
+    m_gridBox->setGeometry(0,h,this->width(),this->height()-h);
+    int w = std::min(m_gridBox->width()- offset - 20, m_gridBox->height()-30);
+    m_modelRedactor->setGeometry(offset,20,w,w);
 }
 
 void DialogTemplates::modelsToActive()
 {
-    QList<QListWidgetItem*> L = listModels->selectedItems();
-    if (L.count() == 0)
+    QList<QListWidgetItem*> items( m_listWidgetModels->selectedItems() );
+    if (items.empty())
         return;
-    foreach (QListWidgetItem * it, L)
+    foreach (QListWidgetItem * it, items)
     {
         currentModelCollection[it->text()] = modelCollection[it->text()];
     }
-    refreshList(currentModelCollection,listActiveModels);
+    refreshList(currentModelCollection,m_listWidgetActiveModels);
     emit newActive();
 }

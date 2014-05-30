@@ -3,42 +3,43 @@
 #include "Figure.h"
 
 
+
 Figure::Figure()
 {
     m_gridEnable = false;
-    line_width = 2.0f;
-    cells = NULL;
-    points = NULL;
-    gridPoints = NULL;
-    color_array = NULL;
-    points_for_draw = NULL;
-    normalsToCells = NULL;
-    drawIndexes = NULL;
-    cnt_cells = cnt_points = cnt_users = 0;
-    stepNmb = 1;
-    *((int*)&color_live) = 0;
-    *((int*)&color_dead) = ~0;
-    *((int*)&color_grid) = 51<<8;
+    m_lineWidth = 2.0f;
+    m_cells = NULL;
+    m_points = NULL;
+    m_gridPoints = NULL;
+    m_colorArray = NULL;
+    m_pointsToDraw = NULL;
+    m_normalsToCells = NULL;
+    m_drawingIndices = NULL;
+    m_cellsCount = m_pointsCount = m_usersCount = 0;
+    m_stepNumber = 1;
+    *((int*)&m_colorLive) = 0;
+    *((int*)&m_colorDead) = ~0;
+    *((int*)&m_colorGrid) = 51<<8;
 
-    listGrid = 1;
-    maxNeighbors = 8;
+    m_listGridId = 1;
+    m_maxNeighborsCount = 8;
     defaultProbabilities();
 }
 
 void Figure::toFile(FILE * F)
 {
-    fwrite(&maxNeighbors,4,1,F);
-    fwrite(probabilities_live,(maxNeighbors+1)*4,1,F);
-    fwrite(probabilities_dead,(maxNeighbors+1)*4,1,F);
-    fwrite(&cnt_cells,4,1,F);
-    int key = 1, s = cnt_cells/32+1;
+    fwrite(&m_maxNeighborsCount,4,1,F);
+    fwrite(m_probabilitiesLive,(m_maxNeighborsCount+1)*4,1,F);
+    fwrite(m_probabilitiesDead,(m_maxNeighborsCount+1)*4,1,F);
+    fwrite(&m_cellsCount,4,1,F);
+    int key = 1, s = m_cellsCount/32+1;
     int * A = new int[s];
     for (int i = 0; i<s; i++)
         A[i] = 0;
     int * a = A;
-    for (int i = 0; i<cnt_cells; i++)
+    for (int i = 0; i<m_cellsCount; i++)
     {
-        if (cells[i].livingStatusNow)
+        if (m_cells[i].livingStatusNow)
             (*a) |= key;
         if ( (key<<=1) == 0 )
         {
@@ -54,14 +55,14 @@ void Figure::fromFile(FILE * F)
 {
     int max_neigh, cnt;
     fread(&max_neigh,4,1,F);
-    fread(probabilities_live,(maxNeighbors+1)*4,1,F);
-    fread(probabilities_dead,(maxNeighbors+1)*4,1,F);
+    fread(m_probabilitiesLive,(m_maxNeighborsCount+1)*4,1,F);
+    fread(m_probabilitiesDead,(m_maxNeighborsCount+1)*4,1,F);
     fread(&cnt,4,1,F);
     clearMap();
-    if (cnt!=cnt_cells)
+    if (cnt!=m_cellsCount)
         return;
     int key = 0, a;
-    for (int i = 0; i<cnt_cells; i++)
+    for (int i = 0; i<m_cellsCount; i++)
     {
         if ( key == 0 )
         {
@@ -78,55 +79,55 @@ void Figure::fromFile(FILE * F)
 
 Figure::~Figure()
 {
-    delete cells->neighbors;
-    delete cells;
-    delete gridPoints;
-    delete ActiveCellNow;
-    delete ActiveCellNext;
-    delete points;
-    delete drawIndexes;
-    delete normalsToCells;
-    delete points_for_draw;
-    delete color_array;
-    delete grid_colors;
+    delete m_cells->neighbors;
+    delete m_cells;
+    delete m_gridPoints;
+    delete m_activeCellsNow;
+    delete m_activeCellsNext;
+    delete m_points;
+    delete m_drawingIndices;
+    delete m_normalsToCells;
+    delete m_pointsToDraw;
+    delete m_colorArray;
+    delete m_gridColors;
 }
 void Figure::defaultProbabilities()
 {
     for (int i = 0; i < 9; i++)
     {
-        probabilities_live[i] = 0.;
-        probabilities_dead[i] = 1.;
+        m_probabilitiesLive[i] = 0.;
+        m_probabilitiesDead[i] = 1.;
     }
-    all_prob_live_bool = all_prob_dead_bool = all_prob_bool = true;
-    probabilities_live[3] = 1.;
-    probabilities_dead[2] = 0.;
-    probabilities_dead[3] = 0.;
+    m_probabilitiesDisabled = true;
+    m_probabilitiesLive[3] = 1.;
+    m_probabilitiesDead[2] = 0.;
+    m_probabilitiesDead[3] = 0.;
 }
 
 void Figure::setProbabilities(double * p_live, double * p_dead)
 {
     for (int i = 0; i < 9; i++)
     {
-        probabilities_live[i] = p_live[i];
-        probabilities_dead[i] = p_dead[i];
+        m_probabilitiesLive[i] = p_live[i];
+        m_probabilitiesDead[i] = p_dead[i];
     }
     calcAllProbBool();
 }
 void Figure::calcAllProbBool()
 {
-    all_prob_bool = true;
-    for (int i = 0; i < 9 && all_prob_bool; i++)
+    m_probabilitiesDisabled = true;
+    for (int i = 0; i < 9 && m_probabilitiesDisabled; i++)
     {
-       // if ((probabilities_live[i]!=0 && probabilities_live[i] != RandomLCG::s_maxValue) ||
-       //     (probabilities_dead[i]!=0 && probabilities_dead[i] != RandomLCG::s_maxValue) )
-        if ( !probabilities_live[i].isLimit() || !probabilities_dead[i].isLimit() )
-            all_prob_bool = false;
+       // if ((m_probabilitiesLive[i]!=0 && m_probabilitiesLive[i] != RandomLCG::s_maxValue) ||
+       //     (m_probabilitiesDead[i]!=0 && m_probabilitiesDead[i] != RandomLCG::s_maxValue) )
+        if ( !m_probabilitiesLive[i].isLimit() || !m_probabilitiesDead[i].isLimit() )
+            m_probabilitiesDisabled = false;
     }
-    if (!all_prob_bool)
+    if (!m_probabilitiesDisabled)
     {
-        for (int i = 0; i<cnt_cells; i++)
-            (ActiveCellNow[i] = &cells[i])->step_flag = stepNmb;
-        cnt_act_now = cnt_cells;
+        for (int i = 0; i<m_cellsCount; i++)
+            (m_activeCellsNow[i] = &m_cells[i])->steps = m_stepNumber;
+        m_activeCountNow = m_cellsCount;
         refresh();
     }
 }
@@ -135,8 +136,8 @@ void Figure::getProbabilities(double * p_live, double * p_dead)
 {
     for (int i = 0; i<9; i++)
     {
-        p_live[i] = probabilities_live[i].get();
-        p_dead[i] = probabilities_dead[i].get();
+        p_live[i] = m_probabilitiesLive[i].get();
+        p_dead[i] = m_probabilitiesDead[i].get();
     }
 }
 
@@ -144,17 +145,17 @@ void Figure::selectAndPlus(const Point3F & p1, const Point3F & p_1, bool plus_on
 {
     float min_r = 1000000;
     int min_ind = -1;
-    for (int i = 0; i<cnt_cells; i++)
+    for (int i = 0; i<m_cellsCount; i++)
     {
-        float r1 = normalsToCells[i*4+3] & (p1 - points_for_draw[i*4]);
-        float r2 = normalsToCells[i*4+3] & (p_1 - points_for_draw[i*4]);
+        float r1 = m_normalsToCells[i*4+3] & (p1 - m_pointsToDraw[i*4]);
+        float r2 = m_normalsToCells[i*4+3] & (p_1 - m_pointsToDraw[i*4]);
         if (r1*r2<0)
         {
             Point3F ip = p1-(p_1-p1)*(r1/(r2-r1));
             for (int j = 0; j<4; j++)
             {
-                if ( (( (points_for_draw[i*4+(j+1)%4] - points_for_draw[i*4+j]) ^
-                        (ip - points_for_draw[i*4+j])) & normalsToCells[i*4+3]) < 0)
+                if ( (( (m_pointsToDraw[i*4+(j+1)%4] - m_pointsToDraw[i*4+j]) ^
+                        (ip - m_pointsToDraw[i*4+j])) & m_normalsToCells[i*4+3]) < 0)
                     goto m5;
             }
             float R = (ip-p1).abs();
@@ -178,40 +179,40 @@ void Figure::selectAndPlus(const Point3F & p1, const Point3F & p_1, bool plus_on
         }
         else
         {
-            addModel(M,&cells[min_ind]);
+            addModel(M,&m_cells[min_ind]);
         }
     }
 }
 
 int Figure::getLivingCellsCount()
 {
-    return cnt_users;
+    return m_usersCount;
 }
 
 void Figure::createGrid()
 {
-    delete gridPoints;
-    gridPoints = new GLuint[cnt_cells*8];
+    delete m_gridPoints;
+    m_gridPoints = new GLuint[m_cellsCount*8];
 
     len_grid_points = 0;
 
-    for (int i = 0; i<cnt_cells; i++)
+    for (int i = 0; i<m_cellsCount; i++)
     {
         int i4 = i*4;
-        GLuint * I = cells[i].indexes;
+        GLuint * I = m_cells[i].indices;
         for (int j = 0; j<4; j++)
         {
-            grid_colors[i4+j] = color_grid;
-            points_for_draw[i4+j] = points[I[j]];
-            drawIndexes[i4+j] = i4+j;
-            if (ArrayCellSides[j] & cells[i].paintSides)
+            m_gridColors[i4+j] = m_colorGrid;
+            m_pointsToDraw[i4+j] = m_points[I[j]];
+            m_drawingIndices[i4+j] = i4+j;
+            if (ArrayCellSides[j] & m_cells[i].paintSides)
             {
-                gridPoints[len_grid_points++] = i4+(j+1)%4;
-                gridPoints[len_grid_points++] = i4+j;
+                m_gridPoints[len_grid_points++] = i4+(j+1)%4;
+                m_gridPoints[len_grid_points++] = i4+j;
             }
             int j1 = (j+1)%4, j_1 = (j+3)%4;
-            normalsToCells[i4+j] = (points[I[j1]] - points[I[j]]) ^
-                    ( points[I[j_1]] - points[I[j]] );
+            m_normalsToCells[i4+j] = (m_points[I[j1]] - m_points[I[j]]) ^
+                    ( m_points[I[j_1]] - m_points[I[j]] );
         }
 
     }
@@ -221,7 +222,7 @@ void Figure::createGrid()
 
 void Figure::setLineWidth(GLfloat width)
 {
-    line_width = width;
+    m_lineWidth = width;
     gridToList();
 }
 
@@ -230,53 +231,53 @@ void Figure::createCells(int cnt, int cnt_pnt)
 {
     if (cnt<1 || cnt_pnt<4)
         return;
-    if (cells!=NULL)
+    if (m_cells!=NULL)
     {
-        delete cells->neighbors;
-        delete ActiveCellNow;
-        delete ActiveCellNext;
-        delete drawIndexes;
-        delete color_array;
-        delete points_for_draw;
-        delete normalsToCells;
-        delete grid_colors;
+        delete m_cells->neighbors;
+        delete m_activeCellsNow;
+        delete m_activeCellsNext;
+        delete m_drawingIndices;
+        delete m_colorArray;
+        delete m_pointsToDraw;
+        delete m_normalsToCells;
+        delete m_gridColors;
 
     }
-    cells = new Cell[cnt];
-    cells->neighbors = new Cell*[cnt*maxNeighbors];
+    m_cells = new Cell[cnt];
+    m_cells->neighbors = new Cell*[cnt*m_maxNeighborsCount];
     for (int i = 1; i<cnt; i++)
     {
-        cells[i].neighbors = cells->neighbors + i*maxNeighbors;
+        m_cells[i].neighbors = m_cells->neighbors + i*m_maxNeighborsCount;
     }
 
-    points = new Point3F[cnt_pnt];
-    normalsToCells = new Point3F[cnt*4];
+    m_points = new Point3F[cnt_pnt];
+    m_normalsToCells = new Point3F[cnt*4];
 
-    points_for_draw = new Point3F[cnt*4];
+    m_pointsToDraw = new Point3F[cnt*4];
 
-    color_array = new bcolor[cnt*4];
-    grid_colors = new bcolor[cnt*4];
+    m_colorArray = new Color4B[cnt*4];
+    m_gridColors = new Color4B[cnt*4];
 
-    ActiveCellNow = new Cell*[cnt];
-    ActiveCellNext = new Cell*[cnt];
+    m_activeCellsNow = new Cell*[cnt];
+    m_activeCellsNext = new Cell*[cnt];
 
-    drawIndexes = new GLuint[cnt*4];
+    m_drawingIndices = new GLuint[cnt*4];
   //  nrm = new
 
-    cnt_cells = cnt;
-    cnt_points = cnt_pnt;
+    m_cellsCount = cnt;
+    m_pointsCount = cnt_pnt;
 
- //   normalsToCells = norm;
+ //   m_normalsToCells = norm;
 
     initBegin();
 }
 
 void Figure::refresh()
 {
-    for (int i = 0; i<cnt_act_now; i++)
+    for (int i = 0; i<m_activeCountNow; i++)
     {
-        ActiveCellNow[i]->livingStatusNext = ActiveCellNow[i]->livingStatusNow;
-        ActiveCellNow[i]->cnt_active_neighbors_next = ActiveCellNow[i]->cnt_active_neighbors_now;
+        m_activeCellsNow[i]->livingStatusNext = m_activeCellsNow[i]->livingStatusNow;
+        m_activeCellsNow[i]->nextCountActiveNeighbours = m_activeCellsNow[i]->currentCountActiveNeighbours;
     }
 }
 
@@ -285,20 +286,20 @@ void Figure::plus(Cell * c)
     if (c->livingStatusNow)
         return;
     c->livingStatusNow = true;
-    cnt_users++;
-    for (int j = 0; j<c->cnt_neighbors; j++)
+    m_usersCount++;
+    for (int j = 0; j<c->neighboursCount; j++)
     {
-        c->neighbors[j]->cnt_active_neighbors_now++;
-        if (c->neighbors[j]->step_flag!= stepNmb)
-            (ActiveCellNow[cnt_act_now++] = c->neighbors[j])->step_flag = stepNmb;
+        c->neighbors[j]->currentCountActiveNeighbours++;
+        if (c->neighbors[j]->steps!= m_stepNumber)
+            (m_activeCellsNow[m_activeCountNow++] = c->neighbors[j])->steps = m_stepNumber;
     }
-    if (c->step_flag!= stepNmb)
-        (ActiveCellNow[cnt_act_now++] = c)->step_flag = stepNmb;
+    if (c->steps!= m_stepNumber)
+        (m_activeCellsNow[m_activeCountNow++] = c)->steps = m_stepNumber;
 }
 
 void Figure::plus(int ind)
 {
-    plus(&cells[(ind + cnt_cells * 4) % cnt_cells]);
+    plus(&m_cells[(ind + m_cellsCount * 4) % m_cellsCount]);
 }
 
 void Figure::minus(Cell * c)
@@ -306,111 +307,105 @@ void Figure::minus(Cell * c)
     if (!c->livingStatusNow)
         return;
     c->livingStatusNow = false;
-    cnt_users--;
-    for (int j = 0; j<c->cnt_neighbors; j++)
+    m_usersCount--;
+    for (int j = 0; j<c->neighboursCount; j++)
     {
-        c->neighbors[j]->cnt_active_neighbors_now--;
-        if (c->neighbors[j]->step_flag!= stepNmb)
-            (ActiveCellNow[cnt_act_now++] = c->neighbors[j])->step_flag = stepNmb;
+        c->neighbors[j]->currentCountActiveNeighbours--;
+        if (c->neighbors[j]->steps!= m_stepNumber)
+            (m_activeCellsNow[m_activeCountNow++] = c->neighbors[j])->steps = m_stepNumber;
     }
-    if (c->step_flag!= stepNmb)
-        (ActiveCellNow[cnt_act_next++] = c)->step_flag = stepNmb;
+    if (c->steps!= m_stepNumber)
+        (m_activeCellsNow[m_activeCountNext++] = c)->steps = m_stepNumber;
 }
 void Figure::minus(int ind)
 {
-    minus(&cells[(ind+cnt_cells*4)%cnt_cells]);
+    minus(&m_cells[(ind+m_cellsCount*4)%m_cellsCount]);
 }
 
 void Figure::step()
 {
-    stepNmb++;
-    cnt_act_next = 0;
+    m_stepNumber++;
+    m_activeCountNext = 0;
     Cell * c;
     int j;
     unsigned int u;
 
-    for (int i = 0; i<cnt_act_now; i++)
+    for (int i = 0; i<m_activeCountNow; i++)
     {
-        c = ActiveCellNow[i];
+        c = m_activeCellsNow[i];
         if (c->livingStatusNow)
         {
-           // u = probabilities_dead[c->cnt_active_neighbors_now];
-            if ( probabilities_dead[c->cnt_active_neighbors_now].simulate( m_random ) )//(u != 0 && (u == RandomLCG::s_maxValue || m_random.next() < u))
+           // u = m_probabilitiesDead[c->currentCountActiveNeighbours];
+            if ( m_probabilitiesDead[c->currentCountActiveNeighbours].simulate( m_random ) )//(u != 0 && (u == RandomLCG::s_maxValue || m_random.next() < u))
             {
                 c->livingStatusNext = false;
-                --cnt_users;
-                for (j = 0; j<c->cnt_neighbors; j++)
+                --m_usersCount;
+                for (j = 0; j<c->neighboursCount; j++)
                 {
-                    c->neighbors[j]->cnt_active_neighbors_next--;
-                  //  if (c->neighbors[j]->cnt_active_neighbors_next < 0)
-                  //      qDebug() << "c->neighbors[j]->cnt_active_neighbors_next";
-                   // assert(c->neighbors[j]->cnt_active_neighbors_next >= 0);
-                    if (c->neighbors[j]->step_flag!= stepNmb)
-                        (ActiveCellNext[cnt_act_next++] = c->neighbors[j])->step_flag = stepNmb;
+                    c->neighbors[j]->nextCountActiveNeighbours--;
+                    if (c->neighbors[j]->steps!= m_stepNumber)
+                        (m_activeCellsNext[m_activeCountNext++] = c->neighbors[j])->steps = m_stepNumber;
                 }
-                if (c->step_flag != stepNmb)
-                    (ActiveCellNext[cnt_act_next++] = c)->step_flag = stepNmb;
+                if (c->steps != m_stepNumber)
+                    (m_activeCellsNext[m_activeCountNext++] = c)->steps = m_stepNumber;
             }
         }
         else
         {
-          //  u = probabilities_live[c->cnt_active_neighbors_now];
-            if ( probabilities_live[c->cnt_active_neighbors_now].simulate( m_random ) )//(u != 0 && (u == RandomLCG::s_maxValue || m_random.next() < u))
+            if ( m_probabilitiesLive[c->currentCountActiveNeighbours].simulate( m_random ) )
             {
                 c->livingStatusNext = true;
-                ++cnt_users;
-                for (j = 0; j<c->cnt_neighbors; j++)
+                ++m_usersCount;
+                for (j = 0; j<c->neighboursCount; j++)
                 {
-                    c->neighbors[j]->cnt_active_neighbors_next++;
-                    if (c->neighbors[j]->step_flag!= stepNmb)
-                        (ActiveCellNext[cnt_act_next++] = c->neighbors[j])->step_flag = stepNmb;
+                    c->neighbors[j]->nextCountActiveNeighbours++;
+                    if (c->neighbors[j]->steps!= m_stepNumber)
+                        (m_activeCellsNext[m_activeCountNext++] = c->neighbors[j])->steps = m_stepNumber;
                 }
-                if (c->step_flag!= stepNmb)
-                    (ActiveCellNext[cnt_act_next++] = c)->step_flag = stepNmb;
+                if (c->steps!= m_stepNumber)
+                    (m_activeCellsNext[m_activeCountNext++] = c)->steps = m_stepNumber;
             }
         }
 
     }
 
-    if (!all_prob_bool)
-        for (int i = 0; i<cnt_act_now; i++)
+    if (!m_probabilitiesDisabled)
+        for (int i = 0; i < m_activeCountNow; i++)
         {
-            u = ActiveCellNow[i]->cnt_active_neighbors_now;
-            if (ActiveCellNow[i]->step_flag != stepNmb &&
-                    !( probabilities_dead[u].isLimit() && probabilities_live[u].isLimit() ) )
-                   // ( (probabilities_dead[u] != 0 && probabilities_dead[u] != RandomLCG::s_maxValue) ||
-                   //   (probabilities_live[u] != 0 && probabilities_live[u] != RandomLCG::s_maxValue) ) )
+            u = m_activeCellsNow[i]->currentCountActiveNeighbours;
+            if (m_activeCellsNow[i]->steps != m_stepNumber &&
+                    !( m_probabilitiesDead[u].isLimit() && m_probabilitiesLive[u].isLimit() ) )
             {
-                (ActiveCellNext[cnt_act_next++] = ActiveCellNow[i])->step_flag = stepNmb;
+                (m_activeCellsNext[m_activeCountNext++] = m_activeCellsNow[i])->steps = m_stepNumber;
             }
         }
 //    else
 //    {
-//        for (int i = 0; i<cnt_act_next; i++)
-//            if (ActiveCellNext[i]->livingStatusNow == ActiveCellNext[i]->livingStatusNext &&
-//                    ActiveCellNext[i]->cnt_active_neighbors_now == ActiveCellNext[i]->cnt_active_neighbors_next)
+//        for (int i = 0; i<m_activeCountNext; i++)
+//            if (m_activeCellsNext[i]->livingStatusNow == m_activeCellsNext[i]->livingStatusNext &&
+//                    m_activeCellsNext[i]->currentCountActiveNeighbours == m_activeCellsNext[i]->nextCountActiveNeighbours)
 //            {
-//                ActiveCellNext[i--] = ActiveCellNext[--cnt_act_next];
+//                m_activeCellsNext[i--] = m_activeCellsNext[--m_activeCountNext];
 //            }
 //    }
 
-    for (int i = 0; i<cnt_act_next; i++)
+    for (int i = 0; i < m_activeCountNext; i++)
     {
-        ActiveCellNext[i]->livingStatusNow = ActiveCellNext[i]->livingStatusNext;
-        ActiveCellNext[i]->cnt_active_neighbors_now = ActiveCellNext[i]->cnt_active_neighbors_next;
+        m_activeCellsNext[i]->livingStatusNow = m_activeCellsNext[i]->livingStatusNext;
+        m_activeCellsNext[i]->currentCountActiveNeighbours = m_activeCellsNext[i]->nextCountActiveNeighbours;
     }
 
 
-    Cell ** acn = ActiveCellNow;
-    ActiveCellNow = ActiveCellNext;
-    ActiveCellNext = acn;
-    cnt_act_now = cnt_act_next;
+    Cell ** acn = m_activeCellsNow;
+    m_activeCellsNow = m_activeCellsNext;
+    m_activeCellsNext = acn;
+    m_activeCountNow = m_activeCountNext;
 
 }
 
 void Figure::clearMap()
 {
-    for (int i = 0; i < cnt_cells; i++)
+    for (int i = 0; i < m_cellsCount; i++)
         minus(i);
     refresh();
 }
@@ -418,7 +413,7 @@ void Figure::clearMap()
 void Figure::createRandomMap(float _p)
 {
     RandomLCGDefault::Probability p(_p);
-    for (int i = 0; i < cnt_cells; i++)
+    for (int i = 0; i < m_cellsCount; i++)
     {
         if ( p.simulate( m_random ) )
             plus(i);
@@ -428,14 +423,14 @@ void Figure::createRandomMap(float _p)
 
 void Figure::initBegin()
 {
-    cnt_act_now = cnt_act_next = cnt_users = 0;
-    stepNmb = 1;
-    for (int i = 0; i<cnt_cells; i++)
+    m_activeCountNow = m_activeCountNext = m_usersCount = 0;
+    m_stepNumber = 1;
+    for (int i = 0; i<m_cellsCount; i++)
     {
-        cells[i].paintSides = ~0;
-        cells[i].livingStatusNext = cells[i].livingStatusNow = false;
-        cells[i].cnt_active_neighbors_next = cells[i].cnt_active_neighbors_now = cells[i].step_flag = 0;
-        cells[i].cnt_neighbors = 8;
+        m_cells[i].paintSides = ~0;
+        m_cells[i].livingStatusNext = m_cells[i].livingStatusNow = false;
+        m_cells[i].nextCountActiveNeighbours = m_cells[i].currentCountActiveNeighbours = m_cells[i].steps = 0;
+        m_cells[i].neighboursCount = 8;
     }
 
 }
@@ -447,15 +442,15 @@ void Figure::drawList()
 
 void Figure::gridToList()
 {
-    if (line_width!=0.0f)
+    if (m_lineWidth!=0.0f)
     {
-        glNewList(listGrid,GL_COMPILE);
+        glNewList(m_listGridId, GL_COMPILE);
         glEnableClientState(GL_VERTEX_ARRAY);
 
-        glLineWidth(line_width);
+        glLineWidth(m_lineWidth);
         glColor3f(0.0f,0.0f,1.0f);
-        glVertexPointer(3, GL_FLOAT, 0, points);
-        glDrawElements(GL_LINES,len_grid_points,GL_UNSIGNED_INT,gridPoints);
+        glVertexPointer(3, GL_FLOAT, 0, m_points);
+        glDrawElements(GL_LINES,len_grid_points,GL_UNSIGNED_INT,m_gridPoints);
         glEndList();
     }
 }
@@ -465,11 +460,11 @@ void Figure::drawCells()
 
    // glNewList(1,GL_COMPILE);
 
-    for (int i = 0; i<cnt_cells; i++)
+    for (int i = 0; i<m_cellsCount; i++)
     {
         int i4 = i*4;
-        color_array[i4+3] = cells[i].livingStatusNow?color_live:color_dead;
-        //color_array[i4+1] = color_array[i4+2] = color_array[i4+3] = color_array[i4];
+        m_colorArray[i4+3] = m_cells[i].livingStatusNow?m_colorLive:m_colorDead;
+        //m_colorArray[i4+1] = m_colorArray[i4+2] = m_colorArray[i4+3] = m_colorArray[i4];
     }
 
     glEnable(GL_LIGHTING);
@@ -479,38 +474,38 @@ void Figure::drawCells()
 
     glEnable(GL_NORMALIZE);
 
-    glVertexPointer(3, GL_FLOAT, 0, points_for_draw);
-    glNormalPointer(GL_FLOAT,0,normalsToCells);
-    glColorPointer(4, GL_UNSIGNED_BYTE, 0, color_array);
+    glVertexPointer(3, GL_FLOAT, 0, m_pointsToDraw);
+    glNormalPointer(GL_FLOAT,0,m_normalsToCells);
+    glColorPointer(4, GL_UNSIGNED_BYTE, 0, m_colorArray);
 
-    glDrawElements(GL_QUADS,cnt_cells*4,GL_UNSIGNED_INT,drawIndexes);
+    glDrawElements(GL_QUADS,m_cellsCount*4,GL_UNSIGNED_INT,m_drawingIndices);
 
    // glDisableClientState(GL_NORMAL_ARRAY);
-  //  if (line_width!=0.0f) glCallList(listGrid);
-    if (m_gridEnable && line_width != 0.0f)
+  //  if (m_lineWidth!=0.0f) glCallList(m_listGridId);
+    if (m_gridEnable && m_lineWidth != 0.0f)
     {
         glDisable(GL_LIGHTING);
        // glDisableClientState(GL_NORMAL_ARRAY);
-        glColorPointer(4, GL_UNSIGNED_BYTE, 0, grid_colors);
-        glLineWidth(line_width);
-        glDrawElements(GL_LINES,len_grid_points,GL_UNSIGNED_INT,gridPoints);
+        glColorPointer(4, GL_UNSIGNED_BYTE, 0, m_gridColors);
+        glLineWidth(m_lineWidth);
+        glDrawElements(GL_LINES,len_grid_points,GL_UNSIGNED_INT,m_gridPoints);
     }
 
         
 //    glBegin(GL_LINES);
 //    glColor3f(0.0f,0.0f,1.0f);
 //    glLineWidth(2.0);
-//    for (int i = 0; i<cnt_cells; i++)
+//    for (int i = 0; i<m_cellsCount; i++)
 //    {
 //
-//        glVertex3fv((GLfloat*)cells[i].points[0]);
-//        glVertex3fv((GLfloat*)cells[i].points[1]);
-//        glVertex3fv((GLfloat*)cells[i].points[1]);
-//        glVertex3fv((GLfloat*)cells[i].points[2]);
-//     //   glVertex3fv((GLfloat*)cells[i].points[2]);
-//     //   glVertex3fv((GLfloat*)cells[i].points[3]);
-//    //    glVertex3fv((GLfloat*)cells[i].points[3]);
-//    //    glVertex3fv((GLfloat*)cells[i].points[0]);
+//        glVertex3fv((GLfloat*)m_cells[i].m_points[0]);
+//        glVertex3fv((GLfloat*)m_cells[i].m_points[1]);
+//        glVertex3fv((GLfloat*)m_cells[i].m_points[1]);
+//        glVertex3fv((GLfloat*)m_cells[i].m_points[2]);
+//     //   glVertex3fv((GLfloat*)m_cells[i].m_points[2]);
+//     //   glVertex3fv((GLfloat*)m_cells[i].m_points[3]);
+//    //    glVertex3fv((GLfloat*)m_cells[i].m_points[3]);
+//    //    glVertex3fv((GLfloat*)m_cells[i].m_points[0]);
 //
 //    }
  //   glEnd();
@@ -524,46 +519,46 @@ void Figure::drawCells()
 
 void Figure::drawActiveCells()
 {
-   if (cells == NULL)
+   if (m_cells == NULL)
        return;
 
     //glNewList(1,GL_COMPILE);
 
-    glLineWidth(line_width);
+    glLineWidth(m_lineWidth);
 
     glEnableClientState(GL_VERTEX_ARRAY);
 
 
-    int a = 0, b = cnt_cells*4 - 1;
-    for (int i = 0; i<cnt_act_now; i++)
+    int a = 0, b = m_cellsCount*4 - 1;
+    for (int i = 0; i<m_activeCountNow; i++)
     {
-        Cell * c = ActiveCellNow[i];
-        if (cells[i].livingStatusNow)
+        Cell * c = m_activeCellsNow[i];
+        if (m_cells[i].livingStatusNow)
         {
-            drawIndexes[a++] = c->indexes[0];
-            drawIndexes[a++] = c->indexes[1];
-            drawIndexes[a++] = c->indexes[2];
-            drawIndexes[a++] = c->indexes[3];
+            m_drawingIndices[a++] = c->indices[0];
+            m_drawingIndices[a++] = c->indices[1];
+            m_drawingIndices[a++] = c->indices[2];
+            m_drawingIndices[a++] = c->indices[3];
         }
         else
         {
-            drawIndexes[b--] = c->indexes[3];
-            drawIndexes[b--] = c->indexes[2];
-            drawIndexes[b--] = c->indexes[1];
-            drawIndexes[b--] = c->indexes[0];
+            m_drawingIndices[b--] = c->indices[3];
+            m_drawingIndices[b--] = c->indices[2];
+            m_drawingIndices[b--] = c->indices[1];
+            m_drawingIndices[b--] = c->indices[0];
         }
 
     }
-    glColor3fv((GLfloat*)&color_live);
-    glVertexPointer(3, GL_FLOAT, 0, points);
-    glDrawElements(GL_QUADS, a, GL_UNSIGNED_INT, drawIndexes);
+    glColor3fv((GLfloat*)&m_colorLive);
+    glVertexPointer(3, GL_FLOAT, 0, m_points);
+    glDrawElements(GL_QUADS, a, GL_UNSIGNED_INT, m_drawingIndices);
 
 
-    glColor3fv((GLfloat*)&color_dead);
-    glDrawElements(GL_QUADS, cnt_cells*4 - 1 - b, GL_UNSIGNED_INT, drawIndexes+b+1);
+    glColor3fv((GLfloat*)&m_colorDead);
+    glDrawElements(GL_QUADS, m_cellsCount*4 - 1 - b, GL_UNSIGNED_INT, m_drawingIndices+b+1);
 
   //  glColor3f(0.0f,0.0f,1.0f);
-   // glDrawElements(GL_LINES,len_grid_points,GL_UNSIGNED_INT,gridPoints);
+   // glDrawElements(GL_LINES,len_grid_points,GL_UNSIGNED_INT,m_gridPoints);
 }
 
 
