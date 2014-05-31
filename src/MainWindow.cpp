@@ -31,12 +31,7 @@ QString file_save_name, path_to_save;
 
 MainWindow::MainWindow()
 {
-    //QEvent::wi
-//    int * x = new int[67000];
-//    unsigned int p0 = (unsigned int)(x);
-//    unsigned int p1 = (unsigned int)(x+65535);
-//    unsigned int p2 = (unsigned int)(x+65537);
-
+    m_checkedLanguageAction = NULL;
     m_widgetsCount = 0;
     m_panelWidth = 200;
     m_s3d = new Scene3D();
@@ -159,11 +154,18 @@ MainWindow::MainWindow()
         {
             menuLang = menuView->addMenu(LNG["languages"]);
             const QList<QString> & languages = LNG.getLanguagesList();
+            QString currentName = LNG["language_name"];
+            m_checkedLanguageAction = NULL;
             for ( QList<QString>::const_iterator it = languages.begin(); it != languages.end(); ++it )
             {
                 QAction * action = menuLang->addAction( *it );
+                action->setCheckable( true );
+                if ( m_checkedLanguageAction == NULL && currentName == *it )
+                    m_checkedLanguageAction = action;
                 connect( action, SIGNAL(triggered()), this, SLOT( actionLanguageClicked() ) );
             }
+            if ( m_checkedLanguageAction )
+                m_checkedLanguageAction->setChecked( true );
         }
     menuModeling = this->menuBar()->addMenu(LNG["modelling"]);
         actSettings = menuModeling->addAction(LNG["modelling_settings"]);
@@ -187,7 +189,7 @@ MainWindow::MainWindow()
     setLang();
    // delete menuOpenFinded;
  //   menuOpenFinded->setVisible(false);
-    path_to_save = QDir::homePath()+tr("/Save Conway");
+    path_to_save = QDir::homePath() + tr("/Save Conway");
     QDir dir(QDir::homePath());
     dir.mkdir(tr("Save Conway"));
     setComboModels();
@@ -308,6 +310,8 @@ void MainWindow::setLang()
     menuHelp->setTitle(LNG["help"]);
         actAbout->setText(LNG["about"]);
 
+    sliderVelValueChanged( m_sliderVelocity->value() );
+
     for (int i = 0; i < m_widgetsCount; i++)
         m_widgets[i]->adjustSize();
 }
@@ -338,8 +342,10 @@ void MainWindow::createNewFigure()
 
 void MainWindow::actionLanguageClicked()
 {
-    QAction * action = ( QAction* )QObject::sender();
-    LNG.setCurrentLanguage( action->text() );
+    if ( m_checkedLanguageAction )
+        m_checkedLanguageAction->setChecked( false );
+    m_checkedLanguageAction = ( QAction* )QObject::sender();
+    LNG.setCurrentLanguage( m_checkedLanguageAction->text() );
     setLang();
 }
 

@@ -5,6 +5,7 @@
 #include "LanguageManager.h"
 
 LanguageManager * LanguageManager::s_instance = NULL;
+const QString LanguageManager::s_baseLanguageId( tr("English") );
 
 LanguageManager::LanguageManager()
     : QObject(),
@@ -27,7 +28,11 @@ LanguageManager::LanguageManager()
         }
     }
 
-    setCurrentLanguage( tr( "Russian" ) );
+    LanguagesMap::iterator it = m_languages.find( s_baseLanguageId );
+    if ( it == m_languages.end() )
+        it = m_languages.begin();
+    if ( it != m_languages.end() )
+        m_base = m_current = &it.value();
 }
 
 LanguageManager & LanguageManager::getInstance()
@@ -86,16 +91,28 @@ void LanguageManager::addLanguageFile(const QString & _filename)
         LanguageMap lm;
         str = S.data();
 
-        while (*str!=0)
+        while (*str != 0)
         {
             while (*str == ' ' || *str == '\n' || *(str) == '\r' || *str == '\t')
                 ++str;
 
+            if (*str == '#')
+            {
+                do
+                    ++str;
+                while ( *str != 0 && *str != '\n');
+
+                continue;
+            }
+
             if (*(key = str) == 0)
                 break;
 
-            while ( *str != ' ' && *str != 0)
+            while ( *str != ' ' && *str != '\t' && *str != '\n' && *str != '\r' && *str != 0)
                 ++str;
+
+            if (*str == 0)
+                break;
 
             *(str++) = 0;
 
@@ -128,8 +145,10 @@ void LanguageManager::addLanguageFile(const QString & _filename)
                 ++str;
             *strValuePtr = 0;
 
+         //   qDebug() << "  " << QString(key) << "   " << QString(strValue);
             lm[QString(key)] = QString(strValue);
         }
+
 
         m_languages.insert( lm["language_id"], LanguageMap() ).value().swap(lm);      //  delete str;
     }

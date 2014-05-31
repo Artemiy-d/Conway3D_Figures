@@ -53,7 +53,7 @@ public:
     void initBegin();
     void drawCells();
     void drawActiveCells();
-    void selectAndPlus(const Point3F & p1, const Point3F & p_1, bool plus_on, Model * m = NULL);
+    void selectAndPlus(const Point3F & _p1, const Point3F & _p_1, bool _plus, Model * _m = NULL);
     void defaultProbabilities();
     virtual void toFile(FILE * F);
     virtual void fromFile(FILE * F);

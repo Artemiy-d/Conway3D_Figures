@@ -37,6 +37,8 @@ public:
     void drawFigure(Figure * _figure);
 
     void prepareDrawing();
+
+    float getScale() const;
 private:
 
     Point3F m_right;

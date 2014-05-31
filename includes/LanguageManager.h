@@ -39,6 +39,7 @@ private:
     LanguageMap * m_base;
 
     static LanguageManager * s_instance;
+    static const QString s_baseLanguageId;
 };
 
 #define LNG (LanguageManager::getInstance())

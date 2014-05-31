@@ -96,6 +96,7 @@ private:
     QAction * actAbout, * actStep, * actSettings, * actPanelSettings, * actFullScreen,
          * actRandomMap, * actClearMap, * actNewFigure, * actOpen, * actSaveAs, * actExit,
          * actStartStop, * actAgar, * actSave, * actTemplates;
+    QAction * m_checkedLanguageAction;
 
     QMenu * menuFile, * menuEdit, * menuView, * menuModeling, * menuHelp, * menuLang, * menuOpenFinded;
     QWidget * m_widgets[50];

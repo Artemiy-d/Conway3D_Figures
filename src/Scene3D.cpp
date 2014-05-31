@@ -288,8 +288,9 @@ void Scene3D::mouseMoveEvent(QMouseEvent* _e)
 {
     if (!m_drawingOn)
     {
-        m_view.rotate( 2.f * M_PI * (  _e->x() - m_mousePosition.x() ) / width(),
-                       2.f * M_PI * ( -_e->y() + m_mousePosition.y() ) / height() );
+        float scaleCoeff = 2.f * M_PI / m_view.getScale();
+        m_view.rotate( scaleCoeff * (  _e->x() - m_mousePosition.x() ) / width(),
+                       scaleCoeff * ( -_e->y() + m_mousePosition.y() ) / height() );
         m_mousePosition = _e->pos();
     }
     else if (m_currentModel == NULL)

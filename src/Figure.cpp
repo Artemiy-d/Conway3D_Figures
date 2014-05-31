@@ -141,45 +141,49 @@ void Figure::getProbabilities(double * p_live, double * p_dead)
     }
 }
 
-void Figure::selectAndPlus(const Point3F & p1, const Point3F & p_1, bool plus_on, Model * M)
+void Figure::selectAndPlus(const Point3F & _p1, const Point3F & _p_1, bool _plus, Model * _m)
 {
-    float min_r = 1000000;
-    int min_ind = -1;
+    float minR = 1000000;
+    int minInd = -1;
     for (int i = 0; i<m_cellsCount; i++)
     {
-        float r1 = m_normalsToCells[i*4+3] & (p1 - m_pointsToDraw[i*4]);
-        float r2 = m_normalsToCells[i*4+3] & (p_1 - m_pointsToDraw[i*4]);
+        float r1 = m_normalsToCells[i*4+3] & (_p1 - m_pointsToDraw[i*4]);
+        float r2 = m_normalsToCells[i*4+3] & (_p_1 - m_pointsToDraw[i*4]);
         if (r1*r2<0)
         {
-            Point3F ip = p1-(p_1-p1)*(r1/(r2-r1));
-            for (int j = 0; j<4; j++)
+            Point3F ip = _p1 - (_p_1 - _p1) * ( r1 / (r2 - r1));
+            bool cellFound = true;
+            for (int j = 0; j < 4 && cellFound; j++)
             {
                 if ( (( (m_pointsToDraw[i*4+(j+1)%4] - m_pointsToDraw[i*4+j]) ^
                         (ip - m_pointsToDraw[i*4+j])) & m_normalsToCells[i*4+3]) < 0)
-                    goto m5;
+                {
+                    cellFound = false;
+                }
             }
-            float R = (ip-p1).abs();
-            if (R<min_r)
+            if ( cellFound )
             {
-                min_r = R;
-                min_ind = i;
+                float r = (ip - _p1).abs();
+                if (r < minR)
+                {
+                    minR = r;
+                    minInd = i;
+                }
             }
         }
-       
-        m5: {}
     }
-    if (min_ind!=-1)
+    if (minInd != -1)
     {
-        if (M == NULL)
+        if (_m == NULL)
         {
-            if (plus_on)
-                plus(min_ind);
+            if (_plus)
+                plus(minInd);
             else
-                minus(min_ind);
+                minus(minInd);
         }
         else
         {
-            addModel(M,&m_cells[min_ind]);
+            addModel(_m, &m_cells[minInd]);
         }
     }
 }

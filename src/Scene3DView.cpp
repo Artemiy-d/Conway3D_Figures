@@ -178,3 +178,8 @@ void Scene3DView::prepareDrawing()
 
     glScalef(m_scale, m_scale, m_scale);
 }
+
+float Scene3DView::getScale() const
+{
+    return m_scale;
+}
