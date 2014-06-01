@@ -34,7 +34,6 @@ protected:
     void mousePressEvent(QMouseEvent * _e);
     void resizeEvent(QResizeEvent * _e);
 
-    void createArray(int w, int h);
     void createField(int _sz);
 
 public slots:

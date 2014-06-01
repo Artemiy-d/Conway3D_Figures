@@ -10,13 +10,14 @@ class QPushButton;
 class DialogAbout : public QDialog
 {
     Q_OBJECT
+public:
+    DialogAbout();
+    virtual ~DialogAbout();
+
 private:
     QLabel * m_labelInfo, * m_labelAuthor;
     QTextEdit * m_browserInfo;
     QPushButton * m_buttonOK;
-public:
-    DialogAbout();
-    virtual ~DialogAbout();
 
 private:
 

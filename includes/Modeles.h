@@ -6,10 +6,12 @@
 class Model
 {
 public:
+    typedef int Index;
+public:
 
     static bool isFileValid(const char * _fn);
 
-    Model(int _sz);
+    Model(Index _sz);
     Model(const Model& _orig);
     Model(const char * _fn);
 
@@ -19,10 +21,10 @@ public:
     bool openFromFile(const char * _fn);
 
 
-    void setCellFilled(int _i, int _j, bool _value = true);
-    virtual void createField(int _sz);
-    bool isCellFilled(int _i, int _j) const;
-    void rotate(int _nmb = 1);
+    void setCellFilled(Index _i, Index _j, bool _value = true);
+    virtual void createField(Index _sz);
+    bool isCellFilled(Index _i, Index _j) const;
+    void rotate(Index _nmb = 1);
     void mirrorX();
     void mirrorY();
 
@@ -31,8 +33,8 @@ public:
     int getSize() const;
 protected:
     bool * m_cells;
-    int m_square;
-    int m_size;
+    Index m_square;
+    Index m_size;
 };
 
 
@@ -45,26 +47,26 @@ public:
 class ModelZSymbol : public Model
 {
 public:
-  ModelZSymbol(int _s = 5);
+  ModelZSymbol(Index _s = 5);
 };
 
 class ModelXSymbol : public Model
 {
 public:
-  ModelXSymbol(int _s = 5);
+  ModelXSymbol(Index _s = 5);
 };
 
 class ModelRect : public Model
 {
 public:
-  ModelRect(int _a = 5);
-  ModelRect(int _a, int _b);
+  ModelRect(Index _a = 5);
+  ModelRect(Index _a, Index _b);
 };
 
 class ModelShip : public Model
 {
 public:
-  ModelShip(int _a = 5);
+  ModelShip(Index _a = 5);
 };
 
 class ModelPentadecatron : public Model

@@ -39,6 +39,13 @@ public:
     {
         return Point<Type>(x - v.x, y - v.y, z - v.z);
     }
+    Point<Type> & operator *= (Type v)
+    {
+        x *= v;
+        y *= v;
+        z *= v;
+        return *this;
+    }
     Type operator & (const Point<Type> & v) const
     {
         return x * v.x + y * v.y + z * v.z;

@@ -29,6 +29,9 @@ public slots:
 
 private:
     QLabel m_label;
+
+    static const int s_decimalsCount;
+    static const double s_singleStep;
 };
 
 class ProbabilitiesGroup : public GroupBoxCustom

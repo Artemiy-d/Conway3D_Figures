@@ -16,7 +16,6 @@ SOURCES += \
     src/FigureClasses.cpp \
     src/DialogAbout.cpp \
     src/Modeles.cpp \
-    src/BaseSurface.cpp \
     src/Scene3D.cpp \
     src/IncludingSurface.cpp \
     src/DialogTemplates.cpp \
@@ -44,7 +43,8 @@ HEADERS += \
     includes/GroupBoxCustom.h \
     includes/ModelRedactor.h \
     includes/Point.h \
-    includes/Scene3DView.h
+    includes/Scene3DView.h \
+    includes/IncludingSurface.h
 
 FORMS +=
 RESOURCES +=

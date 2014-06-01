@@ -5,12 +5,16 @@
 #include "Scene3D.h"
 
 
+const int ProbabilitySpinBox::s_decimalsCount = 6;
+const double ProbabilitySpinBox::s_singleStep = 0.01;
+
 ProbabilitySpinBox::ProbabilitySpinBox(QWidget * _parent)
     : QDoubleSpinBox(_parent),
       m_label(_parent)
 {
-    setRange(0,1);
-    setSingleStep(0.001);
+    setRange(0, 1);
+    setSingleStep( s_singleStep );
+    setDecimals( s_decimalsCount );
     newVal(0);
     connect(this, SIGNAL(valueChanged(double)), this, SLOT(newVal(double)));
 }
@@ -53,6 +57,8 @@ void ProbabilitiesGroup::refresh()
 }
 
 
+
+
 ProbabilitiesGroup::ProbabilitiesGroup()
     : GroupBoxCustom(),
       m_xMrgn(15),
@@ -61,9 +67,6 @@ ProbabilitiesGroup::ProbabilitiesGroup()
     for (int i = 0; i < cnt; i++)
     {
         m_boxes[i].setParent(this);
-        m_boxes[i].setRange(0,1);
-        m_boxes[i].setSingleStep(0.01);
-        m_boxes[i].setDecimals(3);
         m_boxes[i].setText("N: " + QString::number(i));
     }
     this->refresh();
@@ -123,9 +126,9 @@ DialogSettings::DialogSettings(Scene3D * _s3d)
 void DialogSettings::setLang()
 {
     this->setWindowTitle(LNG["modelling_settings"]);
-    m_groupDead->setText(LNG["probabilities_d"]);
-    m_groupLive->setText(LNG["probabilities_r"]);
-    m_buttonDefault->setText(LNG["set_def"]);
+    m_groupDead->setText(LNG["probabilities_death"]);
+    m_groupLive->setText(LNG["probabilities_revival"]);
+    m_buttonDefault->setText(LNG["set_default"]);
     m_buttonCancel->setText(LNG["cancel"]);
     m_buttonOK->setText(LNG["ok"]);
     m_buttonApply->setText(LNG["apply"]);

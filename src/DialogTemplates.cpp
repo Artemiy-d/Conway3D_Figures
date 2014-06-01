@@ -26,13 +26,18 @@ DialogTemplates::DialogTemplates()
     m_listWidgetModels->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     m_btnToActive = new QPushButton(this);
-    m_btnToActive->setGeometry(m_listWidgetModels->x()+m_listWidgetModels->width()+10,
-                             m_listWidgetModels->y()+m_listWidgetModels->height()/2-13,26,26);
+    m_btnToActive->setGeometry(m_listWidgetModels->x() + m_listWidgetModels->width() + 10,
+                               m_listWidgetModels->y() + m_listWidgetModels->height() / 2 - 13,
+                               26,
+                               26);
     m_btnToActive->setText(">");
     connect(m_btnToActive,SIGNAL(clicked()),this,SLOT(modelsToActive()));
 
     m_listWidgetActiveModels = new QListWidget(this);
-    m_listWidgetActiveModels->setGeometry(m_btnToActive->x()+m_btnToActive->width()+10,m_listWidgetModels->y(),m_listWidgetModels->width(),m_listWidgetModels->height() );
+    m_listWidgetActiveModels->setGeometry(m_btnToActive->x() + m_btnToActive->width()+10,
+                                          m_listWidgetModels->y(),
+                                          m_listWidgetModels->width(),
+                                          m_listWidgetModels->height() );
     m_listWidgetActiveModels->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     m_widgets[m_widgetsCount++] = m_labelActiveTemplates = new QLabel(this);

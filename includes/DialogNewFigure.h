@@ -28,13 +28,13 @@ private:
     QWidget * m_widgets[15];
     int m_widgetsCount;
 
-
-public:
     Scene3D * m_s3d;
 
     bool m_result;
+public:
 
-    DialogNewFigure();
+
+    DialogNewFigure(Scene3D * _s3d);
    // DialogNewFigure(const DialogNewFigure& orig);
     virtual ~DialogNewFigure();
 
@@ -42,8 +42,10 @@ public:
 
 public slots:
     void pressOK();
-    void selectingFigure(int index);
+    void selectingFigure(int _index);
     void setLang();
+
+    virtual int exec();
 };
 
 #endif	/* DIALOGNEWFIGURE_H */

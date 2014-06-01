@@ -11,7 +11,7 @@ public:
     virtual ~DialogSaveFigure() {}
     QString execToSave();
 private slots:
-    void filterChanged(const QString& filter);
+    void filterChanged(const QString & _filter);
 
 private:
     QStringList m_filters;

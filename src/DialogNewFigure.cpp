@@ -9,8 +9,9 @@
 #include "DialogNewFigure.h"
 #include "LanguageManager.h"
 
-DialogNewFigure::DialogNewFigure()
+DialogNewFigure::DialogNewFigure(Scene3D * _s3d)
 {
+    m_s3d = _s3d;
     m_result = false;
     m_widgetsCount = 0;
     m_widgets[m_widgetsCount++] = m_labelCombo = new QLabel(this);
@@ -24,7 +25,7 @@ DialogNewFigure::DialogNewFigure()
 
     m_grpBoxSizes = new GroupBoxCustom();
    
-    for (int i = 0; i<3; i++)
+    for (int i = 0; i < 3; i++)
     {
         m_widgets[m_widgetsCount++] = m_labelSize[i] = new QLabel(m_grpBoxSizes);
         m_labelSize[i]->move(15,25+i*50);
@@ -86,9 +87,9 @@ void DialogNewFigure::setLang()
 
 }
 
-void DialogNewFigure::selectingFigure(int index)
+void DialogNewFigure::selectingFigure(int _index)
 {
-    switch (index)
+    switch (_index)
     {
         case 0:
             m_labelSize[2]->setEnabled(false);
@@ -140,5 +141,11 @@ void DialogNewFigure::pressOK()
 DialogNewFigure::~DialogNewFigure()
 {
 
+}
+
+int DialogNewFigure::exec()
+{
+    QDialog::exec();
+    return (int)m_result;
 }
 

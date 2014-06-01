@@ -37,8 +37,7 @@ MainWindow::MainWindow()
     m_s3d = new Scene3D();
     m_s3d->setParent(this);
    // m_s3d->
-    m_dialogNewFigure = new DialogNewFigure();
-    m_dialogNewFigure->m_s3d = m_s3d;
+    m_dialogNewFigure = new DialogNewFigure( m_s3d );
 
     m_dialogTemplates = new DialogTemplates();
     connect(m_dialogTemplates, SIGNAL(newActive()),this,SLOT(setComboModels()));
@@ -325,16 +324,16 @@ void MainWindow::setComboModels()
     m_comboBoxModels->adjustSize();
 }
 
-void MainWindow::setDrawingEnable(int on)
+void MainWindow::setDrawingEnable(int _on)
 {
-    m_comboBoxModels->setEnabled(on!=0);
-    m_lavelDrawType->setEnabled(on!=0);
+    m_comboBoxModels->setEnabled( _on != 0);
+    m_lavelDrawType->setEnabled( _on != 0);
 }
 
 void MainWindow::createNewFigure()
 {
-    m_dialogNewFigure->exec();
-    if (m_dialogNewFigure->m_result)
+    int result = m_dialogNewFigure->exec();
+    if (result)
     {
         file_save_name = "";
     }
@@ -349,11 +348,11 @@ void MainWindow::actionLanguageClicked()
     setLang();
 }
 
-void MainWindow::changeDrawModel(const QString& name)
+void MainWindow::changeDrawModel(const QString& _name)
 {
-    m_s3d->setCurrentModel( name == strPen
+    m_s3d->setCurrentModel( _name == strPen
         ? NULL
-        : currentModelCollection[name] );
+        : currentModelCollection[_name] );
 }
 
 void MainWindow::resize()
@@ -363,16 +362,16 @@ void MainWindow::resize()
     m_panelSettings->setGeometry(this->width()-m_panelWidth,menuHeight,m_panelWidth,this->height()-menuHeight);
 }
 
-void MainWindow::setSettingsVisible(bool value)
+void MainWindow::setSettingsVisible(bool _value)
 {
-    m_panelSettings->setVisible(value);
-    m_panelWidth = value ? 200 : 0;
+    m_panelSettings->setVisible(_value);
+    m_panelWidth = _value ? 200 : 0;
     resize();
 }
 
-double getVelocity(QSlider * slider)
+double getVelocity(QSlider * _slider)
 {
-    return pow(1. * (slider->maximum() - slider->value()) / slider->maximum(), 1) * 1000;
+    return pow(1. * (_slider->maximum() - _slider->value()) / _slider->maximum(), 1) * 1000;
 }
 
 void MainWindow::startStopNames()
@@ -405,7 +404,7 @@ void MainWindow::sliderVelValueChanged(int)
     m_s3d->setInterval( interval );
 }
 
-void MainWindow::resizeEvent(QResizeEvent * /*e*/)
+void MainWindow::resizeEvent(QResizeEvent * /*_e*/)
 {
     resize();
 }
