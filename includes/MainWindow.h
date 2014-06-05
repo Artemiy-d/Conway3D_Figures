@@ -26,7 +26,7 @@ signals:
 };
 
 
-
+class ModelsManager;
 class DialogSettings;
 class DialogNewFigure;
 class DialogAbout;
@@ -104,6 +104,8 @@ private:
     int m_panelWidth;
     QList<QMenu*> menuList;
     QList<OpenAction*> actList;
+
+    ModelsManager * m_modelsManager;
 };
 
 

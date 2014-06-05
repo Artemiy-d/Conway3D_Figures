@@ -5,26 +5,24 @@
 #include "LanguageManager.h"
 
 LanguageManager * LanguageManager::s_instance = NULL;
-const QString LanguageManager::s_baseLanguageId( tr("English") );
+const QString LanguageManager::s_baseLanguageId( "English" );
+const QString LanguageManager::s_dirName( "languages" );
 
 LanguageManager::LanguageManager()
     : QObject(),
       m_current(NULL),
       m_base(NULL)
 {
-    qDebug() << QDir::currentPath();
-    QDir dir(QDir::currentPath() + tr("/languages") );
-    QStringList sl = dir.entryList(QDir::Files);
- //   QString basefile = tr("BaseLang.txt");
-    if (sl.count())
+    //qDebug() << QDir::currentPath();
+    QDir dir(QDir::currentPath() + "/" + s_dirName );
+    QStringList fileList = dir.entryList(QDir::Files);
+
+    if (fileList.count())
     {
-        foreach (QString s, sl)
+        foreach (const QString & s, fileList)
         {
-          //  if (s == basefile)
-            {
-                QString sum = dir.absoluteFilePath(s);
-                addLanguageFile(sum);
-            }
+            QString path = dir.absoluteFilePath(s);
+            addLanguageFile(path);
         }
     }
 

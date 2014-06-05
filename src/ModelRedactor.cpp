@@ -2,7 +2,7 @@
 #include <QPainter>
 
 #include "ModelRedactor.h"
-#include "Modeles.h"
+#include "Models.h"
 
 ModelRedactor::View::View(const QSize & _visibleSize, const Model * _model) :
     m_visibleSize(_visibleSize),
@@ -105,6 +105,11 @@ void ModelRedactor::setModel(const Model * _model)
     m_model = _model->clone();
     m_view->update( size(), m_model );
     repaint();
+}
+
+const Model * ModelRedactor::getModel() const
+{
+    return m_model;
 }
 
 ModelRedactor::ModelRedactor(QWidget * _parent)

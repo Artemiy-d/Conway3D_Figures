@@ -4,12 +4,12 @@
 
 #include "DialogAbout.h"
 
-const QString DialogAbout::s_authorLabelText = tr("Author:");
-const QString DialogAbout::s_programmNameText = tr("Conway's game\nModeling of life");
-const QString DialogAbout::s_titleText = tr("About");
-const QString DialogAbout::s_authorName = tr("Artyom Dyomin");
-const QString DialogAbout::s_authorEmail = tr("mailto:art.dyomin@gmail.com");
-const QString DialogAbout::s_mainText = s_authorName + tr("\n<a href=\"") + s_authorEmail + tr("\">") + s_authorEmail + "</a>";
+const QString DialogAbout::s_authorLabelText = QString("Author:");
+const QString DialogAbout::s_programmNameText = QString("Conway's game\nModeling of life");
+const QString DialogAbout::s_titleText = QString("About");
+const QString DialogAbout::s_authorName = QString("Artyom Dyomin");
+const QString DialogAbout::s_authorEmail = QString("mailto:art.dyomin@gmail.com");
+const QString DialogAbout::s_mainText = s_authorName + QString("\n<a href=\"") + s_authorEmail + QString("\">") + s_authorEmail + "</a>";
 
 DialogAbout::DialogAbout()
 {
@@ -35,7 +35,7 @@ DialogAbout::DialogAbout()
     m_browserInfo->setHtml( s_mainText );
     m_browserInfo->setReadOnly(true);
     m_buttonOK = new QPushButton(this);
-    m_buttonOK->setText(tr("OK"));
+    m_buttonOK->setText(QString("OK"));
     int w = m_browserInfo->pos().x() * 2 + m_browserInfo->width();
     m_buttonOK->move((w - m_buttonOK->width()) / 2, m_browserInfo->pos().y() + m_browserInfo->height() + 20);
     this->setFixedSize(w, m_buttonOK->pos().y() + m_buttonOK->height() + 20);

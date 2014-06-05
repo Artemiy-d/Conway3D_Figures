@@ -8,8 +8,8 @@
 Scene3D::StatisticWidget::StatisticWidget(QWidget * _parent)
     : QWidget(_parent)
 {
-    m_text[STEPS] = tr("Step 0");
-    m_text[LIVING_CELLS] = tr("Users: ");
+    m_text[STEPS] = QString("Step 0");
+    m_text[LIVING_CELLS] = QString("Users: ");
     m_font.setWeight(10);
 }
 void Scene3D::Scene3D::StatisticWidget::resizeEvent(QResizeEvent * /*_e*/)

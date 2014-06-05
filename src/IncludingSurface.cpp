@@ -1,6 +1,6 @@
 #include "IncludingSurface.h"
 #include "Figure.h"
-#include "Modeles.h"
+#include "Models.h"
 
 
 IncludingSurface::IncludingSurface(Figure * _parent) :

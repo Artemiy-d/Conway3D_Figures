@@ -19,7 +19,8 @@
 #include "DialogTemplates.h"
 #include "DialogSaveFigure.h"
 #include "FigureClasses.h"
-#include "Modeles.h"
+#include "Models.h"
+#include "ModelsManager.h"
 
 
 #include "LanguageManager.h"
@@ -31,6 +32,7 @@ QString file_save_name, path_to_save;
 
 MainWindow::MainWindow()
 {
+    m_modelsManager = new ModelsManager;
     m_checkedLanguageAction = NULL;
     m_widgetsCount = 0;
     m_panelWidth = 200;
@@ -39,7 +41,7 @@ MainWindow::MainWindow()
    // m_s3d->
     m_dialogNewFigure = new DialogNewFigure( m_s3d );
 
-    m_dialogTemplates = new DialogTemplates();
+    m_dialogTemplates = new DialogTemplates(m_modelsManager);
     connect(m_dialogTemplates, SIGNAL(newActive()),this,SLOT(setComboModels()));
 
     m_dialogAbout = new DialogAbout();
@@ -188,13 +190,14 @@ MainWindow::MainWindow()
     setLang();
    // delete menuOpenFinded;
  //   menuOpenFinded->setVisible(false);
-    path_to_save = QDir::homePath() + tr("/Save Conway");
+    path_to_save = QDir::homePath() + QString("/Save Conway");
     QDir dir(QDir::homePath());
-    dir.mkdir(tr("Save Conway"));
+    dir.mkdir(QString("Save Conway"));
     setComboModels();
     //    QMessageBox M1;
      //   M1.exec();
     setDrawingEnable(0);
+
 }
 
 void MainWindow::createOpenTree()
@@ -204,7 +207,7 @@ void MainWindow::createOpenTree()
     actList.clear();
     menuList.clear();
 
-    QString P = QDir::homePath()+tr("/Save Conway");
+    QString P = QDir::homePath()+QString("/Save Conway");
     delete menuOpenFinded;
     menuOpenFinded = new QMenu(LNG["open_founded"],this);
     menuFile->insertMenu(actSave,menuOpenFinded);
@@ -219,7 +222,7 @@ bool MainWindow::createOpenMenuTreeRec(QMenu * _menu, const QString & _path, int
     bool ret = false;
 
     QDir d(_path);
-    QStringList filt(tr("*.cf"));
+    QStringList filt(QString("*.cf"));
     QStringList fileList = d.entryList(filt,QDir::Files);
 
     if (fileList.count()!=0)
@@ -284,11 +287,11 @@ void MainWindow::setLang()
 
     menuFile->setTitle(LNG["file"]);
 
-        actNewFigure->setText(createMenuText(LNG["new_figure"],tr("  ctrl+N")));
-        actOpen->setText(createMenuText(LNG["open"],tr("  ctrl+O")));
+        actNewFigure->setText(createMenuText(LNG["new_figure"],QString("  ctrl+N")));
+        actOpen->setText(createMenuText(LNG["open"],QString("  ctrl+O")));
         if (menuOpenFinded != NULL)
             menuOpenFinded->setTitle(LNG["open_founded"]);
-        actSave->setText(createMenuText(LNG["save"],tr("  ctrl+S")));
+        actSave->setText(createMenuText(LNG["save"],QString("  ctrl+S")));
         actSaveAs->setText(LNG["save_as"]);
         actExit->setText(LNG["exit"]);
     menuEdit->setTitle(LNG["edit"]);
@@ -318,9 +321,8 @@ void MainWindow::setLang()
 void MainWindow::setComboModels()
 {
     m_comboBoxModels->clear();
-    m_comboBoxModels->addItem(strPen);
-    for ( StringMap<Model*>::iterator it = currentModelCollection.begin(); it != currentModelCollection.end(); ++it )
-        m_comboBoxModels->addItem( it.key() );
+    m_comboBoxModels->addItem( ModelsManager::s_modelPenName );
+    m_comboBoxModels->addItems( m_modelsManager->getActiveModels() );
     m_comboBoxModels->adjustSize();
 }
 
@@ -350,9 +352,9 @@ void MainWindow::actionLanguageClicked()
 
 void MainWindow::changeDrawModel(const QString& _name)
 {
-    m_s3d->setCurrentModel( _name == strPen
+    m_s3d->setCurrentModel( _name == ModelsManager::s_modelPenName
         ? NULL
-        : currentModelCollection[_name] );
+        : m_modelsManager->getModel( _name ) );
 }
 
 void MainWindow::resize()
@@ -446,9 +448,9 @@ void MainWindow::openFile(const QString & _fn)
 
 void MainWindow::openFile()
 {
-    QString filters = LNG["figure_files"] +  tr(" (*.cf);;") + LNG["all_files"] + tr(" (*.*)");
+    QString filters = LNG["figure_files"] +  QString(" (*.cf);;") + LNG["all_files"] + QString(" (*.*)");
     QString fn = QFileDialog::getOpenFileName(this,
-                          tr("Open Figure"),
+                          QString("Open Figure"),
                           path_to_save,
                           filters,
                           0,
@@ -521,8 +523,8 @@ void MainWindow::saveFileAs()
     if (m_s3d == NULL || m_s3d->getFigure() == NULL )
     {
         QMessageBox messageBox;
-        messageBox.setText(tr("Figure hasn't been created") );
-        messageBox.setWindowTitle(tr("Cannot save"));
+        messageBox.setText(QString("Figure hasn't been created") );
+        messageBox.setWindowTitle(QString("Cannot save"));
         messageBox.exec();
         return;
     }

@@ -1,15 +1,11 @@
 #ifndef MODELES_H
 #define	MODELES_H
 
-#include "StringMap.h"
-
 class Model
 {
 public:
     typedef int Index;
 public:
-
-    static bool isFileValid(const char * _fn);
 
     Model(Index _sz);
     Model(const Model& _orig);
@@ -81,9 +77,6 @@ public:
   ModelAcorn();
 };
 
-extern StringMap <Model*> modelCollection;
-extern StringMap <Model*> currentModelCollection;
-extern QString strPen;
 
 #endif	/* MODELES_H */
 

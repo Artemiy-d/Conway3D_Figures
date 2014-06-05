@@ -4,7 +4,7 @@
 #include <QDialog>
 
 
-
+class ModelsManager;
 class ModelRedactor;
 class GroupBoxCustom;
 class QLineEdit;
@@ -24,25 +24,28 @@ class DialogTemplates : public QDialog
 {
     Q_OBJECT
 public:
-    DialogTemplates();
+    DialogTemplates(ModelsManager * _modelsManager);
     virtual ~DialogTemplates();
 private slots:
     void setLang();
-    void selectModel(QListWidgetItem *item);
+    void selectModel(QListWidgetItem * _item);
     void addToActive();
     void saveTemplate();
     void modelsToActive();
 protected:
-    void resizeEvent(QResizeEvent * e);
-    void refreshList(StringMap<Model*> &coll, QListWidget * list);
-    void deleteModels(StringMap<Model*> &coll, QListWidget * list);
-    bool eventFilter(QObject * obj, QEvent * e);
-    bool beginAddTemplate(StringMap<Model*> &coll);
+    void resizeEvent(QResizeEvent * _e);
+    void deleteModels(QListWidget * _list);
+    bool eventFilter(QObject * _obj, QEvent * _e);
+    bool beginAddTemplate();
+
+    void updateMainModels();
+    void updateActiveModels();
 signals:
     void newActive();
 
 private:
 
+    ModelsManager * m_modelsManager;
     ModelRedactor * m_modelRedactor;
     GroupBoxCustom * m_gridBox;
     QLineEdit * m_editCurrentName;

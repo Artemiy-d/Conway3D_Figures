@@ -40,6 +40,7 @@ private:
 
     static LanguageManager * s_instance;
     static const QString s_baseLanguageId;
+    static const QString s_dirName;
 };
 
 #define LNG (LanguageManager::getInstance())

@@ -29,6 +29,7 @@ public:
     virtual ~ModelRedactor();
 
     void setModel (const Model * _model);
+    const Model * getModel() const;
 protected:
     void paintEvent(QPaintEvent * _e);
     void mousePressEvent(QMouseEvent * _e);

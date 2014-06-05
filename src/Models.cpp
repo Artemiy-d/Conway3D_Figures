@@ -1,5 +1,7 @@
-#include "Modeles.h"
+#include "Models.h"
+
 #include "Figure.h"
+#include "FileManager.h"
 
 
 Model::Model(Index _sz)
@@ -125,72 +127,40 @@ int Model::getSize() const
     return m_size;
 }
 
-bool Model::isFileValid(const char * _fn)
-{
-    FILE * file;
-    if ( (file = fopen(_fn, "rb") ) != NULL )
-    {
-        char s;
-        fseek(file, 0, SEEK_END);
-        int sz = ftell(file) - 4;
-        int sum = -1234;
-        if (sz <= 0)
-        {
-            fclose(file);
-            return false;
-        }
-        rewind(file);
-
-        while (sz--)
-        {
-            fread(&s, 1, 1, file);
-            sum += s;
-        }
-        fread(&sz, 4, 1, file);
-        fclose(file);
-
-        if (sz == sum)
-            return true;
-
-    }
-    return false;
-}
 bool Model::saveToFile(const char * _fn) const
 {
-    FILE * file;
-    if ( (file = fopen(_fn, "w+b") ) != NULL )
-    {
-        fwrite(&m_size, 4, 1, file);
-        fwrite(m_cells, m_square, 1, file);
-        int sz = ftell(file);
-        rewind(file);
-        char s;
-        int sum = -1234;
-        while (sz--)
-        {
-            fread(&s, 1, 1, file);
-            sum += s;
-        }
-        fwrite(&sum, 4, 1, file);
-        fclose(file);
-        return true;
-    }
-    return false;
+    FileManager::Writer writer(_fn);
+
+    if ( !writer.isOpen() )
+        return false;
+
+    writer.openTag("Model");
+    writer.writeData("Field", m_cells, m_square);
+    writer.closeTag();
+
+    return true;
 }
 bool Model::openFromFile(const char * _fn)
 {
-   // if (!isFileValid(fn)) return false;
-    FILE * file;
-    if ( (file = fopen(_fn, "rb") ) != NULL )
-    {
-        int sz;
-        fread(&sz, 4, 1, file);
-        createField(sz);
-        fread(m_cells, m_square, 1, file);
-        fclose(file);
-        return true;
-    }
-    return false;
+    FileManager::Reader reader( _fn );
+
+    if ( !reader.isOpen() )
+        return false;
+
+    if ( !reader.openTag( "Model" ) )
+        return false;
+
+    unsigned int size = 0;
+    if ( !reader.openData( "Field", size ) )
+        return false;
+
+    createField( sqrt( size ) );
+    if ( !reader.readData( m_cells ) )
+        return false;
+
+    reader.closeTag();
+
+    return true;
 }
 
 ///--------------------------------------------------
@@ -198,33 +168,33 @@ bool Model::openFromFile(const char * _fn)
 
 ModelPlaner::ModelPlaner() : Model(3)
 {
-    this->setCellFilled(0, 0);
-    this->setCellFilled(0, 1);
-    this->setCellFilled(0, 2);
-    this->setCellFilled(1, 0);
-    this->setCellFilled(2, 1);
+    setCellFilled(0, 0);
+    setCellFilled(0, 1);
+    setCellFilled(0, 2);
+    setCellFilled(1, 0);
+    setCellFilled(2, 1);
 }
 
-ModelZSymbol::ModelZSymbol(int _s) : Model(_s)
+ModelZSymbol::ModelZSymbol(Index _s) : Model(_s)
 {
     for (Index i = 0; i < _s; i++)
     {
-        this->setCellFilled(_s - 1, i);
-        this->setCellFilled(i, i);
-        this->setCellFilled(0, i);
+        setCellFilled(_s - 1, i);
+        setCellFilled(i, i);
+        setCellFilled(0, i);
     }
 }
 
-ModelXSymbol::ModelXSymbol(int _s) : Model(_s)
+ModelXSymbol::ModelXSymbol(Index _s) : Model(_s)
 {
     for (Index i = 0; i < _s; i++)
     {
-        this->setCellFilled(i, i);
-        this->setCellFilled(_s - i - 1, i);
+        setCellFilled(i, i);
+        setCellFilled(_s - i - 1, i);
     }
 }
 
-ModelRect::ModelRect(int _a) : Model(_a)
+ModelRect::ModelRect(Index _a) : Model(_a)
 {
     for (Index i = 0; i < _a; i++)
         for (Index j = 0; j < _a; j++)
@@ -233,8 +203,8 @@ ModelRect::ModelRect(int _a) : Model(_a)
 
 ModelRect::ModelRect(Index _a, Index _b) : Model( std::max(_a, _b) )
 {
-    for (int i = 0; i < _a; i++)
-        for (int j = 0; j < _b; j++)
+    for (Index i = 0; i < _a; i++)
+        for (Index j = 0; j < _b; j++)
             setCellFilled(i, j);
 }
 
@@ -242,11 +212,11 @@ ModelShip::ModelShip(Index _a) : Model(_a)
 {
     for (Index i = 1; i < _a; i++)
         setCellFilled(0, i);
-    this->setCellFilled(1, 0);
-    this->setCellFilled(3, 0);
-    this->setCellFilled(1, _a - 1);
-    this->setCellFilled(2, _a - 1);
-    this->setCellFilled(3, _a - 2);
+    setCellFilled(1, 0);
+    setCellFilled(3, 0);
+    setCellFilled(1, _a - 1);
+    setCellFilled(2, _a - 1);
+    setCellFilled(3, _a - 2);
     for (Index i = 2; i < _a - 3; i++)
         setCellFilled(4, i);
 }
@@ -280,7 +250,3 @@ ModelAcorn::ModelAcorn() : Model(7)
     setCellFilled(2, 1);
 }
 
-
-StringMap <Model*> modelCollection;
-StringMap <Model*> currentModelCollection;
-QString strPen;

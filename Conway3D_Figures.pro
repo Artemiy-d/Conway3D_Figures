@@ -15,7 +15,6 @@ SOURCES += \
     src/DialogSettings.cpp \
     src/FigureClasses.cpp \
     src/DialogAbout.cpp \
-    src/Modeles.cpp \
     src/Scene3D.cpp \
     src/IncludingSurface.cpp \
     src/DialogTemplates.cpp \
@@ -24,11 +23,13 @@ SOURCES += \
     src/DialogSaveFigure.cpp \
     src/GroupBoxCustom.cpp \
     src/ModelRedactor.cpp \
-    src/Scene3DView.cpp
+    src/Scene3DView.cpp \
+    src/FileManager.cpp \
+    src/ModelsManager.cpp \
+    src/Models.cpp
 
 HEADERS += \
     includes/Scene3D.h \
-    includes/Modeles.h \
     includes/MainWindow.h \
     includes/FigureClasses.h \
     includes/DialogAbout.h \
@@ -44,7 +45,10 @@ HEADERS += \
     includes/ModelRedactor.h \
     includes/Point.h \
     includes/Scene3DView.h \
-    includes/IncludingSurface.h
+    includes/IncludingSurface.h \
+    includes/FileManager.h \
+    includes/ModelsManager.h \
+    includes/Models.h
 
 FORMS +=
 RESOURCES +=
