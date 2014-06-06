@@ -17,13 +17,10 @@ LanguageManager::LanguageManager()
     QDir dir(QDir::currentPath() + "/" + s_dirName );
     QStringList fileList = dir.entryList(QDir::Files);
 
-    if (fileList.count())
+    foreach (const QString & s, fileList)
     {
-        foreach (const QString & s, fileList)
-        {
-            QString path = dir.absoluteFilePath(s);
-            addLanguageFile(path);
-        }
+        QString path = dir.absoluteFilePath(s);
+        addLanguageFile(path);
     }
 
     LanguagesMap::iterator it = m_languages.find( s_baseLanguageId );

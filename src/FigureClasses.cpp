@@ -1,8 +1,7 @@
 #include "FigureClasses.h"
 
 #include "IncludingSurface.h"
-
-
+#include "FileManager.h"
 
 
 BaseSurface::BaseSurface() : Figure()
@@ -12,7 +11,7 @@ BaseSurface::BaseSurface() : Figure()
     m_firstSize = 0.2;
     m_secondSize = 1;
 }
-BaseSurface::BaseSurface(Index /*_firstSideCount*/, Index /*cnt_2*/) : Figure()
+BaseSurface::BaseSurface(Index /*_firstSideCount*/, Index /*m_secondSideCount*/) : Figure()
 {
     m_firstSideCount = 0;
     m_secondSideCount = 0;
@@ -117,7 +116,7 @@ void BaseSurface::createField(Index _firstSideCount, Index _secondSideCount)
 }
 
 
-
+const char * const Surface::s_stringType = "Surface";
 
 Surface::Surface() : BaseSurface() { }
 
@@ -127,30 +126,52 @@ Surface::Surface(Index _firstSideCount, Index _secondSideCount)
     createField(_firstSideCount, _secondSideCount);
 }
 
-Surface::Surface(FILE * F)
+Surface::Surface(FileManager::Reader * _reader)
 {
-    fromFile(F);
+    fromFile(_reader);
 }
 
-void Surface::toFile(FILE * F)
+void Surface::toFile(FileManager::Writer * _writer)
 {
-    int sz_param = 8, type = (int) figSurface;
-    fwrite(&type,4,1,F);
-    fwrite(&sz_param,4,1,F);
-    fwrite(&m_firstSideCount,4,1,F);
-    fwrite(&m_secondSideCount,4,1,F);
-    Figure::toFile(F);
+    _writer->openTag( getStringType() );
+
+    _writer->writeData("First side", &m_firstSideCount, sizeof(m_firstSideCount));
+    _writer->writeData("Second side", &m_secondSideCount, sizeof(m_secondSideCount));
+
+    Figure::toFile(_writer);
+
+    _writer->closeTag();
 }
-void Surface::fromFile(FILE * F)
+bool Surface::fromFile(FileManager::Reader * _reader)
 {
-    int sz_param, cnt_1, cnt_2;
-    fread(&sz_param,4,1,F);
-    fread(&cnt_1,4,1,F);
-    fread(&cnt_2,4,1,F);
-    if (cnt_1 < 1 || cnt_2 < 1)
-        return;
-    createField(cnt_1, cnt_2);
-    Figure::fromFile(F);
+    if ( !_reader->openTag( getStringType() ) )
+        return false;
+
+    Index firstSideCount = 0, secondSideCount = 0;
+
+    FileManager::DataSize dataSize = 0;
+    if ( !_reader->openData("First side", dataSize) )
+        return false;
+    _reader->readData( &firstSideCount );
+
+    if ( !_reader->openData("Second side", dataSize) )
+        return false;
+    _reader->readData( &secondSideCount );
+
+
+    if (firstSideCount < 1 || secondSideCount < 1)
+        return false;
+
+    createField(firstSideCount, secondSideCount);
+    if ( !Figure::fromFile(_reader) )
+        return false;
+
+    return _reader->closeTag();
+}
+
+const char * Surface::getStringType() const
+{
+    return s_stringType;
 }
 
 void Surface::createField(Index _firstSideCount, Index _secondSideCount)
@@ -176,6 +197,9 @@ void Surface::setPhisicSize(float _s, float)
 }
 
 
+
+const char * const Torus::s_stringType = "Torus";
+
 Torus::Torus() : BaseSurface() {}
 Torus::Torus(Index _firstSideCount, Index _secondSideCount, int _offset_1)
     : BaseSurface(_firstSideCount, _secondSideCount)
@@ -188,37 +212,64 @@ Torus::Torus(Index _firstSideCount, Index _secondSideCount, int _offset_1)
                 m_secondSideCount = _secondSideCount,
                 _offset_1);
 }
-Torus::Torus(FILE * F) : BaseSurface()
+Torus::Torus(FileManager::Reader * _reader) : BaseSurface()
 {
-    fromFile(F);
+    fromFile(_reader);
 }
 
-void Torus::toFile(FILE * F)
+void Torus::toFile(FileManager::Writer * _writer)
 {
-    int sz_param = 12, type = (int) figTorus;
-    fwrite(&type,4,1,F);
-    fwrite(&sz_param,4,1,F);
-    fwrite(&m_firstSideCount,4,1,F);
-    fwrite(&m_secondSideCount,4,1,F);
-    fwrite(&m_offset,4,1,F);
-    Figure::toFile(F);
+    _writer->openTag( getStringType() );
+
+    _writer->writeData( "First side", &m_firstSideCount, sizeof( m_firstSideCount ) );
+    _writer->writeData( "Second side", &m_secondSideCount, sizeof( m_secondSideCount ) );
+    _writer->writeData( "Offset", &m_offset, sizeof( m_offset ) );
+
+
+    Figure::toFile(_writer);
+
+    _writer->closeTag();
 }
 
-void Torus::fromFile(FILE * F)
+bool Torus::fromFile(FileManager::Reader * _reader)
 {
-    int sz_param, cnt_1, cnt_2, offs;
-    fread(&sz_param,4,1,F);
-    fread(&cnt_1,4,1,F);
-    fread(&cnt_2,4,1,F);
-    fread(&offs,4,1,F);
-    if (cnt_1 < 1 || cnt_2 < 1)
-        return;
+    if ( !_reader->openTag( getStringType() ) )
+        return false;
+
+    Index firstSideCount = 0, secondSideCount = 0;
+    int offset = 0;
+
+    FileManager::DataSize dataSize = 0;
+    if ( !_reader->openData("First side", dataSize) )
+        return false;
+    _reader->readData( &firstSideCount );
+
+    if ( !_reader->openData("Second side", dataSize) )
+        return false;
+    _reader->readData( &secondSideCount );
+
+    if ( !_reader->openData("Offset", dataSize) )
+        return false;
+    _reader->readData( &offset );
+
+    if (firstSideCount < 1 || secondSideCount < 1)
+        return false;
+
     m_secondSize = 0.5;
-    m_firstSize = m_secondSize * cnt_1 / cnt_2;
+    m_firstSize = m_secondSize * firstSideCount / secondSideCount;
     if (m_firstSize > 0.9 * m_secondSize)
         m_firstSize = 0.9 * m_secondSize;
-    createField(cnt_1, cnt_2, offs);
-    Figure::fromFile(F);
+    createField(firstSideCount, secondSideCount, offset);
+
+    if ( !Figure::fromFile(_reader) )
+        return false;
+
+    return _reader->closeTag();
+}
+
+const char * Torus::getStringType() const
+{
+    return s_stringType;
 }
 
 void Torus::setPhisicSize(float _s1, float _s2)
@@ -293,52 +344,79 @@ void Torus::createField(Index _firstSideCount, Index _secondSideCount, int _offs
 }
 
 
-Ellipsoid::Ellipsoid() : Figure()
+const char * const Parallelepiped::s_stringType = "Parallelepiped";
+
+Parallelepiped::Parallelepiped() :
+    Figure(),
+    m_size(1.f)
+{ }
+Parallelepiped::Parallelepiped(Index _firstSideCount, Index _secondSideCount, Index _thirdSideCount) :
+    Figure(),
+    m_size(1.f)
 {
-    m_ellipsoidForm = true;
-    m_size = 1.0;
-}
-Ellipsoid::Ellipsoid(Index _firstSideCount, Index _secondSideCount, Index _thirdSideCount, bool _ellipsoidFormOn) : Figure()
-{
-    m_ellipsoidForm = _ellipsoidFormOn;
-    m_size = 1.0;
     createField(_firstSideCount, _secondSideCount, _thirdSideCount);
 }
 
-Ellipsoid::Ellipsoid(FILE * F) : Figure()
+Parallelepiped::Parallelepiped(FileManager::Reader * _reader) :
+    Figure(),
+    m_size(1.f)
 {
-    m_size = 1.0;
-    fromFile(F);
+    fromFile(_reader);
 }
 
-void Ellipsoid::toFile(FILE * F)
+void Parallelepiped::toFile(FileManager::Writer * _writer)
 {
-    int sz_param = 13, type = (int) m_ellipsoidForm?figEllipsoid:figParallelepiped;
-    fwrite(&type,4,1,F);
-    fwrite(&sz_param,4,1,F);
-    fwrite(&m_firstSideCount,4,1,F);
-    fwrite(&m_secondSideCount,4,1,F);
-    fwrite(&m_thirdSideCount,4,1,F);
-    fwrite(&m_ellipsoidForm,1,1,F);
-    Figure::toFile(F);
+    _writer->openTag( getStringType() );
+
+    _writer->writeData( "First side", &m_firstSideCount, sizeof(m_firstSideCount) );
+    _writer->writeData( "Second side", &m_secondSideCount, sizeof(m_secondSideCount) );
+    _writer->writeData( "Third side", &m_thirdSideCount, sizeof(m_thirdSideCount) );
+
+    Figure::toFile(_writer);
+
+    _writer->closeTag();
 }
 
-void Ellipsoid::fromFile(FILE * F)
+bool Parallelepiped::fromFile(FileManager::Reader * _reader)
 {
-    int sz_param, cnt_1, cnt_2, cnt_3;
-    fread(&sz_param,4,1,F);
-    fread(&cnt_1,4,1,F);
-    fread(&cnt_2,4,1,F);
-    fread(&cnt_3,4,1,F);
-    fread(&m_ellipsoidForm,1,1,F);
-    if (cnt_1 == 0 || cnt_2 == 0 || cnt_3 == 0)
-        return;
-    createField(cnt_1, cnt_2, cnt_3);
-    Figure::fromFile(F);
+    if ( !_reader->openTag( getStringType() ))
+        return false;
+
+    Index firstSideCount = 0;
+    Index secondSideCount = 0;
+    Index thirdSideCount = 0;
+
+    FileManager::DataSize dataSize = 0;
+    if ( !_reader->openData( "First side", dataSize ) )
+        return false;
+    _reader->readData( &firstSideCount );
+
+    if ( !_reader->openData( "Second side", dataSize ) )
+        return false;
+    _reader->readData( &secondSideCount );
+
+    if ( !_reader->openData( "Third side", dataSize ) )
+        return false;
+    _reader->readData( &thirdSideCount );
+
+    if (firstSideCount < 1 || secondSideCount < 1 || thirdSideCount < 1)
+        return false;
+
+    createField(firstSideCount, secondSideCount, thirdSideCount);
+
+    if ( !Figure::fromFile(_reader) )
+        return false;
+
+    return _reader->closeTag();
+}
+
+const char * Parallelepiped::getStringType() const
+{
+    return s_stringType;
 }
 
 
-void Ellipsoid::setPhisicSize(float _s, float)
+void Parallelepiped::setPhisicSize(float _s, float)
 {
     m_size = _s;
     m_scale = 3 * m_size / (m_firstSideCount + m_secondSideCount + m_thirdSideCount);
@@ -382,32 +460,15 @@ void Ellipsoid::setPhisicSize(float _s, float)
     m_surfaces[5] = new IncludingSurface(this, C, m_thirdSideCount, m_secondSideCount);
     m_surfaces[5]->createFullPlaneVertexes(pnts[0], pnts[1], pnts[4], m_points, index);
     C += m_thirdSideCount * m_secondSideCount;
-
-    if (m_ellipsoidForm)
-    {
-        for (Index i = 0; i < m_pointsCount; ++i)
-        {
-            float coeff = m_size / sqrt(pow(m_points[i].x / m_firstSize, 2) +
-                                        pow(m_points[i].y / m_secondSize, 2) +
-                                        pow(m_points[i].z / m_thirdSize, 2));
-            m_points[i].x *= coeff;
-        }
-    }
-
 }
 
-void Ellipsoid::setEllipsoidFormEnable(bool _on)
-{
-    m_ellipsoidForm = _on;
-    setPhisicSize(m_size, 0);
-}
-
-void Ellipsoid::createAgar()
+void Parallelepiped::createAgar()
 {
     for (int i = 0; i < 6; ++i)
         m_surfaces[i]->createAgar();
 }
-void Ellipsoid::addModel(Model * _model, Cell * _cell)
+
+void Parallelepiped::addModel(Model * _model, Cell * _cell)
 {
     for (int i = 0; i < 6; ++i)
     {
@@ -416,7 +477,7 @@ void Ellipsoid::addModel(Model * _model, Cell * _cell)
     }
 }
 
-void Ellipsoid::createField(Index _firstSideCount, Index _secondSideCount, Index _thirdSideCount)
+void Parallelepiped::createField(Index _firstSideCount, Index _secondSideCount, Index _thirdSideCount)
 {
     if (_firstSideCount <= 0 || _secondSideCount <= 0 || _thirdSideCount <= 0)
         return;
@@ -462,5 +523,36 @@ void Ellipsoid::createField(Index _firstSideCount, Index _secondSideCount, Index
 
 }
 
+
+const char * const Ellipsoid::s_stringType = "Ellipsoid";
+
+Ellipsoid::Ellipsoid() : Parallelepiped()
+{ }
+Ellipsoid::Ellipsoid(FileManager::Reader * _reader) : Parallelepiped()
+{
+    fromFile(_reader);
+}
+Ellipsoid::Ellipsoid(Index _firstSideCount, Index _secondSideCount, Index _thirdSideCount) : Parallelepiped()
+{
+    createField(_firstSideCount, _secondSideCount, _thirdSideCount);
+}
+
+const char * Ellipsoid::getStringType() const
+{
+    return s_stringType;
+}
+
+void Ellipsoid::setPhisicSize(float _s, float)
+{
+    Parallelepiped::setPhisicSize( _s, 0 );
+
+    for (Index i = 0; i < m_pointsCount; ++i)
+    {
+        float coeff = m_size / sqrt(pow(m_points[i].x / m_firstSize, 2) +
+                                    pow(m_points[i].y / m_secondSize, 2) +
+                                    pow(m_points[i].z / m_thirdSize, 2));
+        m_points[i] *= coeff;
+    }
+}
 
 

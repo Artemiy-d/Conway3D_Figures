@@ -159,7 +159,7 @@ DialogSettings::~DialogSettings()
 
 void DialogSettings::apply()
 {
-    m_s3d->getFigure()->setProbabilities(m_groupLive->getValues(), m_groupDead->getValues());
+    m_s3d->getFigure()->setProbabilities(m_groupLive->getValues(), m_groupDead->getValues(), Figure::s_defaultNeighborsCount);
 }
 void DialogSettings::fromFigure()
 {

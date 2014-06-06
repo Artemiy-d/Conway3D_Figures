@@ -35,42 +35,20 @@ class Torus : public BaseSurface
 public:
     virtual ~Torus() {}
     Torus();
-    Torus(FILE * F);
+    Torus(FileManager::Reader * _reader);
     Torus(Index _firstSideCount, Index _secondSideCount, int _offset_1 = 0);
     void setPhisicSize(float _s1, float _s2);
     void createField(Index _firstSideCount, Index _secondSideCount, int _offset_1 = 0);
-    virtual void toFile(FILE * F);
-    virtual void fromFile(FILE * F);
+    virtual void toFile(FileManager::Writer * _writer);
+    virtual bool fromFile(FileManager::Reader * _reader);
+    virtual const char * getStringType() const;
+
+public:
+    static const char * const s_stringType;
 
 private:
     int m_offset;
-    GLfloat m_angle;
-};
-
-class Ellipsoid : public Figure
-{
-public:
-    virtual ~Ellipsoid() {}
-    Ellipsoid();
-    Ellipsoid(FILE * F);
-    Ellipsoid(Index _firstSideCount, Index _secondSideCount, Index _thirdSideCount, bool _ellipsoidFormOn = true);
-    void createField(Index _firstSideCount, Index _secondSideCount, Index _thirdSideCount);
-    void setPhisicSize(float _s, float);
-    void createAgar();
-    void setEllipsoidFormEnable(bool _on);
-    void addModel(Model * _model, Cell * _cell);
-    virtual void addModel(Model *, Index, Index, bool) { }
-    virtual void toFile(FILE * F);
-    virtual void fromFile(FILE * F);
-
-private:
-    float m_size;
-    Index m_firstSideCount, m_secondSideCount, m_thirdSideCount;
-    IncludingSurface * m_surfaces[6];
-
-    float m_scale;
-    float m_firstSize, m_secondSize, m_thirdSize;
-    bool m_ellipsoidForm;
+    float m_angle;
 };
 
 class Surface : public BaseSurface
@@ -79,12 +57,62 @@ public:
     virtual ~Surface() {}
     Surface();
     Surface(Index _firstSideCount, Index _secondSideCount);
-    Surface(FILE * _file);
+    Surface(FileManager::Reader * _reader);
     void createField(Index _firstSideCount, Index _secondSideCount);
     void setPhisicSize(float _s, float);
 
-    virtual void toFile(FILE * F);
-    virtual void fromFile(FILE * F);
+    virtual void toFile(FileManager::Writer * _writer);
+    virtual bool fromFile(FileManager::Reader * _reader);
+    virtual const char * getStringType() const;
+
+public:
+    static const char * const s_stringType;
 };
+
+class Parallelepiped : public Figure
+{
+public:
+    virtual ~Parallelepiped() {}
+    Parallelepiped();
+    Parallelepiped(FileManager::Reader * _reader);
+    Parallelepiped(Index _firstSideCount, Index _secondSideCount, Index _thirdSideCount);
+    void createField(Index _firstSideCount, Index _secondSideCount, Index _thirdSideCount);
+    virtual void setPhisicSize(float _s, float);
+    void createAgar();
+    void addModel(Model * _model, Cell * _cell);
+    virtual void addModel(Model *, Index, Index, bool) { }
+    virtual void toFile(FileManager::Writer * _writer);
+    virtual bool fromFile(FileManager::Reader * _reader);
+    virtual const char * getStringType() const;
+
+
+public:
+    static const char * const s_stringType;
+protected:
+    float m_size;
+    Index m_firstSideCount, m_secondSideCount, m_thirdSideCount;
+    IncludingSurface * m_surfaces[6];
+
+    float m_scale;
+    float m_firstSize, m_secondSize, m_thirdSize;
+};
+
+
+class Ellipsoid : public Parallelepiped
+{
+public:
+    Ellipsoid();
+    Ellipsoid(FileManager::Reader * _reader);
+    Ellipsoid(Index _firstSideCount, Index _secondSideCount, Index _thirdSideCount);
+
+    virtual const char * getStringType() const;
+
+    virtual void setPhisicSize(float _s, float);
+
+public:
+
+    static const char * const s_stringType;
+};
+
 #endif	/* FIGURECLASSES_H */
 

@@ -7,9 +7,11 @@
 
 class FileManager
 {
+public:
+    typedef unsigned int DataSize;
 private:
     typedef unsigned char DataBlockType;
-    typedef unsigned int DataSize;
+
 public:
 
     class Reader
@@ -29,7 +31,9 @@ public:
 
         bool openData( const std::string & _name, DataSize & _size );
 
-        bool readData(void * _data);
+        DataSize readData(void * _data);
+        DataSize readData(void * _data, DataSize _size);
+
 
         bool openTag(const std::string & _tagName);
 
@@ -64,6 +68,8 @@ public:
         void closeTag();
 
         void writeData( const char * _tag, const void * _data, DataSize _size );
+
+        void writeData( const char * _tag, const char * _dataString);
 
     private:
         EndPosStack m_posStack;

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <GL/gl.h>
 
+#include "FileManager.h"
 #include "RandomLCG.h"
 #include "Point.h"
 
@@ -49,7 +50,7 @@ public:
     virtual void createAgar() {}
     void setLineWidth(GLfloat _width);
     void drawList();
-    void setProbabilities(const double * _pLive, const double * _pDead);
+    void setProbabilities(const double * _pLive, const double * _pDead, Index _neighborsCount);
     void getProbabilities(double * _pLive, double * _pDead) const;
     void createRandomMap(float _p);
     void clearMap();
@@ -65,8 +66,10 @@ public:
     void drawActiveCells();
     void selectAndPlus(const Point3F & _p1, const Point3F & _p_1, bool _plus, Model * _model = NULL);
     void defaultProbabilities();
-    virtual void toFile(FILE * F);
-    virtual void fromFile(FILE * F);
+    virtual void toFile(FileManager::Writer * _writer);
+    virtual bool fromFile(FileManager::Reader * _reader);
+
+    virtual const char * getStringType() const = 0;
 
 protected:
     void createCells(Index _cellsCount, Index _pointsCount);
@@ -74,8 +77,12 @@ protected:
     void gridToList();
     void calcAllProbBool();
 
+    void createProbabilities( Index _neighborsCount );
+
 public:
     bool m_gridEnable;
+
+    static const Index s_defaultNeighborsCount;
 
 protected:
     Index m_gridPointsCount;
@@ -87,7 +94,7 @@ protected:
 private:
 
     bool m_probabilitiesDisabled;
-    RandomLCGDefault::Probability m_probabilitiesLive[9], m_probabilitiesDead[9];
+    RandomLCGDefault::Probability * m_probabilitiesLive, * m_probabilitiesDead;
     StepIndex m_stepNumber;
     Index m_maxNeighborsCount;
     Index m_activeCountNow, m_activeCountNext;
@@ -103,6 +110,8 @@ private:
     RandomLCGDefault m_random;
 
     Color4B m_colorLive, m_colorDead, m_colorGrid;
+
+    static const char * const s_stringType;
 };
 
 

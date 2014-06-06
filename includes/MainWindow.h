@@ -67,7 +67,7 @@ public slots:
     void buttonStartClicked();
     void sliderVelValueChanged(int _value);
     void setSettingsVisible(bool _value);
-    void openFile(const QString & _fn);
+    bool openFile(const QString & _fn);
     void openFile();
     void saveFileAs();
     void saveFile();
@@ -106,6 +106,8 @@ private:
     QList<OpenAction*> actList;
 
     ModelsManager * m_modelsManager;
+
+    QString m_savedFileName;
 };
 
 

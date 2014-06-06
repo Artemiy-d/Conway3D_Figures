@@ -1,8 +1,12 @@
 #include <assert.h>
+#include <iostream>
+
 
 #include "Figure.h"
+#include "FileManager.h"
 
-
+const Figure::Index Figure::s_defaultNeighborsCount = 8;
+const char * const Figure::s_stringType = "Figure";
 
 Figure::Figure()
 {
@@ -22,63 +26,117 @@ Figure::Figure()
     *((int*)&m_colorGrid) = 51<<8;
 
     m_listGridId = 1;
-    m_maxNeighborsCount = 8;
+
+    m_probabilitiesLive = NULL;
+    m_probabilitiesDead = NULL;
+    m_maxNeighborsCount = 0;
+
+    createProbabilities( s_defaultNeighborsCount );
+
     defaultProbabilities();
 }
 
-void Figure::toFile(FILE * F)
+void Figure::createProbabilities( Index _neighborsCount )
 {
-    fwrite(&m_maxNeighborsCount,4,1,F);
-    fwrite(m_probabilitiesLive,(m_maxNeighborsCount+1)*4,1,F);
-    fwrite(m_probabilitiesDead,(m_maxNeighborsCount+1)*4,1,F);
-    fwrite(&m_cellsCount,4,1,F);
-    int key = 1, s = m_cellsCount/32+1;
-    int * A = new int[s];
-    for (int i = 0; i<s; i++)
-        A[i] = 0;
-    int * a = A;
-    for (int i = 0; i<m_cellsCount; i++)
-    {
-        if (m_cells[i].livingStatusNow)
-            (*a) |= key;
-        if ( (key<<=1) == 0 )
-        {
-            a++;
-            key = 1;
-        }
-    }
-    fwrite(A,s*4,1,F);
-    delete A;
+    m_maxNeighborsCount = _neighborsCount;
+    delete m_probabilitiesLive;
+    Index blockCount = m_maxNeighborsCount + 1;
+    m_probabilitiesLive = new RandomLCGDefault::Probability[ blockCount * 2 ];
+    m_probabilitiesDead = m_probabilitiesLive + blockCount;
 }
 
-void Figure::fromFile(FILE * F)
+void Figure::toFile(FileManager::Writer * _writer)
 {
-    int max_neigh, cnt;
-    fread(&max_neigh,4,1,F);
-    fread(m_probabilitiesLive,(m_maxNeighborsCount+1)*4,1,F);
-    fread(m_probabilitiesDead,(m_maxNeighborsCount+1)*4,1,F);
-    fread(&cnt,4,1,F);
-    clearMap();
-    if (cnt!=m_cellsCount)
-        return;
-    int key = 0, a;
-    for (Index i = 0; i < m_cellsCount; i++)
+    _writer->openTag( s_stringType );
+    _writer->writeData( "Live probabilities", m_probabilitiesLive, (m_maxNeighborsCount + 1) * sizeof(m_probabilitiesLive[0]) );
+    _writer->writeData( "Dead probabilities", m_probabilitiesDead, (m_maxNeighborsCount + 1) * sizeof(m_probabilitiesDead[0]) );
+    _writer->writeData( "Cells count", &m_cellsCount, sizeof(m_cellsCount) );
+
+    Index bytesCount = m_cellsCount / (8 * sizeof(int)) + 1;
+    int * bytes = new int[bytesCount];
+    int * a = bytes;
+    int key = 1;
+    *a = 0;
+    for (Index i = 0; i < m_cellsCount; ++i, key <<= 1)
     {
         if ( key == 0 )
         {
-            fread(&a,4,1,F);
+            key = 1;
+            *(++a) = 0;
+        }
+        if (m_cells[i].livingStatusNow)
+            (*a) |= key;
+    }
+
+    _writer->writeData( "Cells enabled", bytes, bytesCount * sizeof(int) );
+
+    delete bytes;
+
+    _writer->closeTag();
+}
+
+bool Figure::fromFile(FileManager::Reader * _reader)
+{
+    if ( !_reader->openTag( s_stringType ) )
+        return false;
+
+    FileManager::DataSize dataSize = 0;
+
+    if ( !_reader->openData( "Live probabilities", dataSize ) )
+        return false;
+
+    if ( dataSize != (s_defaultNeighborsCount + 1) * sizeof(m_probabilitiesLive[0]) )
+        std::cout << "Warn: dataSize != (s_defaultNeighborsCount + 1) * sizeof(m_probabilitiesLive[0])" << std::endl;
+
+    createProbabilities( s_defaultNeighborsCount );
+
+    _reader->readData( m_probabilitiesLive );
+
+    if ( !_reader->openData( "Dead probabilities", dataSize ) )
+        return false;
+
+    if ( dataSize != (s_defaultNeighborsCount + 1) * sizeof(m_probabilitiesDead[0]) )
+        std::cout << "Warn: dataSize != (s_defaultNeighborsCount + 1) * sizeof(m_probabilitiesDead[0])" << std::endl;
+
+    _reader->readData( m_probabilitiesDead );
+
+    if ( !_reader->openData( "Cells count", dataSize ) )
+        return false;
+
+
+    Index cellsCount = 0;
+    _reader->readData( &cellsCount );
+    if ( cellsCount != m_cellsCount )
+    {
+        std::cout << "Error: cellsCount != m_cellsCount" << std::endl;
+        return false;
+    }
+
+    if ( !_reader->openData( "Cells enabled", dataSize ) )
+        return false;
+
+    int key = 0, a = 0;
+    for (Index i = 0; i < m_cellsCount; ++i, key <<= 1)
+    {
+        if ( key == 0 )
+        {
+            _reader->readData( &a, sizeof(int) );
             key = 1;
         }
         if (a & key)
             plus(i);
-        key<<=1;
     }
+
+
     calcAllProbBool();
     refresh();
+
+    return _reader->closeTag();
 }
 
 Figure::~Figure()
 {
+    delete m_probabilitiesLive;
     delete m_cells->neighbors;
     delete m_cells;
     delete m_gridPoints;
@@ -93,20 +151,19 @@ Figure::~Figure()
 }
 void Figure::defaultProbabilities()
 {
-    for (int i = 0; i < 9; i++)
+    for (Index i = 0; i <= m_maxNeighborsCount; ++i)
     {
-        m_probabilitiesLive[i] = 0.;
-        m_probabilitiesDead[i] = 1.;
+        m_probabilitiesLive[i] = i == 3 ? 1. : 0.;
+        m_probabilitiesDead[i] = i == 2 || i == 3 ? 0. : 1.;
     }
     m_probabilitiesDisabled = true;
-    m_probabilitiesLive[3] = 1.;
-    m_probabilitiesDead[2] = 0.;
-    m_probabilitiesDead[3] = 0.;
 }
 
-void Figure::setProbabilities(const double * _pLive, const double * _pDead)
+void Figure::setProbabilities(const double * _pLive, const double * _pDead, Index _neighborsCount)
 {
-    for (int i = 0; i < 9; i++)
+    if ( _neighborsCount != m_maxNeighborsCount )
+        createProbabilities( _neighborsCount );
+    for (Index i = 0; i <= m_maxNeighborsCount; i++)
     {
         m_probabilitiesLive[i] = _pLive[i];
         m_probabilitiesDead[i] = _pDead[i];
@@ -116,16 +173,14 @@ void Figure::setProbabilities(const double * _pLive, const double * _pDead)
 void Figure::calcAllProbBool()
 {
     m_probabilitiesDisabled = true;
-    for (int i = 0; i < 9 && m_probabilitiesDisabled; i++)
+    for (Index i = 0; i <= m_maxNeighborsCount && m_probabilitiesDisabled; ++i)
     {
-       // if ((m_probabilitiesLive[i]!=0 && m_probabilitiesLive[i] != RandomLCG::s_maxValue) ||
-       //     (m_probabilitiesDead[i]!=0 && m_probabilitiesDead[i] != RandomLCG::s_maxValue) )
         if ( !m_probabilitiesLive[i].isLimit() || !m_probabilitiesDead[i].isLimit() )
             m_probabilitiesDisabled = false;
     }
     if (!m_probabilitiesDisabled)
     {
-        for (Index i = 0; i < m_cellsCount; i++)
+        for (Index i = 0; i < m_cellsCount; ++i)
             (m_activeCellsNow[i] = &m_cells[i])->steps = m_stepNumber;
         m_activeCountNow = m_cellsCount;
         refresh();
@@ -134,7 +189,7 @@ void Figure::calcAllProbBool()
 
 void Figure::getProbabilities(double * _pLive, double * _pDead) const
 {
-    for (int i = 0; i < 9; i++)
+    for (Index i = 0; i <= m_maxNeighborsCount; ++i)
     {
         _pLive[i] = m_probabilitiesLive[i].get();
         _pDead[i] = m_probabilitiesDead[i].get();
@@ -265,7 +320,7 @@ void Figure::createCells(Index _cellsCount, Index _pointsCount)
     m_activeCellsNow = new Cell*[_cellsCount];
     m_activeCellsNext = new Cell*[_cellsCount];
 
-    m_drawingIndices = new GLuint[_cellsCount *4];
+    m_drawingIndices = new GLuint[_cellsCount * 4];
   //  nrm = new
 
     m_cellsCount = _cellsCount;

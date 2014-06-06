@@ -163,7 +163,7 @@ void Scene3D::createFigure(FigureType _figuretype, int * _sizeParams, float * /*
             m_figure = new Ellipsoid(_sizeParams[0], _sizeParams[1], _sizeParams[2]);
             break;
         case figParallelepiped:
-            m_figure = new Ellipsoid(_sizeParams[0], _sizeParams[1], _sizeParams[2], false);
+            m_figure = new Parallelepiped(_sizeParams[0], _sizeParams[1], _sizeParams[2]);
             break;
     }
 
@@ -171,7 +171,7 @@ void Scene3D::createFigure(FigureType _figuretype, int * _sizeParams, float * /*
     if (_copySettings)
     {
         m_figure->m_gridEnable = gridOn;
-        m_figure->setProbabilities(pLive, pDead);
+        m_figure->setProbabilities(pLive, pDead, Figure::s_defaultNeighborsCount);
     }
 
     updateGL();

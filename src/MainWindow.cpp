@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QKeyEvent>
+#include <QFontMetrics>
 
 #include "math.h"
 
@@ -26,9 +27,8 @@
 #include "LanguageManager.h"
 
 
-int versionSaving = 0;
+static const int s_versionSaving = 0;
 
-QString file_save_name, path_to_save;
 
 MainWindow::MainWindow()
 {
@@ -190,9 +190,7 @@ MainWindow::MainWindow()
     setLang();
    // delete menuOpenFinded;
  //   menuOpenFinded->setVisible(false);
-    path_to_save = QDir::homePath() + QString("/Save Conway");
-    QDir dir(QDir::homePath());
-    dir.mkdir(QString("Save Conway"));
+
     setComboModels();
     //    QMessageBox M1;
      //   M1.exec();
@@ -207,7 +205,7 @@ void MainWindow::createOpenTree()
     actList.clear();
     menuList.clear();
 
-    QString P = QDir::homePath()+QString("/Save Conway");
+    QString P = QDir::currentPath() + QString("/Save Conway");
     delete menuOpenFinded;
     menuOpenFinded = new QMenu(LNG["open_founded"],this);
     menuFile->insertMenu(actSave,menuOpenFinded);
@@ -260,12 +258,23 @@ bool MainWindow::createOpenMenuTreeRec(QMenu * _menu, const QString & _path, int
     return ret;
 }
 
-QString createMenuText(const QString & _begin, const QString & _end, int _len = 20)
+QString createMenuText(const QString & _first, const QString & _second, const QFont & _font, int width)
 {
-    QString s;
-    if (_begin.length() + _end.length() < _len)
-        s.fill(' ', _len - _begin.length() - _end.length());
-    return _begin + s + _end;
+    QFontMetrics metrics(_font);
+
+    int firstWidth = metrics.width(_first);
+    QString spaces;
+    if ( width > firstWidth )
+    {
+        int spaceWidth = metrics.width(' ');
+        spaces.fill(' ', (width - firstWidth) / spaceWidth);
+    }
+    else
+    {
+        spaces.fill(' ', 1);
+    }
+
+    return _first + spaces + "\t" + _second;
 }
 
 void MainWindow::setLang()
@@ -287,11 +296,12 @@ void MainWindow::setLang()
 
     menuFile->setTitle(LNG["file"]);
 
-        actNewFigure->setText(createMenuText(LNG["new_figure"],QString("  ctrl+N")));
-        actOpen->setText(createMenuText(LNG["open"],QString("  ctrl+O")));
+        const int menuWidth = 90;
+        actNewFigure->setText(createMenuText(LNG["new_figure"], QString("Ctrl+N"), actNewFigure->font(), menuWidth));
+        actOpen->setText(createMenuText(LNG["open"], QString("Ctrl+O"), actNewFigure->font(), menuWidth));
         if (menuOpenFinded != NULL)
             menuOpenFinded->setTitle(LNG["open_founded"]);
-        actSave->setText(createMenuText(LNG["save"],QString("  ctrl+S")));
+        actSave->setText(createMenuText(LNG["save"], QString("Ctrl+S"), actNewFigure->font(), menuWidth));
         actSaveAs->setText(LNG["save_as"]);
         actExit->setText(LNG["exit"]);
     menuEdit->setTitle(LNG["edit"]);
@@ -302,7 +312,7 @@ void MainWindow::setLang()
     menuView->setTitle(LNG["view"]);
         actFullScreen->setText(LNG["full_screen"]);
         actPanelSettings->setText(LNG["settings_panel"]);
-        if (LNG.count()>1)
+        if (LNG.count() > 1)
             menuLang->setTitle(LNG["languages"]);
 
     menuModeling->setTitle(LNG["modelling"]);
@@ -337,7 +347,7 @@ void MainWindow::createNewFigure()
     int result = m_dialogNewFigure->exec();
     if (result)
     {
-        file_save_name = "";
+        m_savedFileName.clear();
     }
 }
 
@@ -411,39 +421,33 @@ void MainWindow::resizeEvent(QResizeEvent * /*_e*/)
     resize();
 }
 
-void MainWindow::openFile(const QString & _fn)
+bool MainWindow::openFile(const QString & _fn)
 {
-    if (!isFileValid(_fn))
-    {
-        QMessageBox messageBox;
-        messageBox.setWindowTitle(LNG["file_not_correct"]);
-        messageBox.setText(LNG["cannot_open_this_file"]);
-        messageBox.exec();
-        return;
-    }
-    FILE * file;
-    if (!_fn.isNull() && (file = fopen(_fn.toLocal8Bit().data(),"rb") ) != NULL )
-    {
-        int vers, type;
-        fread(&vers, 4, 1, file);
-        fread(&type, 4, 1, file);
+    if ( _fn.isNull() )
+        return false;
 
-        switch ((FigureType)type)
-        {
-            case figTorus:
-                m_s3d->setFigure( new Torus(file) );
-                break;
-            case figSurface:
-                m_s3d->setFigure( new Surface(file) );
-                break;
-            case figEllipsoid:
-            case figParallelepiped:
-                m_s3d->setFigure( new Ellipsoid(file) );
-                break;
-        }
-        fclose(file);
-        file_save_name = _fn;
-    }
+    FileManager::Reader reader( _fn.toLocal8Bit().data() );
+
+    if ( !reader.isOpen() )
+        return false;
+
+    FileManager::DataSize dataSize = 0;
+    if ( !reader.openData( "Figure type", dataSize ) )
+        return false;
+
+    char * type = new char( dataSize + 1 );
+    type[dataSize] = 0;
+    reader.readData( type );
+
+    if ( !strcmp( type, "Torus" ) )
+        m_s3d->setFigure( new Torus(&reader) );
+    else if ( !strcmp( type, "Surface" ) )
+        m_s3d->setFigure( new Surface(&reader) );
+    delete type;
+
+    m_savedFileName = _fn;
+
+    return true;
 }
 
 void MainWindow::openFile()
@@ -451,20 +455,29 @@ void MainWindow::openFile()
     QString filters = LNG["figure_files"] +  QString(" (*.cf);;") + LNG["all_files"] + QString(" (*.*)");
     QString fn = QFileDialog::getOpenFileName(this,
                           QString("Open Figure"),
-                          path_to_save,
+                          QString(),
                           filters,
                           0,
                           QFileDialog::DontUseNativeDialog );
-    if (!fn.isNull())
-        openFile(fn);
+
+    if ( !fn.isNull() )
+    {
+        if ( !openFile(fn) )
+        {
+            QMessageBox messageBox;
+            messageBox.setWindowTitle(LNG["file_not_correct"]);
+            messageBox.setText(LNG["cannot_open_this_file"]);
+            messageBox.exec();
+        }
+    }
 }
 
 void MainWindow::saveFile()
 {
-    if (file_save_name.isNull() || file_save_name == "")
+    if (m_savedFileName.isNull() || m_savedFileName == "")
         saveFileAs();
     else
-        saveFileTo(file_save_name);
+        saveFileTo(m_savedFileName);
 }
 
 bool MainWindow::isFileValid(const QString & _fn)
@@ -497,25 +510,21 @@ bool MainWindow::isFileValid(const QString & _fn)
 
 void MainWindow::saveFileTo(const QString & _fn)
 {
-    FILE * file;
-    if (!_fn.isNull() && (file = fopen(_fn.toLocal8Bit().data(), "w+b") )!=NULL )
-    {
-        fwrite(&versionSaving, 4, 1, file);
-        m_s3d->getFigure()->toFile(file);
-        int sz = ftell(file);
-        rewind(file);
-        char s;
-        int sum = -1000;
-        while (sz--)
-        {
-            fread(&s, 1, 1, file);
-            sum += s;
-        }
-        fwrite(&sum, 4, 1, file);
-        fclose(file);
-        file_save_name = _fn;
-        createOpenTree();
-    }
+    FileManager::Writer writer( _fn.toLocal8Bit().data() );
+
+    if ( !writer.isOpen() )
+        return;
+
+
+    writer.writeData( "Version", &s_versionSaving, sizeof(s_versionSaving) );
+
+    writer.writeData( "Figure type", m_s3d->getFigure()->getStringType() );
+
+    m_s3d->getFigure()->toFile(&writer);
+
+    m_savedFileName = _fn;
+   // createOpenTree();
+
 }
 
 void MainWindow::saveFileAs()

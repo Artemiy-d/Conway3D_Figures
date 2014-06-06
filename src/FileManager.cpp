@@ -1,5 +1,6 @@
 #include <map>
 
+//#include <codecvt>
 #include <string.h>
 
 #include "FileManager.h"
@@ -190,7 +191,10 @@ bool FileManager::Reader::openData( const std::string & _name, DataSize & _size 
         return false;
     m_dataTag = m_tagInfoStack.back()->getData(_name);
     if (m_dataTag)
+    {
         _size = m_dataTag->getInterval();
+        m_stream.seekg( m_dataTag->getBegin(), std::ios_base::beg );
+    }
     return !!m_dataTag;
 }
 
@@ -201,17 +205,26 @@ FileManager::Reader::~Reader()
     m_stream.close();
 }
 
-bool FileManager::Reader::readData(void * _data)
+FileManager::DataSize FileManager::Reader::readData(void * _data)
 {
-    if (!m_dataTag)
-        return false;
-
-    m_stream.seekg( m_dataTag->getBegin(), std::ios_base::beg );
-    m_stream.read( (char *)_data, m_dataTag->getInterval() );
-
-    return true;
+    return m_dataTag ? readData(_data, m_dataTag->getInterval()) : 0;
 }
 
+FileManager::DataSize FileManager::Reader::readData(void * _data, DataSize _size)
+{
+    if (!m_dataTag)
+        return 0;
+
+    DataSize currentPos = static_cast<DataSize>( m_stream.tellg() );
+    if ( currentPos >= m_dataTag->getEnd() )
+        return 0;
+
+    DataSize bytesToRead = std::min(m_dataTag->getEnd() - currentPos, _size);
+
+    m_stream.read( (char *)_data, bytesToRead );
+
+    return bytesToRead;
+}
 
 FileManager::Writer::Writer( const char * _fn )
 {
@@ -259,4 +272,9 @@ void FileManager::Writer::writeData( const char * _tag, const void * _data, Data
     m_stream.write( (const char*)&nextPos, sizeof(DataSize) );
     m_stream.write( (const char*)_tag, tagLength + 1 );
     m_stream.write( (const char*)_data, _size );
+}
+
+void FileManager::Writer::writeData( const char * _tag, const char * _dataString)
+{
+    writeData( _tag, _dataString, strlen( _dataString ) );
 }
