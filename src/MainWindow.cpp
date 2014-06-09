@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QKeyEvent>
 #include <QFontMetrics>
+#include <QDebug>
 
 #include "math.h"
 
@@ -38,11 +39,11 @@ MainWindow::MainWindow()
     m_panelWidth = 200;
     m_s3d = new Scene3D();
     m_s3d->setParent(this);
-   // m_s3d->
+
     m_dialogNewFigure = new DialogNewFigure( m_s3d );
 
     m_dialogTemplates = new DialogTemplates(m_modelsManager);
-    connect(m_dialogTemplates, SIGNAL(newActive()),this,SLOT(setComboModels()));
+    connect(m_dialogTemplates, SIGNAL(newActive()), this, SLOT(setComboModels()));
 
     m_dialogAbout = new DialogAbout();
     m_dialogSettings = new DialogSettings(m_s3d);
@@ -51,111 +52,111 @@ MainWindow::MainWindow()
 
     m_sliderVelocity = new QSlider(m_panelSettings);
     m_sliderVelocity->setOrientation(Qt::Horizontal);
-    m_sliderVelocity->setGeometry(10,40,m_panelWidth-20,20);
+    m_sliderVelocity->setGeometry(10, 40, m_panelWidth - 20, 20);
     m_sliderVelocity->setMaximum(100);
     m_sliderVelocity->setValue(30);
     
     m_widgets[m_widgetsCount++] = m_labelVelocity = new QLabel(m_panelSettings);
    // m_labelVelocity->set
-    m_labelVelocity->move(m_sliderVelocity->pos().x(),m_sliderVelocity->pos().y()-20);
-    connect(m_sliderVelocity,SIGNAL(valueChanged(int)),this,SLOT(sliderVelValueChanged(int)));
+    m_labelVelocity->move(m_sliderVelocity->pos().x(), m_sliderVelocity->pos().y() - 20);
+    connect(m_sliderVelocity, SIGNAL(valueChanged(int)), this, SLOT(sliderVelValueChanged(int)));
     sliderVelValueChanged( m_sliderVelocity->value() );
 
     m_widgets[m_widgetsCount++] = m_checkBoxAnimation = new QCheckBox(m_panelSettings);
     m_checkBoxAnimation->setChecked(true);
-    m_checkBoxAnimation->move(10,70);
-    connect(m_checkBoxAnimation,SIGNAL(stateChanged(int)),m_s3d,SLOT(setAnimationEnable(int)));
+    m_checkBoxAnimation->move(10, 70);
+    connect(m_checkBoxAnimation, SIGNAL(stateChanged(int)), m_s3d, SLOT(setAnimationEnable(int)));
 
     m_widgets[m_widgetsCount++] = m_checkBoxGrid = new QCheckBox(m_panelSettings);
-    m_checkBoxGrid->move(10,90);
-    connect(m_checkBoxGrid,SIGNAL(stateChanged(int)),m_s3d,SLOT(setGridEnable(int)));
+    m_checkBoxGrid->move(10, 90);
+    connect(m_checkBoxGrid, SIGNAL(stateChanged(int)), m_s3d, SLOT(setGridEnable(int)));
 
     m_widgets[m_widgetsCount++] = m_checkBoxAxes = new QCheckBox(m_panelSettings);
     m_checkBoxAxes->setChecked(true);
-    m_checkBoxAxes->move(10,110);
-    connect(m_checkBoxAxes,SIGNAL(stateChanged(int)),m_s3d,SLOT(setAxesVisible(int)));
+    m_checkBoxAxes->move(10, 110);
+    connect(m_checkBoxAxes, SIGNAL(stateChanged(int)), m_s3d, SLOT(setAxesVisible(int)));
 
     m_widgets[m_widgetsCount++] = m_checkBoxStatistic = new QCheckBox(m_panelSettings);
     m_checkBoxStatistic->setChecked(true);
-    m_checkBoxStatistic->move(10,130);
-    connect(m_checkBoxStatistic,SIGNAL(stateChanged(int)),m_s3d,SLOT(setStatisticVisible(int)));
+    m_checkBoxStatistic->move(10, 130);
+    connect(m_checkBoxStatistic, SIGNAL(stateChanged(int)), m_s3d, SLOT(setStatisticVisible(int)));
 
     m_widgets[m_widgetsCount++] = m_checkBoxDraw = new QCheckBox(m_panelSettings);
-    m_checkBoxDraw->move(10,150);
-    connect(m_checkBoxDraw,SIGNAL(stateChanged(int)),m_s3d,SLOT(setDrawingEnable(int)));
-    connect(m_checkBoxDraw,SIGNAL(stateChanged(int)),this,SLOT(setDrawingEnable(int)));
+    m_checkBoxDraw->move(10, 150);
+    connect(m_checkBoxDraw, SIGNAL(stateChanged(int)), m_s3d, SLOT(setDrawingEnable(int)));
+    connect(m_checkBoxDraw, SIGNAL(stateChanged(int)), this, SLOT(setDrawingEnable(int)));
     
 
     m_widgets[m_widgetsCount++] = m_lavelDrawType = new QLabel(m_panelSettings);
-    m_lavelDrawType->move(15,175);
+    m_lavelDrawType->move(15, 175);
 
     m_comboBoxModels = new QComboBox(m_panelSettings);
-    m_comboBoxModels->move(10,195);
+    m_comboBoxModels->move(10, 195);
     connect(m_comboBoxModels, SIGNAL(currentIndexChanged(const QString&) ), this, SLOT(changeDrawModel(const QString&) ));
 
     m_widgets[m_widgetsCount++] = m_buttonStart = new QPushButton(m_panelSettings);
-    m_buttonStart->move(20,m_checkBoxDraw->pos().y()+100);
-    connect(m_buttonStart,SIGNAL(clicked()),this,SLOT(buttonStartClicked()));
+    m_buttonStart->move(20, m_checkBoxDraw->pos().y() + 100);
+    connect(m_buttonStart, SIGNAL(clicked()), this, SLOT(buttonStartClicked()));
 
     m_widgets[m_widgetsCount++] = m_buttonStep = new QPushButton(m_panelSettings);
-    m_buttonStep->move(20,m_buttonStart->pos().y()+m_buttonStart->height()+5);
-    connect(m_buttonStep,SIGNAL(clicked()),m_s3d,SLOT(stepFigure()));
+    m_buttonStep->move(20, m_buttonStart->pos().y() + m_buttonStart->height() + 5);
+    connect(m_buttonStep, SIGNAL(clicked()), m_s3d, SLOT(stepFigure()));
 
     m_widgets[m_widgetsCount++] = m_buttonClear = new QPushButton(m_panelSettings);
-    m_buttonClear->move(20,m_buttonStep->pos().y()+m_buttonStep->height()+20);
-    connect(m_buttonClear,SIGNAL(clicked()),m_s3d,SLOT(clearMap()));
+    m_buttonClear->move(20, m_buttonStep->pos().y() + m_buttonStep->height() + 20);
+    connect(m_buttonClear, SIGNAL(clicked()), m_s3d, SLOT(clearMap()));
 
     m_widgets[m_widgetsCount++] = m_buttonAgar = new QPushButton(m_panelSettings);
-    m_buttonAgar->move(20,m_buttonClear->pos().y()+m_buttonClear->height()+5);
-    connect(m_buttonAgar,SIGNAL(clicked()),m_s3d,SLOT(createAgar()));
+    m_buttonAgar->move(20, m_buttonClear->pos().y() + m_buttonClear->height() + 5);
+    connect(m_buttonAgar, SIGNAL(clicked()), m_s3d, SLOT(createAgar()));
 
     m_widgets[m_widgetsCount++] = m_buttonRnd = new QPushButton(m_panelSettings);
-    m_buttonRnd->move(20,m_buttonAgar->pos().y()+m_buttonAgar->height()+5);
-    connect(m_buttonRnd,SIGNAL(clicked()),m_s3d,SLOT(createRandomMap()));
+    m_buttonRnd->move(20, m_buttonAgar->pos().y() + m_buttonAgar->height() + 5);
+    connect(m_buttonRnd, SIGNAL(clicked()), m_s3d, SLOT(createRandomMap()));
     //list.
 
-    menuFile = this->menuBar()->addMenu(LNG["file"]);
+    menuFile = menuBar()->addMenu(LNG["file"]);
     //menuFile->addActions(*(QList<QAction*>*)&list);
         actNewFigure = menuFile->addAction(LNG["new_fig"]);
-        connect(actNewFigure,SIGNAL(triggered()), this,SLOT(createNewFigure()));
+        connect(actNewFigure, SIGNAL(triggered()), this, SLOT(createNewFigure()));
         menuFile->addSeparator();
         actOpen = menuFile->addAction(LNG["open"]);
-        connect(actOpen,SIGNAL(triggered()),this,SLOT(openFile()));
+        connect(actOpen, SIGNAL(triggered()), this, SLOT(openFile()));
 
         actSave = menuFile->addAction(LNG["save"]);
-        connect(actSave,SIGNAL(triggered()),this,SLOT(saveFile()));
+        connect(actSave, SIGNAL(triggered()), this, SLOT(saveFile()));
 
         actSaveAs = menuFile->addAction(LNG["save_as"]);
-        connect(actSaveAs,SIGNAL(triggered()),this,SLOT(saveFileAs()));
+        connect(actSaveAs, SIGNAL(triggered()), this, SLOT(saveFileAs()));
         menuFile->addSeparator();
         actExit = menuFile->addAction(LNG["exit"]);
-        connect(actExit,SIGNAL(triggered()),this,SLOT(close()));
+        connect(actExit, SIGNAL(triggered()), this, SLOT(close()));
     
-    menuEdit = this->menuBar()->addMenu(LNG["edit"]);
+    menuEdit = menuBar()->addMenu(LNG["edit"]);
 
         actClearMap = menuEdit->addAction(LNG["clear_map"]);
-        connect(actClearMap,SIGNAL(triggered()),m_s3d,SLOT(clearMap()));
+        connect(actClearMap, SIGNAL(triggered()), m_s3d, SLOT(clearMap()));
 
         actAgar = menuEdit->addAction(LNG["create_agar"]);
-        connect(actAgar,SIGNAL(triggered()),m_s3d,SLOT(createAgar()));
+        connect(actAgar, SIGNAL(triggered()), m_s3d, SLOT(createAgar()));
         actRandomMap = menuEdit->addAction(LNG["create_random_map"]);
-        connect(actRandomMap,SIGNAL(triggered()),m_s3d,SLOT(createRandomMap()));
+        connect(actRandomMap, SIGNAL(triggered()), m_s3d, SLOT(createRandomMap()));
         menuEdit->addSeparator();
         actTemplates = menuEdit->addAction(LNG["templates"]);
-        connect(actTemplates,SIGNAL(triggered()),m_dialogTemplates,SLOT(exec()));
+        connect(actTemplates, SIGNAL(triggered()), m_dialogTemplates, SLOT(exec()));
         
-    menuView = this->menuBar()->addMenu(LNG["view"]);
+    menuView = menuBar()->addMenu(LNG["view"]);
         actFullScreen = menuView->addAction(LNG["full_screen"]);
-        connect(actFullScreen,SIGNAL(triggered()),m_s3d,SLOT(setFullScreen()));
+        connect(actFullScreen, SIGNAL(triggered()), m_s3d, SLOT(setFullScreen()));
         actPanelSettings = menuView->addAction(LNG["settings_panel"]);
         actPanelSettings->setCheckable(true);
         actPanelSettings->setChecked(true);
-        connect(actPanelSettings,SIGNAL(triggered(bool)),this,SLOT(setSettingsVisible(bool)));
-      //  if (LNG.Count()>1)
+        connect(actPanelSettings, SIGNAL(triggered(bool)), this, SLOT(setSettingsVisible(bool)));
+        if (LNG.count() > 1)
         {
             menuLang = menuView->addMenu(LNG["languages"]);
             const QList<QString> & languages = LNG.getLanguagesList();
-            QString currentName = LNG["language_name"];
+            const QString & currentName = LNG["language_name"];
             m_checkedLanguageAction = NULL;
             for ( QList<QString>::const_iterator it = languages.begin(); it != languages.end(); ++it )
             {
@@ -168,19 +169,19 @@ MainWindow::MainWindow()
             if ( m_checkedLanguageAction )
                 m_checkedLanguageAction->setChecked( true );
         }
-    menuModeling = this->menuBar()->addMenu(LNG["modelling"]);
+    menuModeling = menuBar()->addMenu(LNG["modelling"]);
         actSettings = menuModeling->addAction(LNG["modelling_settings"]);
-        connect(actSettings,SIGNAL(triggered()),m_dialogSettings,SLOT(exec()));
+        connect(actSettings, SIGNAL(triggered()), m_dialogSettings,SLOT(exec()));
         menuModeling->addSeparator();
         actStep = menuModeling->addAction(LNG["step"]);
-        connect(actStep,SIGNAL(triggered()),m_s3d,SLOT(stepFigure()));
+        connect(actStep, SIGNAL(triggered()), m_s3d, SLOT(stepFigure()));
         actStartStop = menuModeling->addAction(LNG["start"]);
         
-        connect(actStartStop,SIGNAL(triggered()),this,SLOT(buttonStartClicked()));
+        connect(actStartStop, SIGNAL(triggered()), this, SLOT(buttonStartClicked()));
 
-    menuHelp = this->menuBar()->addMenu(LNG["help"]);
+    menuHelp = menuBar()->addMenu(LNG["help"]);
         actAbout = menuHelp->addAction(LNG["about"]);
-        connect(actAbout,SIGNAL(triggered()),m_dialogAbout,SLOT(exec()));
+        connect(actAbout, SIGNAL(triggered()), m_dialogAbout, SLOT(exec()));
  
        
     m_panelSettings->setParent(this);
@@ -208,7 +209,7 @@ void MainWindow::createOpenTree()
     QString P = QDir::currentPath() + QString("/Save Conway");
     delete menuOpenFinded;
     menuOpenFinded = new QMenu(LNG["open_founded"],this);
-    menuFile->insertMenu(actSave,menuOpenFinded);
+    menuFile->insertMenu(actSave, menuOpenFinded);
     if (!createOpenMenuTreeRec(menuOpenFinded,P))
         menuOpenFinded = NULL;
 }
@@ -223,31 +224,25 @@ bool MainWindow::createOpenMenuTreeRec(QMenu * _menu, const QString & _path, int
     QStringList filt(QString("*.cf"));
     QStringList fileList = d.entryList(filt,QDir::Files);
 
-    if (fileList.count()!=0)
+    foreach (const QString & s, fileList)
     {
-        foreach (QString s, fileList)
+        QString absPath = d.absoluteFilePath(s);
+       // if (isFileValid(absPath))
         {
-            QString absPath = d.absoluteFilePath(s);
-            if (isFileValid(absPath))
-            {
-                OpenAction * a = new OpenAction(s, absPath, NULL);
-                connect(a, SIGNAL(fileSelected(const QString &)), this, SLOT(openFile(const QString &)));
-                _menu->addAction(a);
-                actList += a;
-                ret = true;
-            }
+            OpenAction * a = new OpenAction(s, absPath, NULL);
+            connect(a, SIGNAL(fileSelected(const QString &)), this, SLOT(openFile(const QString &)));
+            _menu->addAction(a);
+            actList += a;
+            ret = true;
         }
     }
 
     QStringList dirList = d.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    if (dirList.count() != 0)
+    foreach (const QString & s, dirList)
     {
-        foreach (QString s, dirList)
-        {
-            QMenu * m = _menu->addMenu(s);
-            ret |= createOpenMenuTreeRec(m, d.absoluteFilePath(s), _it + 1);
-        }
+        QMenu * m = _menu->addMenu(s);
+        ret |= createOpenMenuTreeRec(m, d.absoluteFilePath(s), _it + 1);
     }
 
     if (!ret)
@@ -280,7 +275,7 @@ QString createMenuText(const QString & _first, const QString & _second, const QF
 void MainWindow::setLang()
 {
     startStopNames();
-    this->setWindowTitle(LNG["conway_game"]);
+    setWindowTitle(LNG["conway_game"]);
     m_panelSettings->setText(LNG["settings"]);
     m_labelVelocity->setText(LNG["speed"]);
     m_lavelDrawType->setText(LNG["type_of_draw"]);
@@ -310,7 +305,7 @@ void MainWindow::setLang()
         actRandomMap->setText(LNG["create_random_map"]);
         actTemplates->setText(LNG["templates"]);
     menuView->setTitle(LNG["view"]);
-        actFullScreen->setText(LNG["full_screen"]);
+        actFullScreen->setText(createMenuText(LNG["full_screen"], QString("Alt+Enter"), actFullScreen->font(), menuWidth ) );
         actPanelSettings->setText(LNG["settings_panel"]);
         if (LNG.count() > 1)
             menuLang->setTitle(LNG["languages"]);
@@ -355,7 +350,12 @@ void MainWindow::actionLanguageClicked()
 {
     if ( m_checkedLanguageAction )
         m_checkedLanguageAction->setChecked( false );
-    m_checkedLanguageAction = ( QAction* )QObject::sender();
+    m_checkedLanguageAction = dynamic_cast< QAction* > ( QObject::sender() );
+    if ( m_checkedLanguageAction == NULL )
+    {
+        qDebug() << "Wrong cast: m_checkedLanguageAction = dynamic_cast< QAction* > ( QObject::sender() );";
+        return;
+    }
     LNG.setCurrentLanguage( m_checkedLanguageAction->text() );
     setLang();
 }
@@ -369,9 +369,9 @@ void MainWindow::changeDrawModel(const QString& _name)
 
 void MainWindow::resize()
 {
-    int menuHeight = this->menuBar()->height();
-    m_s3d->setGeometry(0,menuHeight,this->width()-m_panelWidth,this->height()-menuHeight);
-    m_panelSettings->setGeometry(this->width()-m_panelWidth,menuHeight,m_panelWidth,this->height()-menuHeight);
+    int menuHeight = menuBar()->height();
+    m_s3d->setGeometry(0, menuHeight, width() - m_panelWidth, height() - menuHeight);
+    m_panelSettings->setGeometry(width() - m_panelWidth, menuHeight, m_panelWidth, height() - menuHeight);
 }
 
 void MainWindow::setSettingsVisible(bool _value)
@@ -411,7 +411,7 @@ void MainWindow::buttonStartClicked()
 }
 void MainWindow::sliderVelValueChanged(int)
 {
-    int interval = (int)getVelocity( m_sliderVelocity );
+    int interval = static_cast<int>( getVelocity( m_sliderVelocity ) );
     m_sliderVelocity->setToolTip( LNG["delay"] + ": " + QString::number(interval) );
     m_s3d->setInterval( interval );
 }
@@ -440,9 +440,13 @@ bool MainWindow::openFile(const QString & _fn)
     reader.readData( type );
 
     if ( !strcmp( type, "Torus" ) )
-        m_s3d->setFigure( new Torus(&reader) );
+        m_s3d->setFigure( new Torus( &reader ) );
     else if ( !strcmp( type, "Surface" ) )
-        m_s3d->setFigure( new Surface(&reader) );
+        m_s3d->setFigure( new Surface( &reader ) );
+    else if ( !strcmp( type, "Ellipsoid" ) )
+        m_s3d->setFigure( new Ellipsoid( &reader ) );
+    else if ( !strcmp( type, "Parallelepiped" ) )
+        m_s3d->setFigure( new Parallelepiped( &reader) );
     delete type;
 
     m_savedFileName = _fn;
@@ -474,38 +478,10 @@ void MainWindow::openFile()
 
 void MainWindow::saveFile()
 {
-    if (m_savedFileName.isNull() || m_savedFileName == "")
+    if (m_savedFileName.isNull() || m_savedFileName.isEmpty())
         saveFileAs();
     else
         saveFileTo(m_savedFileName);
-}
-
-bool MainWindow::isFileValid(const QString & _fn)
-{
-    FILE * file;
-    if (!_fn.isNull() && (file = fopen(_fn.toLocal8Bit().data(), "rb") )!=NULL )
-    {
-        char s;
-        int sum = -1000;
-        fseek(file, 0, SEEK_END);
-        int sz = ftell(file) - 4;
-        if (sz <= 0)
-        {
-            fclose(file);
-            return false;
-        }
-        rewind(file);
-        while (sz--)
-        {
-            fread(&s, 1, 1, file);
-            sum += s;
-        }
-        fread(&sz, 4, 1, file);
-        fclose(file);
-        if (sum == sz)
-            return true;
-    }
-    return false;
 }
 
 void MainWindow::saveFileTo(const QString & _fn)
@@ -560,6 +536,15 @@ void MainWindow::keyPressEvent(QKeyEvent * _e)
                 break;
         }
     }
+    else if (QApplication::keyboardModifiers() == Qt::AltModifier)
+    {
+        switch (_e->key())
+        {
+            case Qt::Key_Return:
+                m_s3d->switchFullScreen();
+                break;
+        }
+    }
 
 }
 
@@ -581,9 +566,4 @@ MainWindow::~MainWindow()
     delete m_panelSettings;
     delete m_s3d;
     delete m_dialogTemplates;
- //       QMessageBox X;
-  //  X.exec();
-  //  DELETE(menuHelp);
-
-    //QAction * actStartStop;
 }

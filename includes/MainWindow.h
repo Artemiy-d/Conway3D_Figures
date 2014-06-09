@@ -1,5 +1,5 @@
-#ifndef WIDG_H
-#define	WIDG_H
+#ifndef MAINWINDOW_H
+#define	MAINWINDOW_H
 
 #include <QAction>
 #include <QMainWindow>
@@ -9,7 +9,7 @@ class OpenAction : public QAction
 {
     Q_OBJECT
 public:
-    QString m_fileName;
+
     OpenAction(const QString &_text, const QString & _fn, QObject * _parent)
         : QAction(_text, _parent),
           m_fileName(_fn)
@@ -23,6 +23,9 @@ private slots:
     }
 signals:
     void fileSelected(const QString & _fn);
+
+private:
+    QString m_fileName;
 };
 
 
@@ -50,7 +53,6 @@ Q_OBJECT
 public:
     //void paintEvent(QPaintEvent *event);
     MainWindow();
-    static bool isFileValid(const QString & _fn);
     void resizeEvent(QResizeEvent * _e);
     void resize();
     virtual ~MainWindow();
@@ -112,5 +114,5 @@ private:
 
 
 
-#endif	/* WIDG_H */
+#endif	/* MAINWINDOW_H */
 

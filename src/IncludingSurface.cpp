@@ -17,14 +17,14 @@ IncludingSurface::IncludingSurface(Figure * _parent, Cell * _cells, Index _first
     m_secondSideCount( _secondCount )
 {
     int s = Side01 | Side30;
-    for (Index i = 0; i < m_firstSideCount; i++)
-        for (Index j = 0; j < m_secondSideCount; j++)
+    for (Index i = 0; i < m_firstSideCount; ++i)
+        for (Index j = 0; j < m_secondSideCount; ++j)
             _cells[i * m_secondSideCount + j].paintSides = s;
 
-    for (Index i = 0; i < m_firstSideCount; i++)
+    for (Index i = 0; i < m_firstSideCount; ++i)
         _cells[i * m_secondSideCount + m_secondSideCount - 1].paintSides |= Side23;
 
-    for (Index j = 0; j < m_secondSideCount; j++)
+    for (Index j = 0; j < m_secondSideCount; ++j)
         _cells[(m_firstSideCount - 1) * m_secondSideCount + j].paintSides |= Side12;
 }
 
@@ -38,28 +38,28 @@ void IncludingSurface::createFullPlaneVertexes(Point3F &pnt0,
         return;
 #define get4(x0,x1,x3,x2) (x2).x=(x1).x+(x3).x-(x0).x; (x2).y=(x1).y+(x3).y-(x0).y; (x2).z=(x1).z+(x3).z-(x0).z;
 #define divSegment(p1,p2,q,len, px) (px).x=((p1).x*(q)+((len)-(q))*(p2).x)/(len); (px).y=((p1).y*(q)+((len)-(q))*(p2).y)/(len); (px).z=((p1).z*(q)+((len)-(q))*(p2).z)/(len);
-    Point3F pnt2,pnt,pnt1_new,pnt3_new,pnt2_new;
-    get4(pnt0,pnt1,pnt3,pnt2)
+    Point3F pnt2, pnt, pnt1_new, pnt3_new, pnt2_new;
+    get4(pnt0, pnt1, pnt3, pnt2)
     Index index = firstIndex;
-    for (Index i = 0; i <= m_firstSideCount; i++)
+    for (Index i = 0; i <= m_firstSideCount; ++i)
     {
-        divSegment(pnt0,pnt1,i,m_firstSideCount,pnt1_new)
-        for (Index j = 0; j <= m_secondSideCount; j++)
+        divSegment(pnt0, pnt1, i, m_firstSideCount, pnt1_new)
+        for (Index j = 0; j <= m_secondSideCount; ++j)
         {
-            divSegment(pnt0,pnt3,j,m_secondSideCount,pnt3_new)
-            get4(pnt0,pnt1_new,pnt3_new,pointArray[index])
-            index++;
+            divSegment(pnt0, pnt3, j, m_secondSideCount, pnt3_new)
+            get4(pnt0, pnt1_new, pnt3_new, pointArray[index])
+            ++index;
         }
     }
 
     Index k = 0;
-    for (Index i = 0; i < m_firstSideCount; i++)
-        for (Index j = 0; j < m_secondSideCount; j++)
+    for (Index i = 0; i < m_firstSideCount; ++i)
+        for (Index j = 0; j < m_secondSideCount; ++j)
         {
-            m_cells[k].indices[0]=i*(m_secondSideCount+1)+j+firstIndex;
-            m_cells[k].indices[1]=(i+1)*(m_secondSideCount+1)+j+firstIndex;
-            m_cells[k].indices[2]=(i+1)*(m_secondSideCount+1)+j+1+firstIndex;
-            m_cells[k++].indices[3]=i*(m_secondSideCount+1)+j+1+firstIndex;
+            m_cells[k].indices[0] = i * (m_secondSideCount + 1) + j + firstIndex;
+            m_cells[k].indices[1] = (i + 1) * (m_secondSideCount + 1) + j + firstIndex;
+            m_cells[k].indices[2] = (i + 1) * (m_secondSideCount + 1) + j + 1 + firstIndex;
+            m_cells[k++].indices[3]= i * (m_secondSideCount + 1) + j + 1 + firstIndex;
         }
     firstIndex = index;
     surfaceCellsConnect();
@@ -80,14 +80,14 @@ void IncludingSurface::minus(Index _x, Index _y)
 {
     Index x = (_x % m_firstSideCount + m_firstSideCount) % m_firstSideCount;
     Index y = (_y % m_secondSideCount + m_secondSideCount) % m_secondSideCount;
-    m_parent->minus(&m_cells[x*m_secondSideCount + y]);
+    m_parent->minus(&m_cells[x * m_secondSideCount + y]);
 }
 void IncludingSurface::createAgar()
 {
     Index c1 = (m_firstSideCount / 3) * 3,
           c2 = (m_secondSideCount / 3) * 3;
-    for (Index i = 0; i < c1; i++)
-        for (Index j = 0; j < c2; j++)
+    for (Index i = 0; i < c1; ++i)
+        for (Index j = 0; j < c2; ++j)
         {
             if (i % 3 && j % 3)
                 plus(i, j);
@@ -102,13 +102,13 @@ void IncludingSurface::addModel(Model * _m, Index _x, Index _y, bool _refresh)
     Index sz = _m->getSize();
     if (_refresh)
     {
-        for (Index i = 0; i < sz; i++)
-            for (Index j = 0; j < sz; j++)
+        for (Index i = 0; i < sz; ++i)
+            for (Index j = 0; j < sz; ++j)
                 minus(_x + i, j + _y);
     }
 
-    for (Index i = 0; i < sz; i++)
-        for (Index j = 0; j < sz; j++)
+    for (Index i = 0; i < sz; ++i)
+        for (Index j = 0; j < sz; ++j)
         {
             if (_m->isCellFilled(i, j))
                 plus(_x + i, j + _y);
@@ -228,13 +228,13 @@ Figure::Cell ** IncludingSurface::GetArrayBySide(IncludingSurface * surf, CellSi
     switch (side)
     {
         case Side01:
-            ACT(i*surf->m_secondSideCount);
+            ACT(i * surf->m_secondSideCount);
             break;
         case Side12:
-            ACT((surf->m_firstSideCount-1)*surf->m_secondSideCount+i);
+            ACT((surf->m_firstSideCount - 1) * surf->m_secondSideCount + i);
             break;
         case Side23:
-            ACT(i*surf->m_secondSideCount+surf->m_secondSideCount-1);
+            ACT(i * surf->m_secondSideCount + surf->m_secondSideCount - 1);
             break;
         case Side30:
             ACT(i);

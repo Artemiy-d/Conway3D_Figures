@@ -78,6 +78,7 @@ public slots:
     void createRandomMap();
     void setFullScreen();
     void restoreNormal();
+    void switchFullScreen();
 
 private:
     QTimer * m_timer;

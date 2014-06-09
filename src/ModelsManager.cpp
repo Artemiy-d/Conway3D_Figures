@@ -60,7 +60,7 @@ ModelsManager::ModelsManager()
     m_modelsMap.insert( "MWSS", ModelData( new ModelShip(6) ) );
     m_modelsMap.insert( "HWSS", ModelData( new ModelShip(7) ) );
     m_modelsMap.insert( "Pentadecatron", ModelData( new ModelPentadecatron() ) );
-    m_modelsMap.insert( "Pentadecatron", ModelData( new ModelAcorn() ) );
+    m_modelsMap.insert( "Acorn", ModelData( new ModelAcorn() ) );
 
 
     QDir dir(QDir::currentPath() + "/" + s_modelsDirectory );

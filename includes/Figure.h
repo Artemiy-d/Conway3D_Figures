@@ -41,6 +41,7 @@ public:
         }
     };
 
+
 public:
     Figure();
     virtual ~Figure();

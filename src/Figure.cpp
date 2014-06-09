@@ -163,7 +163,7 @@ void Figure::setProbabilities(const double * _pLive, const double * _pDead, Inde
 {
     if ( _neighborsCount != m_maxNeighborsCount )
         createProbabilities( _neighborsCount );
-    for (Index i = 0; i <= m_maxNeighborsCount; i++)
+    for (Index i = 0; i <= m_maxNeighborsCount; ++i)
     {
         m_probabilitiesLive[i] = _pLive[i];
         m_probabilitiesDead[i] = _pDead[i];
@@ -200,18 +200,19 @@ void Figure::selectAndPlus(const Point3F & _p1, const Point3F & _p_1, bool _plus
 {
     float minR = 1000000;
     Index minInd(-1);
-    for (Index i = 0; i < m_cellsCount; i++)
+    for (Index i = 0; i < m_cellsCount; ++i)
     {
-        float r1 = m_normalsToCells[i*4+3] & (_p1 - m_pointsToDraw[i*4]);
-        float r2 = m_normalsToCells[i*4+3] & (_p_1 - m_pointsToDraw[i*4]);
-        if (r1*r2<0)
+        Index i4 = i * 4;
+        float r1 = m_normalsToCells[i4 + 3] & (_p1 - m_pointsToDraw[i4]);
+        float r2 = m_normalsToCells[i4 + 3] & (_p_1 - m_pointsToDraw[i4]);
+        if (r1 * r2 < 0)
         {
             Point3F ip = _p1 - (_p_1 - _p1) * ( r1 / (r2 - r1));
             bool cellFound = true;
-            for (int j = 0; j < 4 && cellFound; j++)
+            for (int j = 0; j < 4 && cellFound; ++j)
             {
-                if ( (( (m_pointsToDraw[i*4+(j+1)%4] - m_pointsToDraw[i*4+j]) ^
-                        (ip - m_pointsToDraw[i*4+j])) & m_normalsToCells[i*4+3]) < 0)
+                if ( (( (m_pointsToDraw[i4 + (j + 1) % 4] - m_pointsToDraw[i4 + j]) ^
+                        (ip - m_pointsToDraw[i4 + j])) & m_normalsToCells[i4 + 3]) < 0)
                 {
                     cellFound = false;
                 }
@@ -255,22 +256,23 @@ void Figure::createGrid()
 
     m_gridPointsCount = 0;
 
-    for (Index i = 0; i < m_cellsCount; i++)
+    for (Index i = 0; i < m_cellsCount; ++i)
     {
-        Index i4 = i*4;
+        Index i4 = i * 4;
         GLuint * I = m_cells[i].indices;
-        for (int j = 0; j < 4; j++)
+        for (int j = 0; j < 4; ++j)
         {
-            m_gridColors[i4+j] = m_colorGrid;
-            m_pointsToDraw[i4+j] = m_points[I[j]];
-            m_drawingIndices[i4+j] = i4+j;
+            m_gridColors[i4 + j] = m_colorGrid;
+            m_pointsToDraw[i4 + j] = m_points[I[j]];
+            m_drawingIndices[i4 + j] = i4 + j;
             if (ArrayCellSides[j] & m_cells[i].paintSides)
             {
-                m_gridPoints[m_gridPointsCount++] = i4+(j+1)%4;
-                m_gridPoints[m_gridPointsCount++] = i4+j;
+                m_gridPoints[m_gridPointsCount++] = i4 + (j + 1) % 4;
+                m_gridPoints[m_gridPointsCount++] = i4 + j;
             }
-            int j1 = (j+1)%4, j_1 = (j+3)%4;
-            m_normalsToCells[i4+j] = (m_points[I[j1]] - m_points[I[j]]) ^
+            int j1 =  (j + 1) % 4;
+            int j_1 = (j + 3) % 4;
+            m_normalsToCells[i4 + j] = (m_points[I[j1]] - m_points[I[j]]) ^
                     ( m_points[I[j_1]] - m_points[I[j]] );
         }
 
@@ -304,7 +306,7 @@ void Figure::createCells(Index _cellsCount, Index _pointsCount)
     }
     m_cells = new Cell[_cellsCount];
     m_cells->neighbors = new Cell*[_cellsCount * m_maxNeighborsCount];
-    for (Index i = 1; i < _cellsCount; i++)
+    for (Index i = 1; i < _cellsCount; ++i)
     {
         m_cells[i].neighbors = m_cells->neighbors + i * m_maxNeighborsCount;
     }
@@ -346,7 +348,7 @@ void Figure::plus(Cell * _cell)
         return;
     _cell->livingStatusNow = true;
     ++m_usersCount;
-    for (Index j = 0; j < _cell->neighborsCount; j++)
+    for (Index j = 0; j < _cell->neighborsCount; ++j)
     {
         _cell->neighbors[j]->currentCountActiveNeighbors++;
         if (_cell->neighbors[j]->steps != m_stepNumber)
@@ -367,7 +369,7 @@ void Figure::minus(Cell * _cell)
         return;
     _cell->livingStatusNow = false;
     --m_usersCount;
-    for (Index j = 0; j < _cell->neighborsCount; j++)
+    for (Index j = 0; j < _cell->neighborsCount; ++j)
     {
         _cell->neighbors[j]->currentCountActiveNeighbors--;
         if (_cell->neighbors[j]->steps != m_stepNumber)
@@ -389,7 +391,7 @@ void Figure::step()
     Index j;
     Index u;
 
-    for (Index i = 0; i < m_activeCountNow; i++)
+    for (Index i = 0; i < m_activeCountNow; ++i)
     {
         c = m_activeCellsNow[i];
         if (c->livingStatusNow)
@@ -399,7 +401,7 @@ void Figure::step()
             {
                 c->livingStatusNext = false;
                 --m_usersCount;
-                for (j = 0; j<c->neighborsCount; j++)
+                for (j = 0; j<c->neighborsCount; ++j)
                 {
                     c->neighbors[j]->nextCountActiveNeighbors--;
                     if (c->neighbors[j]->steps!= m_stepNumber)
@@ -415,7 +417,7 @@ void Figure::step()
             {
                 c->livingStatusNext = true;
                 ++m_usersCount;
-                for (j = 0; j<c->neighborsCount; j++)
+                for (j = 0; j<c->neighborsCount; ++j)
                 {
                     c->neighbors[j]->nextCountActiveNeighbors++;
                     if (c->neighbors[j]->steps!= m_stepNumber)
@@ -429,7 +431,7 @@ void Figure::step()
     }
 
     if (!m_probabilitiesDisabled)
-        for (Index i = 0; i < m_activeCountNow; i++)
+        for (Index i = 0; i < m_activeCountNow; ++i)
         {
             u = m_activeCellsNow[i]->currentCountActiveNeighbors;
             if (m_activeCellsNow[i]->steps != m_stepNumber &&
@@ -448,7 +450,7 @@ void Figure::step()
 //            }
 //    }
 
-    for (Index i = 0; i < m_activeCountNext; i++)
+    for (Index i = 0; i < m_activeCountNext; ++i)
     {
         m_activeCellsNext[i]->livingStatusNow = m_activeCellsNext[i]->livingStatusNext;
         m_activeCellsNext[i]->currentCountActiveNeighbors = m_activeCellsNext[i]->nextCountActiveNeighbors;
@@ -464,7 +466,7 @@ void Figure::step()
 
 void Figure::clearMap()
 {
-    for (Index i = 0; i < m_cellsCount; i++)
+    for (Index i = 0; i < m_cellsCount; ++i)
         minus(i);
     refresh();
 }
@@ -472,7 +474,7 @@ void Figure::clearMap()
 void Figure::createRandomMap(float _p)
 {
     RandomLCGDefault::Probability p(_p);
-    for (Index i = 0; i < m_cellsCount; i++)
+    for (Index i = 0; i < m_cellsCount; ++i)
     {
         if ( p.simulate( m_random ) )
             plus(i);
@@ -484,7 +486,7 @@ void Figure::initBegin()
 {
     m_activeCountNow = m_activeCountNext = m_usersCount = 0;
     m_stepNumber = 1;
-    for (Index i = 0; i < m_cellsCount; i++)
+    for (Index i = 0; i < m_cellsCount; ++i)
     {
         m_cells[i].paintSides = ~0;
         m_cells[i].livingStatusNext = m_cells[i].livingStatusNow = false;
@@ -519,10 +521,10 @@ void Figure::drawCells()
 
    // glNewList(1,GL_COMPILE);
 
-    for (Index i = 0; i < m_cellsCount; i++)
+    for (Index i = 0; i < m_cellsCount; ++i)
     {
-        Index i4 = i*4;
-        m_colorArray[i4+3] = m_cells[i].livingStatusNow ? m_colorLive : m_colorDead;
+        Index i4 = i * 4;
+        m_colorArray[i4 + 3] = m_cells[i].livingStatusNow ? m_colorLive : m_colorDead;
         //m_colorArray[i4+1] = m_colorArray[i4+2] = m_colorArray[i4+3] = m_colorArray[i4];
     }
 
@@ -534,10 +536,10 @@ void Figure::drawCells()
     glEnable(GL_NORMALIZE);
 
     glVertexPointer(3, GL_FLOAT, 0, m_pointsToDraw);
-    glNormalPointer(GL_FLOAT,0,m_normalsToCells);
+    glNormalPointer(GL_FLOAT, 0, m_normalsToCells);
     glColorPointer(4, GL_UNSIGNED_BYTE, 0, m_colorArray);
 
-    glDrawElements(GL_QUADS,m_cellsCount*4,GL_UNSIGNED_INT,m_drawingIndices);
+    glDrawElements(GL_QUADS, m_cellsCount * 4, GL_UNSIGNED_INT, m_drawingIndices);
 
    // glDisableClientState(GL_NORMAL_ARRAY);
   //  if (m_lineWidth!=0.0f) glCallList(m_listGridId);
@@ -547,7 +549,7 @@ void Figure::drawCells()
        // glDisableClientState(GL_NORMAL_ARRAY);
         glColorPointer(4, GL_UNSIGNED_BYTE, 0, m_gridColors);
         glLineWidth(m_lineWidth);
-        glDrawElements(GL_LINES,m_gridPointsCount,GL_UNSIGNED_INT,m_gridPoints);
+        glDrawElements(GL_LINES, m_gridPointsCount, GL_UNSIGNED_INT, m_gridPoints);
     }
 
         
@@ -588,8 +590,9 @@ void Figure::drawActiveCells()
     glEnableClientState(GL_VERTEX_ARRAY);
 
 
-    int a = 0, b = m_cellsCount*4 - 1;
-    for (int i = 0; i<m_activeCountNow; i++)
+    Index a = 0;
+    Index b = m_cellsCount * 4 - 1;
+    for (Index i = 0; i < m_activeCountNow; ++i)
     {
         Cell * c = m_activeCellsNow[i];
         if (m_cells[i].livingStatusNow)
@@ -614,7 +617,7 @@ void Figure::drawActiveCells()
 
 
     glColor3fv((GLfloat*)&m_colorDead);
-    glDrawElements(GL_QUADS, m_cellsCount*4 - 1 - b, GL_UNSIGNED_INT, m_drawingIndices+b+1);
+    glDrawElements(GL_QUADS, m_cellsCount * 4 - 1 - b, GL_UNSIGNED_INT, m_drawingIndices + b + 1);
 
   //  glColor3f(0.0f,0.0f,1.0f);
    // glDrawElements(GL_LINES,m_gridPointsCount,GL_UNSIGNED_INT,m_gridPoints);

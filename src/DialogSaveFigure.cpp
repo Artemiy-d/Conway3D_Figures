@@ -15,7 +15,7 @@ DialogSaveFigure::DialogSaveFigure() :
 
 QString DialogSaveFigure::execToSave()
 {
-    this->setAcceptMode(QFileDialog::AcceptSave);
+    setAcceptMode(QFileDialog::AcceptSave);
     if (QFileDialog::exec() != QDialog::Accepted)
         return QString();
     return selectedFiles().first();
@@ -24,7 +24,7 @@ QString DialogSaveFigure::execToSave()
 void DialogSaveFigure::filterChanged(const QString& _filter)
 {
     if (_filter == m_filters.first())
-        this->setDefaultSuffix( s_conwayFigureSuffix );
+        setDefaultSuffix( s_conwayFigureSuffix );
     else
-        this->setDefaultSuffix( QString() );
+        setDefaultSuffix( QString() );
 }

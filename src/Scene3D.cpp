@@ -190,12 +190,17 @@ Figure * Scene3D::getFigure()
     return m_figure;
 }
 
-void Scene3D::mouseDoubleClickEvent(QMouseEvent * /*_e*/)
+void Scene3D::switchFullScreen()
 {
     if (parent() == NULL)
         restoreNormal();
     else
         setFullScreen();
+}
+
+void Scene3D::mouseDoubleClickEvent(QMouseEvent * /*_e*/)
+{
+    switchFullScreen();
 }
 
 void Scene3D::restoreNormal()
