@@ -45,7 +45,6 @@ public:
     void start(int _interval = 500);
     void stop();
     void setInterval(int _interval = 500);
-    void createFigure(FigureType _figureType, int * _sizeParams, float * _phizParams, bool _copySettings);
 
     void setFigure(Figure * _figure);
 

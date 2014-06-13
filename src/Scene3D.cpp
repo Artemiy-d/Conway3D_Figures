@@ -22,7 +22,7 @@ void Scene3D::StatisticWidget::paintEvent(QPaintEvent * /*_e*/)
     m_painter.begin(this);
     m_painter.setFont(m_font);
     m_painter.fillRect(0, 0, width(), height(), QColor(0, 255, 0));
-    for (int i = 0; i < STATISTIC_ITEMS_COUNT; i++)
+    for (int i = 0; i < STATISTIC_ITEMS_COUNT; ++i)
         m_painter.drawText(5, (m_font.weight() + 3) * (i + 1), m_text[i]);
     m_painter.end();
 }
@@ -45,9 +45,9 @@ void Scene3D::stepFigure()
     if (m_statisticVisible)
         drawStatistic();
     if (m_animationOn)
-        this->updateGL();
+        updateGL();
 
-    m_stepsNumber++;
+    ++m_stepsNumber;
 }
 
 Scene3D::Scene3D(QWidget* _parent)
@@ -126,57 +126,10 @@ void Scene3D::drawStatistic()
     if (m_figure != NULL)
     {
         m_statisticWidget->setText("Step " + QString::number(m_stepsNumber), StatisticWidget::STEPS, false);
-        m_statisticWidget->setText("Users: "+ QString::number(m_figure->getLivingCellsCount()), StatisticWidget::LIVING_CELLS);
+        m_statisticWidget->setText("Users: " + QString::number(m_figure->getLivingCellsCount()), StatisticWidget::LIVING_CELLS);
     }
 }
 
-
-void Scene3D::createFigure(FigureType _figuretype, int * _sizeParams, float * /*_phizParams*/, bool _copySettings)
-{
-    double pLive[9], pDead[9];
-    bool gridOn = false;
-
-    if (m_figure != NULL)
-    {
-        if (_copySettings)
-        {
-            m_figure->getProbabilities(pLive, pDead);
-            gridOn = m_figure->m_gridEnable;
-        }
-        delete m_figure;
-        m_figure = NULL;
-    }
-    else
-    {
-        _copySettings = false;
-    }
-
-    switch (_figuretype)
-    {
-        case figSurface:
-            m_figure = new Surface(_sizeParams[0], _sizeParams[1]);
-            break;
-        case figTorus:
-            m_figure = new Torus(_sizeParams[0], _sizeParams[1], _sizeParams[2]);
-            break;
-        case figEllipsoid:
-            m_figure = new Ellipsoid(_sizeParams[0], _sizeParams[1], _sizeParams[2]);
-            break;
-        case figParallelepiped:
-            m_figure = new Parallelepiped(_sizeParams[0], _sizeParams[1], _sizeParams[2]);
-            break;
-    }
-
-    m_stepsNumber = 0;
-    if (_copySettings)
-    {
-        m_figure->m_gridEnable = gridOn;
-        m_figure->setProbabilities(pLive, pDead, Figure::s_defaultNeighborsCount);
-    }
-
-    updateGL();
-
-}
 
 void Scene3D::setFigure(Figure * _figure)
 {
@@ -223,7 +176,7 @@ void Scene3D::setFullScreen()
 void Scene3D::initializeGL()
 {
     m_view.init();
-    m_figure = new Torus(50,100,20);
+    m_figure = new Torus(50, 100, 20);
 
     drawStatistic();
 }
@@ -281,7 +234,7 @@ void Scene3D::mousePressEvent(QMouseEvent* _e)
 {
    m_mousePosition = _e->pos();
    m_leftButtonPressed = _e->button() == Qt::LeftButton;
-   this->setFocus();
+   setFocus();
    if (m_drawingOn)
    {
        drawModel( _e->pos() );

@@ -28,7 +28,12 @@
 #include "LanguageManager.h"
 
 
+static const QString s_defaultPathToSave = "Save Conway";
+static const QString s_defaultAbsolutePathToSave = QDir::currentPath() + "/" + s_defaultPathToSave;
+
 static const int s_versionSaving = 0;
+
+static const int s_defaultPanelWidth = 200;
 
 
 MainWindow::MainWindow()
@@ -36,7 +41,7 @@ MainWindow::MainWindow()
     m_modelsManager = new ModelsManager;
     m_checkedLanguageAction = NULL;
     m_widgetsCount = 0;
-    m_panelWidth = 200;
+    m_panelWidth = s_defaultPanelWidth;
     m_s3d = new Scene3D();
     m_s3d->setParent(this);
 
@@ -57,7 +62,7 @@ MainWindow::MainWindow()
     m_sliderVelocity->setValue(30);
     
     m_widgets[m_widgetsCount++] = m_labelVelocity = new QLabel(m_panelSettings);
-   // m_labelVelocity->set
+
     m_labelVelocity->move(m_sliderVelocity->pos().x(), m_sliderVelocity->pos().y() - 20);
     connect(m_sliderVelocity, SIGNAL(valueChanged(int)), this, SLOT(sliderVelValueChanged(int)));
     sliderVelValueChanged( m_sliderVelocity->value() );
@@ -113,10 +118,8 @@ MainWindow::MainWindow()
     m_widgets[m_widgetsCount++] = m_buttonRnd = new QPushButton(m_panelSettings);
     m_buttonRnd->move(20, m_buttonAgar->pos().y() + m_buttonAgar->height() + 5);
     connect(m_buttonRnd, SIGNAL(clicked()), m_s3d, SLOT(createRandomMap()));
-    //list.
 
     menuFile = menuBar()->addMenu(LNG["file"]);
-    //menuFile->addActions(*(QList<QAction*>*)&list);
         actNewFigure = menuFile->addAction(LNG["new_fig"]);
         connect(actNewFigure, SIGNAL(triggered()), this, SLOT(createNewFigure()));
         menuFile->addSeparator();
@@ -187,42 +190,34 @@ MainWindow::MainWindow()
     m_panelSettings->setParent(this);
 
     menuOpenFinded = NULL;
-    createOpenTree();
+    createFoundFilesTree();
     setLang();
-   // delete menuOpenFinded;
- //   menuOpenFinded->setVisible(false);
 
     setComboModels();
-    //    QMessageBox M1;
-     //   M1.exec();
-    setDrawingEnable(0);
 
+    setDrawingEnable(0);
 }
 
-void MainWindow::createOpenTree()
+void MainWindow::createFoundFilesTree()
 {
-  //  foreach (OpenAction * a, actList) { delete a; }
-   // foreach (QMenu * m, menuList) { delete m; }
-    actList.clear();
-    menuList.clear();
-
-    QString P = QDir::currentPath() + QString("/Save Conway");
     delete menuOpenFinded;
-    menuOpenFinded = new QMenu(LNG["open_founded"],this);
+    menuOpenFinded = new QMenu(LNG["open_founded"], this);
     menuFile->insertMenu(actSave, menuOpenFinded);
-    if (!createOpenMenuTreeRec(menuOpenFinded,P))
+    if (!createFoundFilesTreeRec(menuOpenFinded, s_defaultAbsolutePathToSave))
         menuOpenFinded = NULL;
 }
 
-bool MainWindow::createOpenMenuTreeRec(QMenu * _menu, const QString & _path, int _it)
+bool MainWindow::createFoundFilesTreeRec(QMenu * _menu, const QString & _path, int _it)
 {
     if (_it == 3)
         return false;
     bool ret = false;
 
     QDir d(_path);
-    QStringList filt(QString("*.cf"));
-    QStringList fileList = d.entryList(filt,QDir::Files);
+
+    static const QStringList filt(QString("*.cf"));
+
+    QStringList fileList = d.entryList(filt, QDir::Files);
 
     foreach (const QString & s, fileList)
     {
@@ -232,7 +227,6 @@ bool MainWindow::createOpenMenuTreeRec(QMenu * _menu, const QString & _path, int
             OpenAction * a = new OpenAction(s, absPath, NULL);
             connect(a, SIGNAL(fileSelected(const QString &)), this, SLOT(openFile(const QString &)));
             _menu->addAction(a);
-            actList += a;
             ret = true;
         }
     }
@@ -242,13 +236,11 @@ bool MainWindow::createOpenMenuTreeRec(QMenu * _menu, const QString & _path, int
     foreach (const QString & s, dirList)
     {
         QMenu * m = _menu->addMenu(s);
-        ret |= createOpenMenuTreeRec(m, d.absoluteFilePath(s), _it + 1);
+        ret |= createFoundFilesTreeRec(m, d.absoluteFilePath(s), _it + 1);
     }
 
     if (!ret)
         delete _menu;
-    else
-        menuList += _menu;
 
     return ret;
 }
@@ -291,7 +283,7 @@ void MainWindow::setLang()
 
     menuFile->setTitle(LNG["file"]);
 
-        const int menuWidth = 90;
+        static const int menuWidth = 90;
         actNewFigure->setText(createMenuText(LNG["new_figure"], QString("Ctrl+N"), actNewFigure->font(), menuWidth));
         actOpen->setText(createMenuText(LNG["open"], QString("Ctrl+O"), actNewFigure->font(), menuWidth));
         if (menuOpenFinded != NULL)
@@ -377,13 +369,14 @@ void MainWindow::resize()
 void MainWindow::setSettingsVisible(bool _value)
 {
     m_panelSettings->setVisible(_value);
-    m_panelWidth = _value ? 200 : 0;
+    m_panelWidth = _value ? s_defaultPanelWidth : 0;
     resize();
 }
 
 double getVelocity(QSlider * _slider)
 {
-    return pow(1. * (_slider->maximum() - _slider->value()) / _slider->maximum(), 1) * 1000;
+    static const double sliderPower = 1.;
+    return pow(1. * (_slider->maximum() - _slider->value()) / _slider->maximum(), sliderPower) * 1000.;
 }
 
 void MainWindow::startStopNames()
@@ -438,15 +431,14 @@ bool MainWindow::openFile(const QString & _fn)
     char * type = new char( dataSize + 1 );
     type[dataSize] = 0;
     reader.readData( type );
+    Figure * figure = FiguresFactory::getInstance().createFigure( type );
+    if ( !figure->fromFile( &reader ) )
+    {
+        delete figure;
+        return false;
+    }
+    m_s3d->setFigure( figure );
 
-    if ( !strcmp( type, "Torus" ) )
-        m_s3d->setFigure( new Torus( &reader ) );
-    else if ( !strcmp( type, "Surface" ) )
-        m_s3d->setFigure( new Surface( &reader ) );
-    else if ( !strcmp( type, "Ellipsoid" ) )
-        m_s3d->setFigure( new Ellipsoid( &reader ) );
-    else if ( !strcmp( type, "Parallelepiped" ) )
-        m_s3d->setFigure( new Parallelepiped( &reader) );
     delete type;
 
     m_savedFileName = _fn;
@@ -454,12 +446,17 @@ bool MainWindow::openFile(const QString & _fn)
     return true;
 }
 
+QString MainWindow::getSavedFileName() const
+{
+    return m_savedFileName.isEmpty() ? s_defaultAbsolutePathToSave : m_savedFileName;
+}
+
 void MainWindow::openFile()
 {
     QString filters = LNG["figure_files"] +  QString(" (*.cf);;") + LNG["all_files"] + QString(" (*.*)");
     QString fn = QFileDialog::getOpenFileName(this,
                           QString("Open Figure"),
-                          QString(),
+                          getSavedFileName(),
                           filters,
                           0,
                           QFileDialog::DontUseNativeDialog );
@@ -499,7 +496,8 @@ void MainWindow::saveFileTo(const QString & _fn)
     m_s3d->getFigure()->toFile(&writer);
 
     m_savedFileName = _fn;
-   // createOpenTree();
+
+    createFoundFilesTree();
 
 }
 
@@ -508,15 +506,20 @@ void MainWindow::saveFileAs()
     if (m_s3d == NULL || m_s3d->getFigure() == NULL )
     {
         QMessageBox messageBox;
-        messageBox.setText(QString("Figure hasn't been created") );
-        messageBox.setWindowTitle(QString("Cannot save"));
+        messageBox.setText( QString("Figure hasn't been created") );
+        messageBox.setWindowTitle( QString("Cannot save"));
         messageBox.exec();
         return;
     }
+
+    QDir dir;
+    dir.mkdir( s_defaultAbsolutePathToSave );
+
+
     DialogSaveFigure dialog;
-    QString fn = dialog.execToSave();
-    if (!fn.isNull())
-        saveFileTo(fn);
+    QString fn = dialog.execToSave( getSavedFileName() );
+    if ( !fn.isNull() )
+        saveFileTo( fn );
 }
 
 void MainWindow::keyPressEvent(QKeyEvent * _e)

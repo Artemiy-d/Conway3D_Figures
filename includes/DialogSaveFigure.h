@@ -9,7 +9,7 @@ class DialogSaveFigure : public QFileDialog
 public:
     DialogSaveFigure();
     virtual ~DialogSaveFigure() {}
-    QString execToSave();
+    QString execToSave(const QString & _lastFileName);
 private slots:
     void filterChanged(const QString & _filter);
 

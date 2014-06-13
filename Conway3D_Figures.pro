@@ -27,7 +27,9 @@ SOURCES += \
     src/Scene3DView.cpp \
     src/FileManager.cpp \
     src/ModelsManager.cpp \
-    src/Models.cpp
+    src/Models.cpp \
+    src/FiguresFactory.cpp \
+    src/NewFigureOptions.cpp
 
 HEADERS += \
     includes/Scene3D.h \
@@ -49,7 +51,9 @@ HEADERS += \
     includes/IncludingSurface.h \
     includes/FileManager.h \
     includes/ModelsManager.h \
-    includes/Models.h
+    includes/Models.h \
+    includes/FiguresFactory.h \
+    includes/NewFigureOptions.h
 
 FORMS +=
 RESOURCES +=

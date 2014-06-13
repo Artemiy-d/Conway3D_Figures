@@ -13,9 +13,24 @@ DialogSaveFigure::DialogSaveFigure() :
     setDefaultSuffix( s_conwayFigureSuffix );
 }
 
-QString DialogSaveFigure::execToSave()
+QString DialogSaveFigure::execToSave(const QString & _lastFileName)
 {
+    QFileInfo fInfo(_lastFileName);
+
+    if ( fInfo.exists() )
+    {
+        if ( fInfo.isDir() )
+        {
+            setDirectory( _lastFileName );
+        }
+        else
+        {
+            setDirectory( fInfo.absolutePath() );
+            selectFile( fInfo.fileName() );
+        }
+    }
     setAcceptMode(QFileDialog::AcceptSave);
+
     if (QFileDialog::exec() != QDialog::Accepted)
         return QString();
     return selectedFiles().first();

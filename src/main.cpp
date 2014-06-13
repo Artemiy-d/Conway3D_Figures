@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     MainWindow mw;
-    mw.setGeometry(10, 100, 1000, 650);
+    mw.setGeometry(100, 100, 1000, 650);
     mw.show();
 
     return app.exec();

@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+#include "NewFigureOptions.h"
+
 class QLabel;
 class QComboBox;
 class GroupBoxCustom;
@@ -14,30 +16,14 @@ class QWidget;
 class Scene3D;
 
 
+
 class DialogNewFigure : public QDialog
 {
     Q_OBJECT
-private:
-    QLabel * m_labelCombo;
-    QComboBox * m_combo;
-    GroupBoxCustom * m_grpBoxSizes, *m_grpBoxParams;
-    QLabel * m_labelSize[3], * m_labelOffset;
-    QSpinBox * m_spinBoxSize[3], * m_spinBoxOffset;
-    QPushButton * m_buttonExit, * m_buttonOK;
-    QCheckBox * m_checkBoxDefaultSettings;
-    QWidget * m_widgets[15];
-    int m_widgetsCount;
-
-    Scene3D * m_s3d;
-
-    bool m_result;
 public:
 
-
     DialogNewFigure(Scene3D * _s3d);
-   // DialogNewFigure(const DialogNewFigure& orig);
     virtual ~DialogNewFigure();
-
 
 
 public slots:
@@ -46,6 +32,19 @@ public slots:
     void setLang();
 
     virtual int exec();
+
+private:
+    Scene3D * m_s3d;
+    bool m_result;
+
+    QLabel * m_labelCombo;
+    QComboBox * m_combo;
+    NewFigureOptions::OptionsBase * m_options;
+    QPushButton * m_buttonExit, * m_buttonOK;
+    QCheckBox * m_checkBoxDefaultSettings;
+    QWidget * m_widgets[15];
+    int m_widgetsCount;
+
 };
 
 #endif	/* DIALOGNEWFIGURE_H */

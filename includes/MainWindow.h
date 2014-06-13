@@ -59,10 +59,12 @@ public:
 
 private:
     void startStopNames();
-    bool createOpenMenuTreeRec(QMenu * _menu, const QString &_path, int _it = 0);
-    void createOpenTree();
+    bool createFoundFilesTreeRec(QMenu * _menu, const QString &_path, int _it = 0);
+    void createFoundFilesTree();
     void saveFileTo(const QString & _fn);
     void keyPressEvent(QKeyEvent* _e);
+
+    QString getSavedFileName() const;
 
 public slots:
     void setComboModels();
@@ -104,8 +106,6 @@ private:
     QWidget * m_widgets[50];
     int m_widgetsCount;
     int m_panelWidth;
-    QList<QMenu*> menuList;
-    QList<OpenAction*> actList;
 
     ModelsManager * m_modelsManager;
 

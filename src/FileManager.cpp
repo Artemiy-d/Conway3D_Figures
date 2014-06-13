@@ -2,6 +2,7 @@
 
 //#include <codecvt>
 #include <string.h>
+#include <iostream>
 
 #include "FileManager.h"
 
@@ -96,7 +97,7 @@ protected:
 FileManager::Reader::Reader(const char * _fn) :
     m_dataTag(NULL)
 {
-    m_stream.open( _fn, std::ifstream::binary );
+    m_stream.open( _fn, std::ios_base::in | std::ios_base::binary );
     m_stream.seekg( 0, std::ios_base::end );
     DataSize fileSize = m_stream.tellg();
     m_stream.seekg( 0, std::ios_base::beg );
@@ -177,6 +178,7 @@ bool FileManager::Reader::openTag(TagInfo * _tagInfo)
     if ( !m_stream.good(  ) )
         return false;
 
+
     if ( nextPos != _tagInfo->getEnd() )
         return false;
 
@@ -228,7 +230,7 @@ FileManager::DataSize FileManager::Reader::readData(void * _data, DataSize _size
 
 FileManager::Writer::Writer( const char * _fn )
 {
-    m_stream.open( _fn );
+    m_stream.open( _fn, std::ios_base::out | std::ios_base::binary );
 }
 
 FileManager::Writer::~Writer()
@@ -269,6 +271,7 @@ void FileManager::Writer::writeData( const char * _tag, const void * _data, Data
     DataSize tagLength = strlen(_tag);
     DataSize nextPos = (DataSize)m_stream.tellp() + sizeof(DataSize) + sizeof(DataBlockType) + tagLength + 1 + _size;
     m_stream.write( (const char*)&s_dataType, sizeof(DataBlockType) );
+
     m_stream.write( (const char*)&nextPos, sizeof(DataSize) );
     m_stream.write( (const char*)_tag, tagLength + 1 );
     m_stream.write( (const char*)_data, _size );

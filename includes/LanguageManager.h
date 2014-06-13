@@ -25,7 +25,11 @@ public:
     int count() const;
 private:
     LanguageManager();
-    ~LanguageManager() {}
+    LanguageManager(const LanguageManager & ) : QObject() { }
+    LanguageManager & operator = (const LanguageManager & ) { return *this; }
+
+    ~LanguageManager() { }
+
 
     void addLanguageFile(const QString & _filename);
 
