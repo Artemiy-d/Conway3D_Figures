@@ -4,13 +4,13 @@
 #include <QGLWidget>
 #include <QPainter>
 
-#include "FigureClasses.h"
 #include "Scene3DView.h"
 
 
 class QTimer;
 
 class Model;
+class Figure;
 
 class Scene3D : public QGLWidget
 {
@@ -24,6 +24,7 @@ private:
         {
             STEPS,
             LIVING_CELLS,
+        //    MAX_LIVING_CELLS,
             STATISTIC_ITEMS_COUNT
         };
     public:
@@ -35,6 +36,8 @@ private:
         QString m_text[STATISTIC_ITEMS_COUNT];
         QPainter m_painter;
         QFont m_font;
+
+        static const QString s_defaultText[STATISTIC_ITEMS_COUNT];
     };
 
 public:
@@ -93,6 +96,7 @@ private:
     bool m_leftButtonPressed;
     QPoint m_mousePosition;
     unsigned long long m_stepsNumber;
+    int m_maxLivingCellsCount;
     QWidget * m_savedParent;
     QRect m_savedGeometry;
     Figure * m_figure;

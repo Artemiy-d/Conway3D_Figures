@@ -5,8 +5,125 @@
 #include "Figure.h"
 #include "FileManager.h"
 
-const Figure::Index Figure::s_defaultNeighborsCount = 8;
 const char * const Figure::s_stringType = "Figure";
+
+
+Figure::Probabilities::Probabilities()
+    : m_count(s_defaultCount),
+      m_probabilities( new Probability[ getAllCount() ] )
+
+{
+    Probability * l = getProbabilitiesLive();
+    Probability * d = getProbabilitiesDeath();
+    for (size_t i = 0; i <= m_count; ++i)
+    {
+        l[i] = i == 3 ? 1. : 0.;
+        d[i] = i == 2 || i == 3 ? 0. : 1.;
+    }
+}
+
+Figure::Probabilities::Probabilities(const Probabilities & _other)
+    : m_count( _other.m_count ),
+      m_probabilities( new Probability[ _other.getAllCount() ] )
+
+{
+    for ( size_t i = 0; i < _other.getAllCount(); ++i )
+        m_probabilities[i] = _other.m_probabilities[i];
+}
+
+Figure::Probabilities::Probabilities(const double * _live, const double * _death, size_t _count)
+    : m_count( _count ),
+      m_probabilities( new Probability[ getAllCount() ] )
+
+{
+    Probability * l = getProbabilitiesLive();
+    Probability * d = getProbabilitiesDeath();
+    for ( size_t i = 0; i <= _count; ++i )
+    {
+        l[i] = _live[i];
+        d[i] = _death[i];
+    }
+}
+
+void Figure::Probabilities::toDouble(double * _live, double * _death, size_t _count) const
+{
+    assert( _count == m_count );
+    const size_t cnt = std::min( _count, m_count );
+
+    const Probability * l = getProbabilitiesLive();
+    const Probability * d = getProbabilitiesDeath();
+    for ( size_t i = 0; i <= cnt; ++i )
+    {
+        _live[i] = l[i].get();
+        _death[i] = d[i].get();
+    }
+}
+
+Figure::Probabilities & Figure::Probabilities::operator = (const Probabilities & _other)
+{
+    setCount(_other.m_count);
+    for ( size_t i = 0; i < getAllCount(); ++i )
+        m_probabilities[i] = _other.m_probabilities[i];
+
+    return *this;
+}
+
+Figure::Probabilities::~Probabilities()
+{
+    delete [] m_probabilities;
+}
+
+Figure::Probabilities::Probability * Figure::Probabilities::getProbabilitiesLive()
+{
+    return m_probabilities;
+}
+
+Figure::Probabilities::Probability * Figure::Probabilities::getProbabilitiesDeath()
+{
+    return m_probabilities + m_count + 1;
+}
+
+const Figure::Probabilities::Probability * Figure::Probabilities::getProbabilitiesLive() const
+{
+    return m_probabilities;
+}
+
+const Figure::Probabilities::Probability * Figure::Probabilities::getProbabilitiesDeath() const
+{
+    return m_probabilities + m_count + 1;
+}
+
+size_t Figure::Probabilities::getCount()
+{
+    return m_count;
+}
+
+void Figure::Probabilities::setCount(size_t _count)
+{
+    if ( _count != m_count )
+    {
+        delete [] m_probabilities;
+        m_count = _count;
+        m_probabilities = new Probability[ getAllCount() ];
+    }
+}
+
+size_t Figure::Probabilities::getAllCount() const
+{
+    return 2 * (m_count + 1);
+}
+
+bool Figure::Probabilities::isAllTrueFalse() const
+{
+    bool result = true;
+    for (size_t i = 0; i < getAllCount() && result; ++i)
+    {
+        if ( !m_probabilities[i].isLimit() )
+            result = false;
+    }
+    return result;
+}
+
 
 Figure::Figure()
 {
@@ -26,30 +143,13 @@ Figure::Figure()
     *((int*)&m_colorGrid) = 51<<8;
 
     m_listGridId = 1;
-
-    m_probabilitiesLive = NULL;
-    m_probabilitiesDead = NULL;
-    m_maxNeighborsCount = 0;
-
-    createProbabilities( s_defaultNeighborsCount );
-
-    defaultProbabilities();
-}
-
-void Figure::createProbabilities( Index _neighborsCount )
-{
-    m_maxNeighborsCount = _neighborsCount;
-    delete m_probabilitiesLive;
-    Index blockCount = m_maxNeighborsCount + 1;
-    m_probabilitiesLive = new RandomLCGDefault::Probability[ blockCount * 2 ];
-    m_probabilitiesDead = m_probabilitiesLive + blockCount;
 }
 
 void Figure::toFile(FileManager::Writer * _writer)
 {
     _writer->openTag( s_stringType );
-    _writer->writeData( "Live probabilities", m_probabilitiesLive, (m_maxNeighborsCount + 1) * sizeof(m_probabilitiesLive[0]) );
-    _writer->writeData( "Dead probabilities", m_probabilitiesDead, (m_maxNeighborsCount + 1) * sizeof(m_probabilitiesDead[0]) );
+    _writer->writeData( "Live probabilities", m_probabilities.getProbabilitiesLive(), (m_probabilities.getCount() + 1) * sizeof(Probabilities::Probability) );
+    _writer->writeData( "Dead probabilities", m_probabilities.getProbabilitiesDeath(), (m_probabilities.getCount() + 1) * sizeof(Probabilities::Probability) );
     _writer->writeData( "Cells count", &m_cellsCount, sizeof(m_cellsCount) );
 
     Index bytesCount = m_cellsCount / (8 * sizeof(int)) + 1;
@@ -85,20 +185,22 @@ bool Figure::fromFile(FileManager::Reader * _reader)
     if ( !_reader->openData( "Live probabilities", dataSize ) )
         return false;
 
-    if ( dataSize != (s_defaultNeighborsCount + 1) * sizeof(m_probabilitiesLive[0]) )
-        std::cout << "Warn: dataSize != (s_defaultNeighborsCount + 1) * sizeof(m_probabilitiesLive[0])" << std::endl;
 
-    createProbabilities( s_defaultNeighborsCount );
 
-    _reader->readData( m_probabilitiesLive );
+    if ( dataSize != (Probabilities::s_defaultCount + 1) * sizeof( Probabilities::Probability ) )
+        std::cout << "Warn: dataSize != (Probabilities::s_defaultCount + 1) * sizeof( Probabilities::Probability )" << std::endl;
+
+    m_probabilities.setCount( Probabilities::s_defaultCount );
+
+    _reader->readData( m_probabilities.getProbabilitiesLive() );
 
     if ( !_reader->openData( "Dead probabilities", dataSize ) )
         return false;
 
-    if ( dataSize != (s_defaultNeighborsCount + 1) * sizeof(m_probabilitiesDead[0]) )
-        std::cout << "Warn: dataSize != (s_defaultNeighborsCount + 1) * sizeof(m_probabilitiesDead[0])" << std::endl;
+    if ( dataSize != (Probabilities::s_defaultCount + 1) * sizeof( Probabilities::Probability ) )
+        std::cout << "Warn: dataSize != (Probabilities::s_defaultCount + 1) * sizeof( Probabilities::Probability )" << std::endl;
 
-    _reader->readData( m_probabilitiesDead );
+    _reader->readData( m_probabilities.getProbabilitiesDeath() );
 
     if ( !_reader->openData( "Cells count", dataSize ) )
         return false;
@@ -136,7 +238,6 @@ bool Figure::fromFile(FileManager::Reader * _reader)
 
 Figure::~Figure()
 {
-    delete m_probabilitiesLive;
     delete m_cells->neighbors;
     delete m_cells;
     delete m_gridPoints;
@@ -149,35 +250,16 @@ Figure::~Figure()
     delete m_colorArray;
     delete m_gridColors;
 }
-void Figure::defaultProbabilities()
-{
-    for (Index i = 0; i <= m_maxNeighborsCount; ++i)
-    {
-        m_probabilitiesLive[i] = i == 3 ? 1. : 0.;
-        m_probabilitiesDead[i] = i == 2 || i == 3 ? 0. : 1.;
-    }
-    m_probabilitiesDisabled = true;
-}
 
-void Figure::setProbabilities(const double * _pLive, const double * _pDead, Index _neighborsCount)
+void Figure::setProbabilities(const Probabilities & _probabilities)
 {
-    if ( _neighborsCount != m_maxNeighborsCount )
-        createProbabilities( _neighborsCount );
-    for (Index i = 0; i <= m_maxNeighborsCount; ++i)
-    {
-        m_probabilitiesLive[i] = _pLive[i];
-        m_probabilitiesDead[i] = _pDead[i];
-    }
+    m_probabilities = _probabilities;
     calcAllProbBool();
 }
 void Figure::calcAllProbBool()
 {
-    m_probabilitiesDisabled = true;
-    for (Index i = 0; i <= m_maxNeighborsCount && m_probabilitiesDisabled; ++i)
-    {
-        if ( !m_probabilitiesLive[i].isLimit() || !m_probabilitiesDead[i].isLimit() )
-            m_probabilitiesDisabled = false;
-    }
+    m_probabilitiesDisabled = m_probabilities.isAllTrueFalse();
+
     if (!m_probabilitiesDisabled)
     {
         for (Index i = 0; i < m_cellsCount; ++i)
@@ -187,13 +269,9 @@ void Figure::calcAllProbBool()
     }
 }
 
-void Figure::getProbabilities(double * _pLive, double * _pDead) const
+const Figure::Probabilities & Figure::getProbabilities() const
 {
-    for (Index i = 0; i <= m_maxNeighborsCount; ++i)
-    {
-        _pLive[i] = m_probabilitiesLive[i].get();
-        _pDead[i] = m_probabilitiesDead[i].get();
-    }
+    return m_probabilities;
 }
 
 void Figure::selectAndPlus(const Point3F & _p1, const Point3F & _p_1, bool _plus, Model * _m)
@@ -292,6 +370,7 @@ void Figure::createCells(Index _cellsCount, Index _pointsCount)
 {
     if (_cellsCount < 1 || _pointsCount < 4)
         return;
+    std::cout << "0";
     if (m_cells != NULL)
     {
         delete m_cells->neighbors;
@@ -304,11 +383,13 @@ void Figure::createCells(Index _cellsCount, Index _pointsCount)
         delete m_gridColors;
 
     }
+    std::cout << "1";
     m_cells = new Cell[_cellsCount];
-    m_cells->neighbors = new Cell*[_cellsCount * m_maxNeighborsCount];
+    std::cout << "2";
+    m_cells->neighbors = new Cell*[_cellsCount * m_probabilities.getCount()];
     for (Index i = 1; i < _cellsCount; ++i)
     {
-        m_cells[i].neighbors = m_cells->neighbors + i * m_maxNeighborsCount;
+        m_cells[i].neighbors = m_cells->neighbors + i * m_probabilities.getCount();
     }
 
     m_points = new Point3F[_pointsCount];
@@ -323,12 +404,9 @@ void Figure::createCells(Index _cellsCount, Index _pointsCount)
     m_activeCellsNext = new Cell*[_cellsCount];
 
     m_drawingIndices = new GLuint[_cellsCount * 4];
-  //  nrm = new
 
     m_cellsCount = _cellsCount;
     m_pointsCount = _pointsCount;
-
- //   m_normalsToCells = norm;
 
     initBegin();
 }
@@ -387,6 +465,9 @@ void Figure::step()
 {
     ++m_stepNumber;
     m_activeCountNext = 0;
+    Probabilities::Probability * probabilitiesDeath = m_probabilities.getProbabilitiesDeath();
+    Probabilities::Probability * probabilitiesLive = m_probabilities.getProbabilitiesLive();
+
     Cell * c;
     Index j;
     Index u;
@@ -396,8 +477,7 @@ void Figure::step()
         c = m_activeCellsNow[i];
         if (c->livingStatusNow)
         {
-           // u = m_probabilitiesDead[c->currentCountActiveNeighbors];
-            if ( m_probabilitiesDead[c->currentCountActiveNeighbors].simulate( m_random ) )//(u != 0 && (u == RandomLCG::s_maxValue || m_random.next() < u))
+            if ( probabilitiesDeath[c->currentCountActiveNeighbors].simulate( m_random ) )//(u != 0 && (u == RandomLCG::s_maxValue || m_random.next() < u))
             {
                 c->livingStatusNext = false;
                 --m_usersCount;
@@ -413,7 +493,7 @@ void Figure::step()
         }
         else
         {
-            if ( m_probabilitiesLive[c->currentCountActiveNeighbors].simulate( m_random ) )
+            if ( probabilitiesLive[c->currentCountActiveNeighbors].simulate( m_random ) )
             {
                 c->livingStatusNext = true;
                 ++m_usersCount;
@@ -435,7 +515,7 @@ void Figure::step()
         {
             u = m_activeCellsNow[i]->currentCountActiveNeighbors;
             if (m_activeCellsNow[i]->steps != m_stepNumber &&
-                    !( m_probabilitiesDead[u].isLimit() && m_probabilitiesLive[u].isLimit() ) )
+                    !( probabilitiesDeath[u].isLimit() && probabilitiesLive[u].isLimit() ) )
             {
                 (m_activeCellsNext[m_activeCountNext++] = m_activeCellsNow[i])->steps = m_stepNumber;
             }

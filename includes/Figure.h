@@ -41,6 +41,40 @@ public:
         }
     };
 
+    class Probabilities
+    {
+    public:
+        typedef RandomLCGDefault::Probability Probability;
+    public:
+        Probabilities();
+        Probabilities(const Probabilities & _other);
+        Probabilities(const double * _live, const double * _death, size_t _count);
+        Probabilities & operator = (const Probabilities & _other);
+        ~Probabilities();
+
+        Probability * getProbabilitiesLive();
+        Probability * getProbabilitiesDeath();
+
+        const Probability * getProbabilitiesLive() const;
+        const Probability * getProbabilitiesDeath() const;
+
+        size_t getCount();
+
+        void setCount(size_t _count);
+
+        bool isAllTrueFalse() const;
+
+        void toDouble(double * _live, double * _death, size_t _count) const;
+    protected:
+        size_t getAllCount() const;
+    public:
+        static const size_t s_defaultCount = 8;
+    private:
+        size_t m_count;
+        RandomLCGDefault::Probability * m_probabilities;
+
+    };
+
 
 public:
     Figure();
@@ -51,8 +85,8 @@ public:
     virtual void createAgar() {}
     void setLineWidth(GLfloat _width);
     void drawList();
-    void setProbabilities(const double * _pLive, const double * _pDead, Index _neighborsCount);
-    void getProbabilities(double * _pLive, double * _pDead) const;
+    void setProbabilities(const Probabilities & _probabilities = Probabilities());
+    const Probabilities & getProbabilities() const;
     void createRandomMap(float _p);
     void clearMap();
     void refresh();
@@ -66,7 +100,7 @@ public:
     void drawCells();
     void drawActiveCells();
     void selectAndPlus(const Point3F & _p1, const Point3F & _p_1, bool _plus, Model * _model = NULL);
-    void defaultProbabilities();
+
     virtual void toFile(FileManager::Writer * _writer);
     virtual bool fromFile(FileManager::Reader * _reader);
 
@@ -78,12 +112,8 @@ protected:
     void gridToList();
     void calcAllProbBool();
 
-    void createProbabilities( Index _neighborsCount );
-
 public:
     bool m_gridEnable;
-
-    static const Index s_defaultNeighborsCount;
 
 protected:
     Index m_gridPointsCount;
@@ -95,9 +125,8 @@ protected:
 private:
 
     bool m_probabilitiesDisabled;
-    RandomLCGDefault::Probability * m_probabilitiesLive, * m_probabilitiesDead;
+    Probabilities m_probabilities;
     StepIndex m_stepNumber;
-    Index m_maxNeighborsCount;
     Index m_activeCountNow, m_activeCountNext;
     GLuint * m_drawingIndices, * m_gridPoints;
     Index m_usersCount;

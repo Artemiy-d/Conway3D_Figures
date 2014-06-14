@@ -1,6 +1,5 @@
 #ifndef FIGURECLASSES_H
 #define	FIGURECLASSES_H
-typedef enum {figSurface, figTorus, figEllipsoid, figParallelepiped} FigureType;
 
 #include "Figure.h"
 
@@ -46,7 +45,7 @@ public:
 public:
     static const char * const s_stringType;
 
-private:
+protected:
     int m_offset;
     float m_angle;
 };
@@ -88,10 +87,13 @@ public:
 
 public:
     static const char * const s_stringType;
+    static const size_t s_surfacesCount = 6;
+
 protected:
+
     float m_size;
     Index m_firstSideCount, m_secondSideCount, m_thirdSideCount;
-    IncludingSurface * m_surfaces[6];
+    IncludingSurface * m_surfaces[s_surfacesCount];
 
     float m_scale;
     float m_firstSize, m_secondSize, m_thirdSize;

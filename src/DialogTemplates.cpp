@@ -78,8 +78,8 @@ DialogTemplates::DialogTemplates(ModelsManager * _modelsManager)
     this->resize(700, 500);
     this->setMinimumSize(600, 400);
 
-    connect(m_listWidgetModels,SIGNAL(itemDoubleClicked(QListWidgetItem*) ),this,SLOT(selectModel(QListWidgetItem*) ) );
-    connect(m_listWidgetActiveModels,SIGNAL(itemDoubleClicked(QListWidgetItem*) ),this,SLOT(selectModel(QListWidgetItem*) ) );
+    connect(m_listWidgetModels, SIGNAL(itemDoubleClicked(QListWidgetItem*) ), this, SLOT(selectModel(QListWidgetItem*) ) );
+    connect(m_listWidgetActiveModels, SIGNAL(itemDoubleClicked(QListWidgetItem*) ), this, SLOT(selectModel(QListWidgetItem*) ) );
 
     updateMainModels();
     updateActiveModels();

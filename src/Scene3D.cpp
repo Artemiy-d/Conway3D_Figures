@@ -5,11 +5,18 @@
 #include "FigureClasses.h"
 
 
+const QString Scene3D::StatisticWidget::s_defaultText[STATISTIC_ITEMS_COUNT] =
+{
+    "Step ",
+    "Users: ",
+    //"Max: "
+};
+
 Scene3D::StatisticWidget::StatisticWidget(QWidget * _parent)
     : QWidget(_parent)
 {
-    m_text[STEPS] = QString("Step 0");
-    m_text[LIVING_CELLS] = QString("Users: ");
+    for ( int i = 0; i < STATISTIC_ITEMS_COUNT; ++i )
+        m_text[i] = s_defaultText[i];
     m_font.setWeight(10);
 }
 void Scene3D::Scene3D::StatisticWidget::resizeEvent(QResizeEvent * /*_e*/)
@@ -30,9 +37,9 @@ void Scene3D::StatisticWidget::setText(const QString & _text, int _stringNumber,
 {
     if (_stringNumber < 0 || _stringNumber >= STATISTIC_ITEMS_COUNT)
         return;
-    m_text[_stringNumber] = _text;
+    m_text[_stringNumber] = s_defaultText[_stringNumber] + _text;
     if (_refresh)
-        this->repaint();
+        repaint();
 }
 
 
@@ -41,6 +48,9 @@ void Scene3D::stepFigure()
     if (m_figure == NULL)
         return;
     m_figure->step();
+
+    if ( m_maxLivingCellsCount < m_figure->getLivingCellsCount() )
+        m_maxLivingCellsCount = m_figure->getLivingCellsCount();
 
     if (m_statisticVisible)
         drawStatistic();
@@ -66,6 +76,7 @@ Scene3D::Scene3D(QWidget* _parent)
     connect(m_timer, SIGNAL(timeout()), this, SLOT(stepFigure()));
     m_currentModel = NULL;
     m_savedParent = NULL;
+    m_maxLivingCellsCount = 0;
 }
 
 Scene3D::~Scene3D()
@@ -83,18 +94,20 @@ void Scene3D::createAgar()
 void Scene3D::clearMap()
 {
     m_figure->clearMap();
+    m_maxLivingCellsCount = 0;
     updateGL();
 }
 void Scene3D::createRandomMap()
 {
-    m_figure->createRandomMap(0.15);
+    static const double defaultMapProbability = 0.15;
+    m_figure->createRandomMap( defaultMapProbability );
     updateGL();
 }
 
 void Scene3D::setGridEnable(int _on)
 {
     m_figure->m_gridEnable = _on != 0;
-    this->updateGL();
+    updateGL();
 }
 void Scene3D::setDrawingEnable(int _on)
 {
@@ -109,7 +122,7 @@ void Scene3D::setDrawingEnable(int _on)
 void Scene3D::setAnimationEnable(int _on)
 {
     m_animationOn = _on != 0;
-    this->updateGL();
+    updateGL();
 }
 void Scene3D::setStatisticVisible(int _on)
 {
@@ -125,15 +138,20 @@ void Scene3D::drawStatistic()
 {
     if (m_figure != NULL)
     {
-        m_statisticWidget->setText("Step " + QString::number(m_stepsNumber), StatisticWidget::STEPS, false);
-        m_statisticWidget->setText("Users: " + QString::number(m_figure->getLivingCellsCount()), StatisticWidget::LIVING_CELLS);
+        m_statisticWidget->setText(QString::number(m_stepsNumber), StatisticWidget::STEPS, false);
+        m_statisticWidget->setText(QString::number(m_figure->getLivingCellsCount()), StatisticWidget::LIVING_CELLS, false);
+       // m_statisticWidget->setText(QString::number( m_maxLivingCellsCount ), StatisticWidget::MAX_LIVING_CELLS);
     }
 }
 
 
 void Scene3D::setFigure(Figure * _figure)
 {
+    if ( m_figure )
+        _figure->setProbabilities( m_figure->getProbabilities() );
+
     delete m_figure;
+
     m_figure = _figure;
     updateGL();
 }

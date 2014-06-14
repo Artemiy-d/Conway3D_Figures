@@ -4,20 +4,24 @@
 #include "FileManager.h"
 
 
-BaseSurface::BaseSurface() : Figure()
-{
-    m_firstSideCount = 0;
-    m_secondSideCount = 0;
-    m_firstSize = 0.2;
-    m_secondSize = 1;
-}
-BaseSurface::BaseSurface(Index /*_firstSideCount*/, Index /*m_secondSideCount*/) : Figure()
-{
-    m_firstSideCount = 0;
-    m_secondSideCount = 0;
-    m_firstSize = 0.2;
-    m_secondSize = 1;
-}
+BaseSurface::BaseSurface()
+    : Figure(),
+      m_includingSurface(NULL),
+      m_firstSideCount(0),
+      m_secondSideCount(0),
+      m_firstSize(0.2f),
+      m_secondSize(1.f)
+{ }
+
+BaseSurface::BaseSurface(Index /*_firstSideCount*/, Index /*m_secondSideCount*/)
+    : Figure(),
+      m_includingSurface(NULL),
+      m_firstSideCount(0),
+      m_secondSideCount(0),
+      m_firstSize(0.2f),
+      m_secondSize(1.f)
+{ }
+
 void BaseSurface::createIncludingSurface()
 {
     if (m_cells == NULL || m_firstSideCount == 0)
@@ -326,7 +330,6 @@ void Torus::createField(Index _firstSideCount, Index _secondSideCount, int _offs
         }
     }
 
-  //  this->m_includingSurface->createVertexesByMain();
     IncludingSurface::ConnectPointsOfSurf(m_includingSurface, Side23,
                                           m_includingSurface, Side01,
                                           _offset_1);
@@ -416,7 +419,7 @@ const char * Parallelepiped::getStringType() const
 }
 
 
-void Parallelepiped::setPhisicSize(float _s, float)
+void Parallelepiped::setPhisicSize(float _s, float /*_s2*/)
 {
     m_size = _s;
     m_scale = 3 * m_size / (m_firstSideCount + m_secondSideCount + m_thirdSideCount);
@@ -464,13 +467,13 @@ void Parallelepiped::setPhisicSize(float _s, float)
 
 void Parallelepiped::createAgar()
 {
-    for (int i = 0; i < 6; ++i)
+    for (size_t i = 0; i < s_surfacesCount; ++i)
         m_surfaces[i]->createAgar();
 }
 
 void Parallelepiped::addModel(Model * _model, Cell * _cell)
 {
-    for (int i = 0; i < 6; ++i)
+    for (size_t i = 0; i < s_surfacesCount; ++i)
     {
         if (m_surfaces[i]->addModel(_model, _cell))
             return;
@@ -503,7 +506,7 @@ void Parallelepiped::createField(Index _firstSideCount, Index _secondSideCount, 
     IncludingSurface::ConnectPointsOfSurf(m_surfaces[2], Side01, m_surfaces[4], Side30);
 
 
-    for (int i = 0; i < 6; ++i)
+    for (size_t i = 0; i < s_surfacesCount; ++i)
         m_surfaces[i]->surfaceCellsConnect();
 
     IncludingSurface::ConnectSurfacesByPoints(m_surfaces[0], Side30, m_surfaces[1], Side12);
@@ -542,7 +545,7 @@ const char * Ellipsoid::getStringType() const
     return s_stringType;
 }
 
-void Ellipsoid::setPhisicSize(float _s, float)
+void Ellipsoid::setPhisicSize(float _s, float /*_s2*/)
 {
     Parallelepiped::setPhisicSize( _s, 0 );
 

@@ -24,7 +24,7 @@ public:
     void setGeometry(int _x, int _y, int _w, int _h);
 
     void setText(const QString & _text);
-public slots:
+protected slots:
     void newVal(double _val);
 
 private:
@@ -37,20 +37,26 @@ private:
 class ProbabilitiesGroup : public GroupBoxCustom
 {
     Q_OBJECT
-private:
-    int m_xMrgn, m_yMrgn;
-    static const int cnt = 9;
-    double m_values[cnt];
-    void refresh();
 public:
 
-    ProbabilitySpinBox m_boxes[cnt];
-    ProbabilitiesGroup();
+    typedef QVector<double> Values;
 
-    double * getValues();
-    void setValues(double * _values);
+public:
+
+    ProbabilitiesGroup(QWidget * _parent, size_t _count);
+
+    Values getValues();
+    void setValues(const Values & _values);
     void setGeometry(int _x, int _y, int _w, int _h);
     ~ProbabilitiesGroup() {}
+
+private:
+    void refresh();
+
+private:
+    static const int s_xMrgn;
+    static const int s_yMrgn;
+    QVector<ProbabilitySpinBox*> m_boxes;
 };
 
 class DialogSettings : public QDialog
