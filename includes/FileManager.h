@@ -76,6 +76,30 @@ public:
         std::ofstream m_stream;
     };
 
+
+    class ISerializable
+    {
+    public:
+        virtual void toFile( Writer * _writer ) = 0;
+        virtual bool fromFile( Reader * _reader ) = 0;
+    };
+
+    class Serializable : public ISerializable
+    {
+    private:
+        typedef std::vector<ISerializable*> Serializables;
+    public:
+        void addSerializable(ISerializable * _serializable);
+
+        void removeSerializable(ISerializable * _serializable);
+
+        void toFile( Writer * _writer );
+
+        bool fromFile( Reader * _reader );
+    private:
+        Serializables m_serializables;
+    };
+
 private:
 
     static const DataBlockType s_tagType;

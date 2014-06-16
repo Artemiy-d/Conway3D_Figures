@@ -3,6 +3,7 @@
 //#include <codecvt>
 #include <string.h>
 #include <iostream>
+#include <algorithm>
 
 #include "FileManager.h"
 
@@ -280,4 +281,35 @@ void FileManager::Writer::writeData( const char * _tag, const void * _data, Data
 void FileManager::Writer::writeData( const char * _tag, const char * _dataString)
 {
     writeData( _tag, _dataString, strlen( _dataString ) );
+}
+
+
+void FileManager::Serializable::addSerializable(ISerializable * _serializable)
+{
+    m_serializables.push_back(_serializable);
+}
+
+void FileManager::Serializable::removeSerializable(ISerializable * _serializable)
+{
+    m_serializables.erase( std::find( m_serializables.begin(), m_serializables.end(), _serializable ) );
+}
+
+
+void FileManager::Serializable::toFile( FileManager::Writer * _writer )
+{
+    for ( Serializables::iterator it = m_serializables.begin();
+          it != m_serializables.end(); ++it )
+        (*it)->toFile(_writer);
+}
+
+bool FileManager::Serializable::fromFile( FileManager::Reader * _reader )
+{
+    bool result = true;
+    for ( Serializables::iterator it = m_serializables.begin();
+          it != m_serializables.end(); ++it )
+    {
+        if ( !(*it)->fromFile(_reader) )
+            result = false;
+    }
+    return result;
 }

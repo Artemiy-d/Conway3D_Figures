@@ -14,7 +14,7 @@ public:
         : QAction(_text, _parent),
           m_fileName(_fn)
     {
-        connect(this,SIGNAL(triggered()),this,SLOT(onClick()) );
+        connect(this, SIGNAL(triggered()), this, SLOT(onClick()) );
     }
 private slots:
     void onClick()
@@ -82,8 +82,7 @@ public slots:
     void changeDrawModel(const QString& _name);
 signals:
     void sign();
-    //void setFullScreen
-  //  void menuBar(QAction* arg1);
+
 private:
     DialogSettings * m_dialogSettings;
     DialogNewFigure * m_dialogNewFigure;

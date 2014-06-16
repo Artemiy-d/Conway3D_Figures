@@ -289,10 +289,11 @@ bool IncludingSurface::ConnectSurfacesByPoints(IncludingSurface * _surf1, CellSi
     Cell ** arrCell2 = GetArrayBySide(_surf2, _side2);
 
     Index k, l, i, j;
+    Index maxNeighborsCount = Figure::Probabilities::s_defaultCount - 1;
     for (i = 0; i < cnt_1; ++i)
-        for (j = 0; j < cnt_1 && arrCell1[i]->neighborsCount < 8; ++j)
+        for (j = 0; j < cnt_1 && arrCell1[i]->neighborsCount < maxNeighborsCount; ++j)
         {
-            if (arrCell2[j]->neighborsCount == 8)
+            if (arrCell2[j]->neighborsCount == maxNeighborsCount)
                 goto m2;
             for (k = 0; k < 4; ++k)
                 for (l = 0; l < 4; ++l)

@@ -19,7 +19,7 @@ struct Color3F {GLfloat r,g,b;};
 struct Color4B {GLubyte r,g,b,a;};
 
 
-class Figure
+class Figure : public FileManager::ISerializable
 {
 public:
     typedef int Index;
@@ -68,7 +68,7 @@ public:
     protected:
         size_t getAllCount() const;
     public:
-        static const size_t s_defaultCount = 8;
+        static const size_t s_defaultCount = 9;
     private:
         size_t m_count;
         RandomLCGDefault::Probability * m_probabilities;

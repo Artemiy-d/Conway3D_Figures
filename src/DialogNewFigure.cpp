@@ -78,7 +78,10 @@ void DialogNewFigure::setLang()
     m_buttonExit->setText(LNG["exit"]);
     m_buttonOK->setText(LNG["create"]);
 
-    for (int i = 0; i<m_widgetsCount; i++)
+    if ( m_options )
+        m_options->setLang();
+
+    for (int i = 0; i < m_widgetsCount; ++i)
         m_widgets[i]->adjustSize();
 }
 
@@ -100,9 +103,10 @@ void DialogNewFigure::selectingFigure(int _index)
         }
         m_options = options;
         m_options->setParent(this);
-        m_options->show();
+        m_options->setLang();
 
         m_options->setGeometry( m_combo->x(), m_checkBoxDefaultSettings->y() + m_checkBoxDefaultSettings->height() + 10, width() - 2 * m_combo->x(), 150);
+        m_options->show();
     }
 }
 

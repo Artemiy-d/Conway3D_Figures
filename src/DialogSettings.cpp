@@ -60,8 +60,8 @@ const int ProbabilitiesGroup::s_yMrgn = 20;
 ProbabilitiesGroup::ProbabilitiesGroup(QWidget * _parent, size_t _count)
     : GroupBoxCustom(_parent)
 {
-    m_boxes.resize(_count + 1);
-    for (size_t i = 0; i <= _count; ++i)
+    m_boxes.resize(_count);
+    for (size_t i = 0; i < _count; ++i)
     {
         m_boxes[i] = new ProbabilitySpinBox(this);
         m_boxes[i]->setText("N: " + QString::number(i));
@@ -175,20 +175,20 @@ void DialogSettings::apply()
     assert( d.size() == l.size() );
 
     m_s3d->getFigure()->setProbabilities( Figure::Probabilities( l.data(), d.data(),
-                                                                 l.size() - 1 ) );
+                                                                 l.size() ) );
 }
 void DialogSettings::fromFigure()
 {
     ProbabilitiesGroup::Values valuesDeath;
     ProbabilitiesGroup::Values valuesLive;
-    valuesDeath.resize( Figure::Probabilities::s_defaultCount + 1 );
-    valuesLive.resize( Figure::Probabilities::s_defaultCount + 1 );
+    valuesDeath.resize( Figure::Probabilities::s_defaultCount );
+    valuesLive.resize( Figure::Probabilities::s_defaultCount );
 
     m_s3d->getFigure()->getProbabilities().toDouble( valuesLive.data(), valuesDeath.data(), Figure::Probabilities::s_defaultCount);
     m_groupLive->setValues(valuesLive);
     m_groupDead->setValues(valuesDeath);
 }
-void DialogSettings::showEvent(QShowEvent * /* e */)
+void DialogSettings::showEvent(QShowEvent * /* _e */)
 {
     fromFigure();
 }

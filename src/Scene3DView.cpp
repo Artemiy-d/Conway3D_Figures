@@ -183,3 +183,43 @@ float Scene3DView::getScale() const
 {
     return m_scale;
 }
+
+void Scene3DView::toFile(FileManager::Writer * _writer)
+{
+    _writer->openTag( "Camera" );
+    _writer->writeData( "Right", &m_right, sizeof(m_right) );
+    _writer->writeData( "Up", &m_up, sizeof(m_up) );
+    _writer->writeData( "Scale", &m_scale, sizeof(m_scale) );
+    _writer->closeTag( );
+}
+
+bool Scene3DView::fromFile(FileManager::Reader * _reader)
+{
+    if ( !_reader->openTag( "Camera" ) )
+        return false;
+
+    Point3F up, right;
+    float scale = 0.f;
+
+    FileManager::DataSize dataSize = 0;
+    if ( !_reader->openData( "Right", dataSize  ) )
+        return false;
+    _reader->readData( &right );
+
+    if ( !_reader->openData( "Up", dataSize  ) )
+        return false;
+    _reader->readData( &up );
+
+    if ( !_reader->openData( "Scale", dataSize  ) )
+        return false;
+    _reader->readData( &scale );
+
+    if ( !_reader->closeTag() )
+        return false;
+
+    m_right = right;
+    m_up = up;
+    m_scale = scale;
+    return true;
+}
+

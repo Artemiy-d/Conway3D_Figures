@@ -3,9 +3,11 @@
 
 #include "Point.h"
 
+#include "FileManager.h"
+
 class Figure;
 
-class Scene3DView
+class Scene3DView : public FileManager::ISerializable
 {
 public:
     Scene3DView();
@@ -39,6 +41,13 @@ public:
     void prepareDrawing();
 
     float getScale() const;
+
+    void toFile(FileManager::Writer * _writer);
+
+    bool fromFile(FileManager::Reader * _reader);
+
+
+
 private:
 
     Point3F m_right;

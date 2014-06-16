@@ -311,7 +311,7 @@ void MainWindow::setLang()
 
     sliderVelValueChanged( m_sliderVelocity->value() );
 
-    for (int i = 0; i < m_widgetsCount; i++)
+    for (int i = 0; i < m_widgetsCount; ++i)
         m_widgets[i]->adjustSize();
 }
 
@@ -439,6 +439,8 @@ bool MainWindow::openFile(const QString & _fn)
     }
     m_s3d->setFigure( figure );
 
+    m_s3d->fromFile( &reader );
+
     delete type;
 
     m_savedFileName = _fn;
@@ -492,6 +494,8 @@ void MainWindow::saveFileTo(const QString & _fn)
     writer.writeData( "Version", &s_versionSaving, sizeof(s_versionSaving) );
 
     writer.writeData( "Figure type", m_s3d->getFigure()->getStringType() );
+
+    m_s3d->toFile( &writer );
 
     m_s3d->getFigure()->toFile(&writer);
 

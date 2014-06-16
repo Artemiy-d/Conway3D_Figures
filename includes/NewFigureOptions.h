@@ -16,6 +16,8 @@ namespace NewFigureOptions
     {
     public:
         OptionsBase(QWidget * _parent) : QWidget( _parent ) { }
+
+        virtual void setLang() = 0;
     };
 
     class LabeledSpinboxes : public OptionsBase
@@ -27,7 +29,7 @@ namespace NewFigureOptions
 
         virtual ~LabeledSpinboxes();
 
-        virtual void setLang();
+        void setLang();
 
 
     protected:

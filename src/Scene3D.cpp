@@ -77,6 +77,8 @@ Scene3D::Scene3D(QWidget* _parent)
     m_currentModel = NULL;
     m_savedParent = NULL;
     m_maxLivingCellsCount = 0;
+
+    addSerializable( &m_view );
 }
 
 Scene3D::~Scene3D()
@@ -151,8 +153,11 @@ void Scene3D::setFigure(Figure * _figure)
         _figure->setProbabilities( m_figure->getProbabilities() );
 
     delete m_figure;
+    //removeSerializable( m_figure );
 
     m_figure = _figure;
+    //addSerializable( m_figure );
+
     updateGL();
 }
 
@@ -194,7 +199,8 @@ void Scene3D::setFullScreen()
 void Scene3D::initializeGL()
 {
     m_view.init();
-    m_figure = new Torus(50, 100, 20);
+
+    setFigure( new Torus(50, 100, 20) );
 
     drawStatistic();
 }

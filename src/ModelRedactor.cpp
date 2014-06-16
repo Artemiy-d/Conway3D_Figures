@@ -33,8 +33,8 @@ void ModelRedactor::View::draw(QPaintDevice * _device)
 
     QPainter painter(_device);
 
-    for (int i = 0; i < sz; i++)
-        for (int j = 0; j < sz; j++)
+    for (int i = 0; i < sz; ++i)
+        for (int j = 0; j < sz; ++j)
         {
             painter.fillRect(m_XPoints[j],
                              m_YPoints[i],
@@ -43,7 +43,7 @@ void ModelRedactor::View::draw(QPaintDevice * _device)
                              m_model->isCellFilled( j, i ) ? Qt::black : Qt::white);
         }
     painter.setPen(Qt::blue);
-    for (int i = 0; i <= sz; i++)
+    for (int i = 0; i <= sz; ++i)
     {
         painter.drawLine(m_XPoints[0], m_YPoints[i], m_XPoints[sz], m_YPoints[i]);
         painter.drawLine(m_XPoints[i], m_YPoints[0], m_XPoints[i], m_YPoints[sz]);
@@ -59,7 +59,7 @@ void ModelRedactor::View::updateBorders()
     delete m_XPoints;
     m_XPoints = new int[sz * 2 + 2];
     m_YPoints = m_XPoints + sz + 1;
-    for (int i = 0; i <= sz; i++)
+    for (int i = 0; i <= sz; ++i)
     {
         m_XPoints[i] = i * ( m_visibleSize.width() - 1) / sz;
         m_YPoints[i] = i * ( m_visibleSize.height() - 1) / sz;

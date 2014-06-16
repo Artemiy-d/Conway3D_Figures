@@ -12,7 +12,7 @@ class QTimer;
 class Model;
 class Figure;
 
-class Scene3D : public QGLWidget
+class Scene3D : public QGLWidget, public FileManager::Serializable
 {
     Q_OBJECT
 private:

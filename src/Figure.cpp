@@ -15,7 +15,7 @@ Figure::Probabilities::Probabilities()
 {
     Probability * l = getProbabilitiesLive();
     Probability * d = getProbabilitiesDeath();
-    for (size_t i = 0; i <= m_count; ++i)
+    for (size_t i = 0; i < m_count; ++i)
     {
         l[i] = i == 3 ? 1. : 0.;
         d[i] = i == 2 || i == 3 ? 0. : 1.;
@@ -38,7 +38,7 @@ Figure::Probabilities::Probabilities(const double * _live, const double * _death
 {
     Probability * l = getProbabilitiesLive();
     Probability * d = getProbabilitiesDeath();
-    for ( size_t i = 0; i <= _count; ++i )
+    for ( size_t i = 0; i < _count; ++i )
     {
         l[i] = _live[i];
         d[i] = _death[i];
@@ -48,11 +48,11 @@ Figure::Probabilities::Probabilities(const double * _live, const double * _death
 void Figure::Probabilities::toDouble(double * _live, double * _death, size_t _count) const
 {
     assert( _count == m_count );
-    const size_t cnt = std::min( _count, m_count );
+    const size_t count = std::min( _count, m_count );
 
     const Probability * l = getProbabilitiesLive();
     const Probability * d = getProbabilitiesDeath();
-    for ( size_t i = 0; i <= cnt; ++i )
+    for ( size_t i = 0; i < count; ++i )
     {
         _live[i] = l[i].get();
         _death[i] = d[i].get();
@@ -80,7 +80,7 @@ Figure::Probabilities::Probability * Figure::Probabilities::getProbabilitiesLive
 
 Figure::Probabilities::Probability * Figure::Probabilities::getProbabilitiesDeath()
 {
-    return m_probabilities + m_count + 1;
+    return m_probabilities + m_count;
 }
 
 const Figure::Probabilities::Probability * Figure::Probabilities::getProbabilitiesLive() const
@@ -90,7 +90,7 @@ const Figure::Probabilities::Probability * Figure::Probabilities::getProbabiliti
 
 const Figure::Probabilities::Probability * Figure::Probabilities::getProbabilitiesDeath() const
 {
-    return m_probabilities + m_count + 1;
+    return m_probabilities + m_count;
 }
 
 size_t Figure::Probabilities::getCount()
@@ -110,7 +110,7 @@ void Figure::Probabilities::setCount(size_t _count)
 
 size_t Figure::Probabilities::getAllCount() const
 {
-    return 2 * (m_count + 1);
+    return 2 * m_count;
 }
 
 bool Figure::Probabilities::isAllTrueFalse() const
@@ -148,8 +148,9 @@ Figure::Figure()
 void Figure::toFile(FileManager::Writer * _writer)
 {
     _writer->openTag( s_stringType );
-    _writer->writeData( "Live probabilities", m_probabilities.getProbabilitiesLive(), (m_probabilities.getCount() + 1) * sizeof(Probabilities::Probability) );
-    _writer->writeData( "Dead probabilities", m_probabilities.getProbabilitiesDeath(), (m_probabilities.getCount() + 1) * sizeof(Probabilities::Probability) );
+    size_t sz = m_probabilities.getCount() * sizeof(Probabilities::Probability);
+    _writer->writeData( "Live probabilities", m_probabilities.getProbabilitiesLive(), sz );
+    _writer->writeData( "Dead probabilities", m_probabilities.getProbabilitiesDeath(), sz );
     _writer->writeData( "Cells count", &m_cellsCount, sizeof(m_cellsCount) );
 
     Index bytesCount = m_cellsCount / (8 * sizeof(int)) + 1;
@@ -187,18 +188,18 @@ bool Figure::fromFile(FileManager::Reader * _reader)
 
 
 
-    if ( dataSize != (Probabilities::s_defaultCount + 1) * sizeof( Probabilities::Probability ) )
-        std::cout << "Warn: dataSize != (Probabilities::s_defaultCount + 1) * sizeof( Probabilities::Probability )" << std::endl;
+    if ( dataSize != Probabilities::s_defaultCount * sizeof( Probabilities::Probability ) )
+        std::cout << "Warn: dataSize != Probabilities::s_defaultCount * sizeof( Probabilities::Probability )" << std::endl;
 
-    m_probabilities.setCount( Probabilities::s_defaultCount );
+    m_probabilities.setCount( dataSize );
 
     _reader->readData( m_probabilities.getProbabilitiesLive() );
 
     if ( !_reader->openData( "Dead probabilities", dataSize ) )
         return false;
 
-    if ( dataSize != (Probabilities::s_defaultCount + 1) * sizeof( Probabilities::Probability ) )
-        std::cout << "Warn: dataSize != (Probabilities::s_defaultCount + 1) * sizeof( Probabilities::Probability )" << std::endl;
+    if ( dataSize != Probabilities::s_defaultCount * sizeof( Probabilities::Probability ) )
+        std::cout << "Warn: dataSize != Probabilities::s_defaultCount * sizeof( Probabilities::Probability )" << std::endl;
 
     _reader->readData( m_probabilities.getProbabilitiesDeath() );
 
@@ -370,7 +371,7 @@ void Figure::createCells(Index _cellsCount, Index _pointsCount)
 {
     if (_cellsCount < 1 || _pointsCount < 4)
         return;
-    std::cout << "0";
+
     if (m_cells != NULL)
     {
         delete m_cells->neighbors;
@@ -383,9 +384,9 @@ void Figure::createCells(Index _cellsCount, Index _pointsCount)
         delete m_gridColors;
 
     }
-    std::cout << "1";
+
     m_cells = new Cell[_cellsCount];
-    std::cout << "2";
+
     m_cells->neighbors = new Cell*[_cellsCount * m_probabilities.getCount()];
     for (Index i = 1; i < _cellsCount; ++i)
     {
@@ -413,7 +414,7 @@ void Figure::createCells(Index _cellsCount, Index _pointsCount)
 
 void Figure::refresh()
 {
-    for (Index i = 0; i < m_activeCountNow; i++)
+    for (Index i = 0; i < m_activeCountNow; ++i)
     {
         m_activeCellsNow[i]->livingStatusNext = m_activeCellsNow[i]->livingStatusNow;
         m_activeCellsNow[i]->nextCountActiveNeighbors = m_activeCellsNow[i]->currentCountActiveNeighbors;
@@ -432,7 +433,7 @@ void Figure::plus(Cell * _cell)
         if (_cell->neighbors[j]->steps != m_stepNumber)
             (m_activeCellsNow[m_activeCountNow++] = _cell->neighbors[j])->steps = m_stepNumber;
     }
-    if (_cell->steps!= m_stepNumber)
+    if (_cell->steps != m_stepNumber)
         (m_activeCellsNow[m_activeCountNow++] = _cell)->steps = m_stepNumber;
 }
 
@@ -453,7 +454,7 @@ void Figure::minus(Cell * _cell)
         if (_cell->neighbors[j]->steps != m_stepNumber)
             (m_activeCellsNow[m_activeCountNow++] = _cell->neighbors[j])->steps = m_stepNumber;
     }
-    if (_cell->steps!= m_stepNumber)
+    if (_cell->steps != m_stepNumber)
         (m_activeCellsNow[m_activeCountNext++] = _cell)->steps = m_stepNumber;
 }
 void Figure::minus(Index _index)
@@ -481,10 +482,10 @@ void Figure::step()
             {
                 c->livingStatusNext = false;
                 --m_usersCount;
-                for (j = 0; j<c->neighborsCount; ++j)
+                for (j = 0; j < c->neighborsCount; ++j)
                 {
                     c->neighbors[j]->nextCountActiveNeighbors--;
-                    if (c->neighbors[j]->steps!= m_stepNumber)
+                    if (c->neighbors[j]->steps != m_stepNumber)
                         (m_activeCellsNext[m_activeCountNext++] = c->neighbors[j])->steps = m_stepNumber;
                 }
                 if (c->steps != m_stepNumber)
@@ -497,13 +498,13 @@ void Figure::step()
             {
                 c->livingStatusNext = true;
                 ++m_usersCount;
-                for (j = 0; j<c->neighborsCount; ++j)
+                for (j = 0; j < c->neighborsCount; ++j)
                 {
                     c->neighbors[j]->nextCountActiveNeighbors++;
-                    if (c->neighbors[j]->steps!= m_stepNumber)
+                    if (c->neighbors[j]->steps != m_stepNumber)
                         (m_activeCellsNext[m_activeCountNext++] = c->neighbors[j])->steps = m_stepNumber;
                 }
-                if (c->steps!= m_stepNumber)
+                if (c->steps != m_stepNumber)
                     (m_activeCellsNext[m_activeCountNext++] = c)->steps = m_stepNumber;
             }
         }
@@ -571,7 +572,7 @@ void Figure::initBegin()
         m_cells[i].paintSides = ~0;
         m_cells[i].livingStatusNext = m_cells[i].livingStatusNow = false;
         m_cells[i].nextCountActiveNeighbors = m_cells[i].currentCountActiveNeighbors = m_cells[i].steps = 0;
-        m_cells[i].neighborsCount = 8;
+        m_cells[i].neighborsCount = Probabilities::s_defaultCount - 1;
     }
 
 }
@@ -589,9 +590,9 @@ void Figure::gridToList()
         glEnableClientState(GL_VERTEX_ARRAY);
 
         glLineWidth(m_lineWidth);
-        glColor3f(0.0f,0.0f,1.0f);
+        glColor3f(0.0f, 0.0f, 1.0f);
         glVertexPointer(3, GL_FLOAT, 0, m_points);
-        glDrawElements(GL_LINES,m_gridPointsCount,GL_UNSIGNED_INT,m_gridPoints);
+        glDrawElements(GL_LINES, m_gridPointsCount, GL_UNSIGNED_INT, m_gridPoints);
         glEndList();
     }
 }
