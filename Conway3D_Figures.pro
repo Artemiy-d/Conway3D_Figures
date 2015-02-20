@@ -7,6 +7,7 @@ VERSION = 1.0.0
 QT = core gui opengl
 #QMAKE_CXXFLAGS += -std=c++11
 
+
 INCLUDEPATH += ./includes
 
 SOURCES += \

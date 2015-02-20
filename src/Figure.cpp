@@ -171,7 +171,7 @@ void Figure::toFile(FileManager::Writer * _writer)
 
     _writer->writeData( "Cells enabled", bytes, bytesCount * sizeof(int) );
 
-    delete bytes;
+    delete[] bytes;
 
     _writer->closeTag();
 }
